@@ -1,14 +1,24 @@
 import { ApiResponse } from '@/types'
 
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
+const BASE_URL = '/api'
+
+const handleResponse = async (response: Response) => {
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.error?.message || errorData.message || 'เกิดข้อผิดพลาดในการเชื่อมต่อ';
+
+        throw new Error(errorMessage);
+    }
+    return response.json();
+}
 
 export const api = {
     get: async <T>(endpoint: string): Promise<ApiResponse<T>> => {
-        const response = await fetch(`${BASE_URL}${endpoint}`)
-        if (!response.ok) {
-            throw new Error('Network response was not ok')
-        }
-        return response.json()
+        const response = await fetch(`${BASE_URL}${endpoint}`, {
+            // 👇 เพิ่มบรรทัดนี้ เพื่อให้ Browser แนบ Cookie ไปกับ Request
+            credentials: 'include',
+        });
+        return handleResponse(response);
     },
 
     post: async <T>(endpoint: string, data: any): Promise<ApiResponse<T>> => {
@@ -17,11 +27,10 @@ export const api = {
             headers: {
                 'Content-Type': 'application/json',
             },
+            // 👇 เพิ่มบรรทัดนี้เช่นกัน
+            credentials: 'include',
             body: JSON.stringify(data),
-        })
-        if (!response.ok) {
-            throw new Error('Network response was not ok')
-        }
-        return response.json()
-    }
+        });
+        return handleResponse(response);
+    },
 }
