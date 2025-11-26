@@ -1,5 +1,5 @@
 import { LoginForm } from '../components/features/auth/LoginForm';
-import authImage from '../assets/images/auth-illustration.png'; // อย่าลืมเอารูปไปวาง
+import authImage from '../assets/images/auth-illustration.png';
 
 const LoginPage = () => {
   return (

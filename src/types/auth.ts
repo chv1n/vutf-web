@@ -17,3 +17,19 @@ export interface LoginResponseData {
   role: string;   
   message: string;
 }
+
+export interface RegisterRequest {
+  email: string;
+  prefixName: string;
+  firstName: string;
+  lastName: string;
+  phone: string;
+  password: string;
+  confirmPassword: string;
+}
+
+export interface RegisterResponse {
+  userId: string;
+  email: string;
+  firstName: string;
+}

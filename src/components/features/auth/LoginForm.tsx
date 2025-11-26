@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { authService } from '../../../services/auth.service';
 import { Input } from '../../common/Input';
 import { Button } from '../../common/Button';
 import { FiMail, FiLock, FiAlertCircle } from 'react-icons/fi';
+
 
 export const LoginForm = () => {
     const navigate = useNavigate(); // Hook สำหรับสั่งเปลี่ยนหน้า
@@ -117,7 +118,10 @@ export const LoginForm = () => {
             </Button>
 
             <p className="mt-4 text-center text-sm text-gray-600">
-                Don't have an account? <a href="#" className="text-blue-600 hover:underline">Register</a>
+                Don't have an account?{' '}
+                <Link to="/register/email" className="text-blue-600 hover:underline">
+                    Register
+                </Link>
             </p>
         </form>
     );
