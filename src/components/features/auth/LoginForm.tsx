@@ -96,7 +96,9 @@ export const LoginForm = () => {
                     <input type="checkbox" className="mr-2 w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
                     Remember me
                 </label>
-                <a href="#" className="text-sm text-blue-600 hover:underline">Forgot Password?</a>
+                <Link to="/forgot-password" className="text-sm text-blue-600 hover:underline">
+                    Forgot Password?
+                </Link>
             </div>
 
             <Button

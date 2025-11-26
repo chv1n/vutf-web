@@ -6,6 +6,7 @@ import LoginPage from './pages/LoginPage';
 import { RegisterEmailPage } from './pages/register/RegisterEmailPage';
 import { VerifyOtpPage } from './pages/register/VerifyOtpPage';
 import { RegisterPage } from './pages/register/RegisterPage';
+import { ForgotPasswordPage, VerifyForgotOtpPage, ResetPasswordPage } from './pages/auth/ForgotPasswordPages';
 
 
 function App() {
@@ -36,9 +37,15 @@ function App() {
         {/* Redirect Root to Login */}
         <Route path="/" element={<Navigate to="/login" replace />} />
 
+        {/* Registration Flow */}
         <Route path="/register/email" element={<RegisterEmailPage />} />
         <Route path="/register/verify-otp" element={<VerifyOtpPage />} />
         <Route path="/register/form" element={<RegisterPage />} />
+
+        {/* Forgot Password Flow */}
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/forgot-password/verify" element={<VerifyForgotOtpPage />} />
+        <Route path="/forgot-password/reset" element={<ResetPasswordPage />} />
       </Routes>
     </BrowserRouter>
   );

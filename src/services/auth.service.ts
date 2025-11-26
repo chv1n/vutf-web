@@ -1,8 +1,9 @@
 // src/services/auth.service.ts
 
 import { api } from './api';
-import { ApiResponse } from '../types';
+// import { ApiResponse } from '../types';
 import { LoginRequest, LoginResponseData, RegisterRequest, RegisterResponse } from '../types/auth';
+import { ForgotPasswordRequest, VerifyForgotOtpRequest, ResetPasswordRequest } from '../types/auth';
 
 // DTO สำหรับการ Request OTP
 interface RequestOtpDto {
@@ -50,5 +51,20 @@ export const authService = {
   // สมัครสมาชิก (ส่ง Cookie registrationToken ไปอัตโนมัติ)
   register: async (data: RegisterRequest) => {
     return api.post<RegisterResponse>('/v1/auth/register', data);
+  },
+
+  // ขอ OTP ลืมรหัสผ่าน
+  requestForgotPasswordOtp: async (data: ForgotPasswordRequest) => {
+    return api.post('/v1/auth/forgot-password', data);
+  },
+
+  // ยืนยัน OTP (Backend จะ set cookie 'resetToken' ให้)
+  verifyForgotPasswordOtp: async (data: VerifyForgotOtpRequest) => {
+    return api.post('/v1/auth/verify-forgot-otp', data);
+  },
+
+  // ตั้งรหัสผ่านใหม่ (Cookie จะถูกส่งไปเองอัตโนมัติ)
+  resetPassword: async (data: ResetPasswordRequest) => {
+    return api.post('/v1/auth/reset-password', data);
   }
 };
