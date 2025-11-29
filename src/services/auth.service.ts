@@ -21,21 +21,26 @@ interface VerifyOtpResponse {
   registrationToken: string;
 }
 
+export interface UserProfile {
+  id: string;
+  email: string;
+  role: string;
+  firstName?: string;
+  lastName?: string;
+  code?: string;
+}
+
 export const authService = {
   login: async (credentials: LoginRequest) => {
     return api.post<LoginResponseData>('/v1/auth/login', credentials);
   },
 
   logout: async () => {
-    // ต้องยิง API ไปบอก Backend ให้ลบ Cookie ออก
-    await api.post('/v1/auth/logout', {});
-
-    localStorage.removeItem('user');
-    window.location.href = '/login';
+    return api.post('/v1/auth/logout', {});
   },
 
-  setSession: (user: any) => {
-    localStorage.setItem('user', JSON.stringify(user));
+  getMe: async () => {
+    return api.get<UserProfile>('/v1/auth/me');
   },
 
   // ขอ OTP

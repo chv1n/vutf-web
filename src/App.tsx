@@ -1,3 +1,4 @@
+// App.tsx
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { MainLayout } from './components/layout/MainLayout';
 import { StudentHome } from './pages/student/StudentHome';
@@ -7,47 +8,54 @@ import { RegisterEmailPage } from './pages/register/RegisterEmailPage';
 import { VerifyOtpPage } from './pages/register/VerifyOtpPage';
 import { RegisterPage } from './pages/register/RegisterPage';
 import { ForgotPasswordPage, VerifyForgotOtpPage, ResetPasswordPage } from './pages/auth/ForgotPasswordPages';
-
+import { ProtectedRoute } from './routes/ProtectedRoute';
+import { AuthProvider } from './contexts/AuthContext';
+import { UnauthorizedPage } from './pages/error/UnauthorizedPage'; 
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        {/* Public Routes */}
-        <Route path="/login" element={<LoginPage />} />
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          {/* Public Routes - เข้าได้ทุกคน */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/unauthorized" element={<UnauthorizedPage />} />
+          <Route path="/" element={<Navigate to="/login" replace />} />
 
-        <Route path="/student" element={<MainLayout />}>
-          {/* ถ้าเข้า /student เฉยๆ ให้เด้งไป /student/dashboard */}
-          <Route index element={<Navigate to="/student/dashboard" replace />} />
+          {/* Registration & Forgot Password Flow*/}
+          <Route path="/register/email" element={<RegisterEmailPage />} />
+          <Route path="/register/verify-otp" element={<VerifyOtpPage />} />
+          <Route path="/register/form" element={<RegisterPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/forgot-password/verify" element={<VerifyForgotOtpPage />} />
+          <Route path="/forgot-password/reset" element={<ResetPasswordPage />} />
 
-          {/* หน้า Dashboard (Create Group) */}
-          <Route path="dashboard" element={<StudentHome />} />
 
-          {/* หน้าอื่นๆ สร้างไฟล์เปล่าๆ มารอไว้ก่อนก็ได้ครับ */}
-          <Route path="profile" element={<div>Profile Page</div>} />
-          <Route path="report" element={<div>Thesis Report Page</div>} />
-        </Route>
+          {/* ------------------------------------------------------- */}
+          {/* PROTECTED ROUTES: ถ้าไม่ Login เข้าไม่ได้ */}
+          {/* ------------------------------------------------------- */}
 
-        <Route path="/instructor" element={<MainLayout />}>
-          <Route index element={<Navigate to="/instructor/dashboard" replace />} />
-          <Route path="dashboard" element={<InstructorHome />} />
-          {/* หน้าอื่นๆ ของอาจารย์ */}
-        </Route>
+          {/* 1. โซน Student */}
+          <Route element={<ProtectedRoute allowedRoles={['student']} />}>
+            <Route path="/student" element={<MainLayout />}>
+              <Route index element={<Navigate to="/student/dashboard" replace />} />
+              <Route path="dashboard" element={<StudentHome />} />
+              <Route path="profile" element={<div>Profile Page</div>} />
+              <Route path="report" element={<div>Thesis Report Page</div>} />
+            </Route>
+          </Route>
 
-        {/* Redirect Root to Login */}
-        <Route path="/" element={<Navigate to="/login" replace />} />
+          {/* 2. โซน Instructor */}
+          <Route element={<ProtectedRoute allowedRoles={['instructor']} />}>
+            <Route path="/instructor" element={<MainLayout />}>
+              <Route index element={<Navigate to="/instructor/dashboard" replace />} />
+              <Route path="dashboard" element={<InstructorHome />} />
+            </Route>
+          </Route>
 
-        {/* Registration Flow */}
-        <Route path="/register/email" element={<RegisterEmailPage />} />
-        <Route path="/register/verify-otp" element={<VerifyOtpPage />} />
-        <Route path="/register/form" element={<RegisterPage />} />
-
-        {/* Forgot Password Flow */}
-        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-        <Route path="/forgot-password/verify" element={<VerifyForgotOtpPage />} />
-        <Route path="/forgot-password/reset" element={<ResetPasswordPage />} />
-      </Routes>
-    </BrowserRouter>
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
 

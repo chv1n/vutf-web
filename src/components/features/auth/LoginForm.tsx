@@ -1,5 +1,7 @@
+// src/components/features/auth/LoginForm.tsx
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../../../contexts/AuthContext';
 import { authService } from '../../../services/auth.service';
 import { Input } from '../../common/Input';
 import { Button } from '../../common/Button';
@@ -8,6 +10,7 @@ import { FiMail, FiLock, FiAlertCircle } from 'react-icons/fi';
 
 export const LoginForm = () => {
     const navigate = useNavigate(); // Hook สำหรับสั่งเปลี่ยนหน้า
+    const { login } = useAuth();
 
     // State ข้อมูลฟอร์ม
     const [email, setEmail] = useState('');
@@ -19,36 +22,30 @@ export const LoginForm = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
-        // เคลียร์ error เก่า และเริ่มหมุน loading
         setError(null);
         setIsLoading(true);
 
         try {
-            const res = await authService.login({ email, password });
+            await login({ email, password });
+            const userRes = await authService.getMe();
 
-            if (res && res.data) {
-                // 1. เก็บ Session ตามปกติ
-                authService.setSession(res.data);
+            if (userRes && userRes.data) {
+                const role = userRes.data.role.toLowerCase();
 
-                // 2. ดึง Role ออกมาเช็ค (แปลงเป็นตัวเล็กก่อนเพื่อความชัวร์)
-                const role = res.data.role.toLowerCase();
-
-                // 3. เช็ค Role แล้วพาไปหน้า Dashboard ของแต่ละคน
                 if (role === 'student') {
                     navigate('/student/dashboard');
                 } else if (role === 'instructor') {
                     navigate('/instructor/dashboard');
                 } else {
-                    // กรณีเป็น Admin หรือ Role อื่นๆ ที่เรายังไม่ได้ทำ
                     navigate('/');
                 }
-
                 console.log(`Login Success as ${role}`);
             }
+
         } catch (err: any) {
             console.error('Login Failed:', err);
-            setError(err.message || 'อีเมลหรือรหัสผ่านไม่ถูกต้อง');
+            // แสดง Error จาก Backend หรือข้อความ Default
+            setError(err.response?.data?.message || 'อีเมลหรือรหัสผ่านไม่ถูกต้อง');
         } finally {
             setIsLoading(false);
         }
