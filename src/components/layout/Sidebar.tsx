@@ -1,8 +1,13 @@
+// src/components/layout/Sidebar.tsx
 import { NavLink, useNavigate } from 'react-router-dom';
-import { FiHome, FiUser, FiFileText, FiCalendar, FiBell, FiSettings, FiLogOut, FiX } from 'react-icons/fi';
-import { authService } from '../../services/auth.service';
+import {
+    FiHome, FiUser, FiFileText, FiCalendar, FiBell,
+    FiSettings, FiLogOut, FiX, FiList, FiFolder,
+    FiTrendingUp, FiClipboard, FiMessageSquare,
+} from 'react-icons/fi';
+import { useAuth } from '../../contexts/AuthContext';
 
-// 1. กำหนดเมนูสำหรับ Student
+// 1. เมนู Student
 const STUDENT_MENU = [
     { icon: FiHome, label: 'Home', path: '/student/dashboard' },
     { icon: FiUser, label: 'Profile', path: '/student/profile' },
@@ -12,7 +17,7 @@ const STUDENT_MENU = [
     { icon: FiSettings, label: 'Settings', path: '/student/settings' },
 ];
 
-// 2. กำหนดเมนูสำหรับ Instructor
+// 2. เมนู Instructor
 const INSTRUCTOR_MENU = [
     { icon: FiHome, label: 'Home', path: '/instructor/dashboard' },
     { icon: FiUser, label: 'Profile', path: '/instructor/profile' },
@@ -22,6 +27,18 @@ const INSTRUCTOR_MENU = [
     { icon: FiSettings, label: 'Settings', path: '/instructor/settings' },
 ];
 
+// 3. เมนู Admin
+const ADMIN_MENU = [
+  { icon: FiHome, label: 'Dashboard', path: '/admin/dashboard' },
+  { icon: FiUser, label: 'User', path: '/admin/users' },
+  { icon: FiList, label: 'Thesis Topic', path: '/admin/topics' },
+  { icon: FiFolder, label: 'Thesis File', path: '/admin/files' },
+  { icon: FiTrendingUp, label: 'Thesis Report', path: '/admin/reports' },
+  { icon: FiClipboard, label: 'Inspection Round', path: '/admin/inspections' },
+  { icon: FiMessageSquare, label: 'Messages', path: '/admin/messages' },
+  { icon: FiSettings, label: 'Settings', path: '/admin/settings' },
+];
+
 interface SidebarProps {
     isOpen: boolean;
     onClose: () => void;
@@ -29,27 +46,30 @@ interface SidebarProps {
 
 export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
     const navigate = useNavigate();
-    const userStr = localStorage.getItem('user');
-    const user = userStr ? JSON.parse(userStr) : {};
-    const isInstructor = user.role === 'instructor';
-    const currentMenuItems = isInstructor ? INSTRUCTOR_MENU : STUDENT_MENU;
+    const { user, logout } = useAuth();
+
+    const role = user?.role?.toLowerCase() || '';
+
+    let currentMenuItems = STUDENT_MENU;
+    if (role === 'instructor') currentMenuItems = INSTRUCTOR_MENU;
+    if (role === 'admin') currentMenuItems = ADMIN_MENU;
 
     const handleLogout = () => {
-        authService.logout();
+        logout(); // ใช้ฟังก์ชันจาก Context
         navigate('/login');
     };
 
     return (
         <>
-            {/* Backdrop (ฉากดำมืดๆ เวลาเปิดเมนูบนมือถือ) */}
+            {/* Backdrop */}
             {isOpen && (
                 <div
                     className="fixed inset-0 z-20 bg-black/50 md:hidden transition-opacity"
-                    onClick={onClose} // กดที่ว่างๆ แล้วปิดเมนู
+                    onClick={onClose}
                 />
             )}
 
-            {/* ตัว Sidebar หลัก */}
+            {/* Sidebar */}
             <aside
                 className={`
           fixed top-0 left-0 z-30 h-screen w-64 bg-white border-r border-gray-100 flex flex-col transition-transform duration-300 ease-in-out
@@ -57,16 +77,14 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
           md:translate-x-0 
         `}
             >
-                {/* Header ของ Sidebar */}
+                {/* Header */}
                 <div className="p-6 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold">
+                        <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold shadow-lg shadow-blue-200">
                             Th
                         </div>
                         <span className="text-xl font-bold text-gray-800">Thesis</span>
                     </div>
-
-                    {/* ปุ่มปิด (X) แสดงเฉพาะบนมือถือ */}
                     <button onClick={onClose} className="md:hidden text-gray-500 hover:text-gray-700">
                         <FiX size={24} />
                     </button>
@@ -78,25 +96,25 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
                         <NavLink
                             key={item.path}
                             to={item.path}
-                            onClick={() => onClose()} // กดลิ้งค์แล้วปิดเมนู (สำหรับมือถือ)
+                            onClick={() => onClose()}
                             className={({ isActive }) =>
-                                `flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${isActive
-                                    ? 'bg-blue-600 text-white shadow-md shadow-blue-200'
+                                `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 font-medium ${isActive
+                                    ? 'bg-blue-600 text-white shadow-md shadow-blue-200 translate-x-1'
                                     : 'text-gray-500 hover:bg-gray-50 hover:text-blue-600'
                                 }`
                             }
                         >
                             <item.icon size={20} />
-                            <span className="font-medium">{item.label}</span>
+                            <span>{item.label}</span>
                         </NavLink>
                     ))}
                 </nav>
 
-                {/* Sign Out */}
+                {/* User Info & Sign Out */}
                 <div className="p-4 border-t border-gray-100">
                     <button
                         onClick={handleLogout}
-                        className="flex items-center gap-3 px-4 py-3 text-gray-500 hover:text-red-500 w-full transition-colors"
+                        className="flex items-center gap-3 px-4 py-2 text-gray-500 hover:text-red-500 w-full transition-colors rounded-lg hover:bg-red-50"
                     >
                         <FiLogOut size={20} />
                         <span className="font-medium">Sign Out</span>

@@ -1,6 +1,6 @@
 import { ApiResponse } from '@/types'
 
-const BASE_URL = '/api'
+const BASE_URL = '/api/v1'
 
 const handleResponse = async (response: Response) => {
     if (!response.ok) {
@@ -30,6 +30,29 @@ export const api = {
             // 👇 เพิ่มบรรทัดนี้เช่นกัน
             credentials: 'include',
             body: JSON.stringify(data),
+        });
+        return handleResponse(response);
+    },
+
+    patch: async <T>(endpoint: string, data: any): Promise<T> => {
+        const response = await fetch(`${BASE_URL}${endpoint}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify(data),
+        });
+        return handleResponse(response);
+    },
+
+    delete: async <T>(endpoint: string): Promise<T> => {
+        const response = await fetch(`${BASE_URL}${endpoint}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include',
         });
         return handleResponse(response);
     },

@@ -10,7 +10,9 @@ import { RegisterPage } from './pages/register/RegisterPage';
 import { ForgotPasswordPage, VerifyForgotOtpPage, ResetPasswordPage } from './pages/auth/ForgotPasswordPages';
 import { ProtectedRoute } from './routes/ProtectedRoute';
 import { AuthProvider } from './contexts/AuthContext';
-import { UnauthorizedPage } from './pages/error/UnauthorizedPage'; 
+import { UnauthorizedPage } from './pages/error/UnauthorizedPage';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import InspectionManagePage from './pages/admin/InspectionManagePage';
 
 function App() {
   return (
@@ -50,6 +52,15 @@ function App() {
             <Route path="/instructor" element={<MainLayout />}>
               <Route index element={<Navigate to="/instructor/dashboard" replace />} />
               <Route path="dashboard" element={<InstructorHome />} />
+            </Route>
+          </Route>
+
+          {/* 3. โซน Admin */}
+          <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
+            <Route path="/admin" element={<MainLayout />}>
+              <Route index element={<Navigate to="/admin/dashboard" replace />} />
+              <Route path="dashboard" element={<AdminDashboard />} />
+              <Route path="inspections" element={<InspectionManagePage />} />
             </Route>
           </Route>
 

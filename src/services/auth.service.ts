@@ -32,44 +32,44 @@ export interface UserProfile {
 
 export const authService = {
   login: async (credentials: LoginRequest) => {
-    return api.post<LoginResponseData>('/v1/auth/login', credentials);
+    return api.post<LoginResponseData>('/auth/login', credentials);
   },
 
   logout: async () => {
-    return api.post('/v1/auth/logout', {});
+    return api.post('/auth/logout', {});
   },
 
   getMe: async () => {
-    return api.get<UserProfile>('/v1/auth/me');
+    return api.get<UserProfile>('/auth/me');
   },
 
   // ขอ OTP
   requestRegistrationOtp: async (data: RequestOtpDto) => {
-    return api.post('/v1/auth/request-registration-otp', data);
+    return api.post('/auth/request-registration-otp', data);
   },
 
   // ยืนยัน OTP
   verifyRegistrationOtp: async (data: VerifyOtpDto) => {
-    return api.post<VerifyOtpResponse>('/v1/auth/verify-registration-otp', data);
+    return api.post<VerifyOtpResponse>('/auth/verify-registration-otp', data);
   },
 
   // สมัครสมาชิก (ส่ง Cookie registrationToken ไปอัตโนมัติ)
   register: async (data: RegisterRequest) => {
-    return api.post<RegisterResponse>('/v1/auth/register', data);
+    return api.post<RegisterResponse>('/auth/register', data);
   },
 
   // ขอ OTP ลืมรหัสผ่าน
   requestForgotPasswordOtp: async (data: ForgotPasswordRequest) => {
-    return api.post('/v1/auth/forgot-password', data);
+    return api.post('/auth/forgot-password', data);
   },
 
   // ยืนยัน OTP (Backend จะ set cookie 'resetToken' ให้)
   verifyForgotPasswordOtp: async (data: VerifyForgotOtpRequest) => {
-    return api.post('/v1/auth/verify-forgot-otp', data);
+    return api.post('/auth/verify-forgot-otp', data);
   },
 
   // ตั้งรหัสผ่านใหม่ (Cookie จะถูกส่งไปเองอัตโนมัติ)
   resetPassword: async (data: ResetPasswordRequest) => {
-    return api.post('/v1/auth/reset-password', data);
+    return api.post('/auth/reset-password', data);
   }
 };
