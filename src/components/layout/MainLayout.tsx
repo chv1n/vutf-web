@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
-import { Sidebar } from './Sidebar';
+import { Sidebar, STUDENT_MENU, INSTRUCTOR_MENU, ADMIN_MENU } from './Sidebar';
 import { Header } from './Header';
 import { FiMenu } from 'react-icons/fi';
 
@@ -9,10 +9,14 @@ export const MainLayout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false); // State สำหรับมือถือ
 
     const getPageTitle = (path: string) => {
-        if (path.includes('dashboard')) return 'Home';
-        if (path.includes('profile')) return 'Profile';
-        if (path.includes('report')) return 'Thesis Report';
-        return 'Dashboard';
+        // รวมเมนูทุก role เข้าด้วยกัน
+        const allMenus = [...STUDENT_MENU, ...INSTRUCTOR_MENU, ...ADMIN_MENU];
+
+        // ค้นหาเมนูที่มี path ตรงกับ URL ปัจจุบัน
+        const found = allMenus.find(menu => menu.path === path);
+
+        // ถ้าเจอ ให้ส่งชื่อ label กลับไป, ถ้าไม่เจอให้ใช้ค่า Default
+        return found ? found.label : 'Thesis Review';
     };
 
     return (
@@ -42,7 +46,7 @@ export const MainLayout = () => {
                     </div>
                 </div>
 
-                {/* Desktop Header (ซ่อนบนมือถือ เพราะเรามี Mobile Header แล้ว หรือจะใช้ร่วมกันก็ได้) */}
+                {/* Desktop Header (ซ่อนบนมือถือ) */}
                 <div className="hidden md:block">
                     <Header title={getPageTitle(location.pathname)} />
                 </div>

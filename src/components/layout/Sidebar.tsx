@@ -8,7 +8,7 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 
 // 1. เมนู Student
-const STUDENT_MENU = [
+export const STUDENT_MENU = [
     { icon: FiHome, label: 'Home', path: '/student/dashboard' },
     { icon: FiUser, label: 'Profile', path: '/student/profile' },
     { icon: FiFileText, label: 'Thesis Report', path: '/student/report' },
@@ -18,7 +18,7 @@ const STUDENT_MENU = [
 ];
 
 // 2. เมนู Instructor
-const INSTRUCTOR_MENU = [
+export const INSTRUCTOR_MENU = [
     { icon: FiHome, label: 'Home', path: '/instructor/dashboard' },
     { icon: FiUser, label: 'Profile', path: '/instructor/profile' },
     { icon: FiFileText, label: 'Thesis Report', path: '/instructor/report' },
@@ -28,7 +28,7 @@ const INSTRUCTOR_MENU = [
 ];
 
 // 3. เมนู Admin
-const ADMIN_MENU = [
+export const ADMIN_MENU = [
   { icon: FiHome, label: 'Dashboard', path: '/admin/dashboard' },
   { icon: FiUser, label: 'User', path: '/admin/users' },
   { icon: FiList, label: 'Thesis Topic', path: '/admin/topics' },
