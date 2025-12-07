@@ -12,7 +12,7 @@ export const STUDENT_MENU = [
     { icon: FiHome, label: 'Home', path: '/student/dashboard' },
     { icon: FiUser, label: 'Profile', path: '/student/profile' },
     { icon: FiFileText, label: 'Thesis Report', path: '/student/report' },
-    { icon: FiCalendar, label: 'Calendar', path: '/student/calendar' },
+    // { icon: FiCalendar, label: 'Calendar', path: '/student/calendar' },
     { icon: FiBell, label: 'Announcements', path: '/student/announcements' },
     { icon: FiSettings, label: 'Settings', path: '/student/settings' },
 ];
@@ -22,21 +22,21 @@ export const INSTRUCTOR_MENU = [
     { icon: FiHome, label: 'Home', path: '/instructor/dashboard' },
     { icon: FiUser, label: 'Profile', path: '/instructor/profile' },
     { icon: FiFileText, label: 'Thesis Report', path: '/instructor/report' },
-    { icon: FiCalendar, label: 'Calendar', path: '/instructor/calendar' },
+    // { icon: FiCalendar, label: 'Calendar', path: '/instructor/calendar' },
     { icon: FiBell, label: 'Announcements', path: '/instructor/announcements' },
     { icon: FiSettings, label: 'Settings', path: '/instructor/settings' },
 ];
 
 // 3. เมนู Admin
 export const ADMIN_MENU = [
-  { icon: FiHome, label: 'Dashboard', path: '/admin/dashboard' },
-  { icon: FiUser, label: 'User', path: '/admin/users' },
-  { icon: FiList, label: 'Thesis Topic', path: '/admin/topics' },
-  { icon: FiFolder, label: 'Thesis File', path: '/admin/files' },
-  { icon: FiTrendingUp, label: 'Thesis Report', path: '/admin/reports' },
-  { icon: FiClipboard, label: 'Inspection Round', path: '/admin/inspections' },
-  { icon: FiMessageSquare, label: 'Messages', path: '/admin/messages' },
-  { icon: FiSettings, label: 'Settings', path: '/admin/settings' },
+    { icon: FiHome, label: 'Dashboard', path: '/admin/dashboard' },
+    { icon: FiUser, label: 'User', path: '/admin/users' },
+    { icon: FiList, label: 'Thesis Topic', path: '/admin/topics' },
+    { icon: FiFolder, label: 'Thesis File', path: '/admin/files' },
+    { icon: FiTrendingUp, label: 'Thesis Report', path: '/admin/reports' },
+    { icon: FiClipboard, label: 'Inspection Round', path: '/admin/inspections' },
+    { icon: FiMessageSquare, label: 'Messages', path: '/admin/messages' },
+    { icon: FiSettings, label: 'Settings', path: '/admin/settings' },
 ];
 
 interface SidebarProps {
@@ -97,12 +97,22 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
                             key={item.path}
                             to={item.path}
                             onClick={() => onClose()}
-                            className={({ isActive }) =>
-                                `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 font-medium ${isActive
-                                    ? 'bg-blue-600 text-white shadow-md shadow-blue-200 translate-x-1'
-                                    : 'text-gray-500 hover:bg-gray-50 hover:text-blue-600'
-                                }`
-                            }
+                            className={({ isActive }) => {
+                                // 3. Logic: เช็คว่าต้อง Active หรือไม่
+                                // เป็นจริงเมื่อ: 
+                                // 1. Router บอกว่า Active (isActive)
+                                // 2. หรือ เราอยู่หน้า /student/upload และปุ่มนี้คือปุ่ม /student/dashboard (Home)
+                                const isHomeActive =
+                                    item.path === '/student/dashboard' &&
+                                    location.pathname === '/student/upload';
+
+                                const shouldBeActive = isActive || isHomeActive;
+
+                                return `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 font-medium ${shouldBeActive
+                                        ? 'bg-blue-600 text-white shadow-md shadow-blue-200 translate-x-1'
+                                        : 'text-gray-500 hover:bg-gray-50 hover:text-blue-600'
+                                    }`;
+                            }}
                         >
                             <item.icon size={20} />
                             <span>{item.label}</span>

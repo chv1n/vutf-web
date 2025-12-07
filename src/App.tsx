@@ -1,7 +1,8 @@
 // App.tsx
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { MainLayout } from './components/layout/MainLayout';
-import { StudentHome } from './pages/student/StudentHome';
+import StudentHome from './pages/student/StudentHome';
+import UploadFile from './pages/student/UploadFile';
 import { InstructorHome } from './pages/instructor/InstructorHome';
 import LoginPage from './pages/LoginPage';
 import { RegisterEmailPage } from './pages/register/RegisterEmailPage';
@@ -42,8 +43,11 @@ function App() {
             <Route path="/student" element={<MainLayout />}>
               <Route index element={<Navigate to="/student/dashboard" replace />} />
               <Route path="dashboard" element={<StudentHome />} />
+              <Route path="upload" element={<UploadFile />} />
               <Route path="profile" element={<div>Profile Page</div>} />
               <Route path="report" element={<div>Thesis Report Page</div>} />
+              <Route path="announcements" element={<div>Announcements Page</div>} />
+              <Route path="settings" element={<div>Setting Page</div>} />
             </Route>
           </Route>
 
