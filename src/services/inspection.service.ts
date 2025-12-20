@@ -11,8 +11,7 @@ export const inspectionService = {
 
     getActiveRound: async (): Promise<InspectionRound | null> => {
         try {
-            const response = await api.get<InspectionRound[]>('/inspections');
-            const rounds = response.data; 
+            const rounds = await api.get<InspectionRound[]>('/inspections');
             const activeRounds = rounds.filter((round) => round.status === InspectionStatus.OPEN);
             return activeRounds.length > 0 ? activeRounds[0] : null;
         } catch (error) {

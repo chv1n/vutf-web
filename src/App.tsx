@@ -14,6 +14,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { UnauthorizedPage } from './pages/error/UnauthorizedPage';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import InspectionManagePage from './pages/admin/InspectionManagePage';
+import { UserManagementPage } from './pages/admin/UserManagementPage';
 
 function App() {
   return (
@@ -64,6 +65,7 @@ function App() {
             <Route path="/admin" element={<MainLayout />}>
               <Route index element={<Navigate to="/admin/dashboard" replace />} />
               <Route path="dashboard" element={<AdminDashboard />} />
+              <Route path="users" element={<UserManagementPage />} />
               <Route path="inspections" element={<InspectionManagePage />} />
             </Route>
           </Route>

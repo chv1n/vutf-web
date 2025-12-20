@@ -51,9 +51,21 @@ const customFetch = async (endpoint: string, options: RequestInit = {}): Promise
     return response;
 };
 
+const buildQueryString = (params?: Record<string, any>) => {
+    if (!params) return '';
+    const query = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+            query.append(key, String(value));
+        }
+    });
+    return query.toString() ? `?${query.toString()}` : '';
+};
+
 export const api = {
-    get: async <T>(endpoint: string): Promise<ApiResponse<T>> => {
-        const response = await customFetch(endpoint, {
+    get: async <T>(endpoint: string, params?: Record<string, any>): Promise<T> => {
+        const queryString = buildQueryString(params);
+        const response = await customFetch(`${endpoint}${queryString}`, {
             method: 'GET',
         });
         return handleResponse(response);
