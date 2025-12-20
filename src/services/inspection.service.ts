@@ -11,8 +11,16 @@ export const inspectionService = {
 
     getActiveRound: async (): Promise<InspectionRound | null> => {
         try {
-            const rounds = await api.get<InspectionRound[]>('/inspections');
-            const activeRounds = rounds.filter((round) => round.status === InspectionStatus.OPEN);
+            const response = await api.get<InspectionRound[]>('/inspections');
+            const rounds = (response as any).data || response;
+
+            // เช็คความชัวร์ว่าเป็น Array ไหม ก่อนสั่ง filter
+            if (!Array.isArray(rounds)) {
+                console.error("Invalid data format (Expected Array):", rounds);
+                return null;
+            }
+
+            const activeRounds = rounds.filter((round: any) => round.status === 'OPEN');
             return activeRounds.length > 0 ? activeRounds[0] : null;
         } catch (error) {
             console.error("Error fetching active round:", error);
