@@ -35,7 +35,7 @@ export const ADMIN_MENU = [
     { icon: FiFolder, label: 'Thesis File', path: '/admin/files' },
     { icon: FiTrendingUp, label: 'Thesis Report', path: '/admin/reports' },
     { icon: FiClipboard, label: 'Inspection Round', path: '/admin/inspections' },
-    { icon: FiMessageSquare, label: 'Messages', path: '/admin/messages' },
+    { icon: FiBell, label: 'Announcements', path: '/admin/announcements' },
     { icon: FiSettings, label: 'Settings', path: '/admin/settings' },
 ];
 

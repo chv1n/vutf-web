@@ -12,7 +12,7 @@ export const Header = ({ title }: HeaderProps) => {
 
   // สร้างชื่อที่จะแสดง
   const displayName = user?.firstName 
-    ? `${user.firstName} ${user.lastName || ''}` 
+    ? `${user.firstName}` 
     : user?.email?.split('@')[0] || 'User';
 
   const role = user?.role || 'Guest';

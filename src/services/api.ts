@@ -93,6 +93,17 @@ export const api = {
         return handleResponse(response);
     },
 
+    put: async <T>(endpoint: string, data: any): Promise<T> => {
+        const response = await customFetch(endpoint, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        });
+        return handleResponse(response);
+    },
+
     delete: async <T>(endpoint: string): Promise<T> => {
         const response = await customFetch(endpoint, {
             method: 'DELETE',

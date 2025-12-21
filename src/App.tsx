@@ -15,6 +15,7 @@ import { UnauthorizedPage } from './pages/error/UnauthorizedPage';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import InspectionManagePage from './pages/admin/InspectionManagePage';
 import { UserManagementPage } from './pages/admin/UserManagementPage';
+import { AnnouncementsPage } from './pages/announcements/AnnouncementsPage';
 
 function App() {
   return (
@@ -47,7 +48,7 @@ function App() {
               <Route path="upload" element={<UploadFile />} />
               <Route path="profile" element={<div>Profile Page</div>} />
               <Route path="report" element={<div>Thesis Report Page</div>} />
-              <Route path="announcements" element={<div>Announcements Page</div>} />
+              <Route path="announcements" element={<AnnouncementsPage />} />
               <Route path="settings" element={<div>Setting Page</div>} />
             </Route>
           </Route>
@@ -57,6 +58,7 @@ function App() {
             <Route path="/instructor" element={<MainLayout />}>
               <Route index element={<Navigate to="/instructor/dashboard" replace />} />
               <Route path="dashboard" element={<InstructorHome />} />
+              <Route path="announcements" element={<AnnouncementsPage />} />
             </Route>
           </Route>
 
@@ -67,6 +69,7 @@ function App() {
               <Route path="dashboard" element={<AdminDashboard />} />
               <Route path="users" element={<UserManagementPage />} />
               <Route path="inspections" element={<InspectionManagePage />} />
+              <Route path="announcements" element={<AnnouncementsPage />} />
             </Route>
           </Route>
 
