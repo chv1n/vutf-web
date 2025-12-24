@@ -3,6 +3,21 @@ import { ApiResponse } from '@/types'
 
 const BASE_URL = '/api/v1'
 
+// ตัวแปรสำหรับจัดการ Concurrency (Mutex Lock)
+let isRefreshing = false;
+let failedQueue: any[] = [];
+
+const processQueue = (error: any, token: any = null) => {
+    failedQueue.forEach(prom => {
+        if (error) {
+            prom.reject(error);
+        } else {
+            prom.resolve(token);
+        }
+    });
+    failedQueue = [];
+};
+
 const handleResponse = async (response: Response) => {
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -12,39 +27,58 @@ const handleResponse = async (response: Response) => {
     return response.json();
 }
 
-// ชันกลางสำหรับยิง fetch พร้อมระบบ Auto Refresh
 const customFetch = async (endpoint: string, options: RequestInit = {}): Promise<Response> => {
     const url = `${BASE_URL}${endpoint}`;
     
-    // ตั้งค่า Default Options
     const fetchOptions: RequestInit = {
         ...options,
-        credentials: 'include', // แนบ Cookie เสมอ
+        credentials: 'include',
         headers: {
             ...options.headers,
         }
     };
 
-    // 1. ยิง Request ครั้งแรก
     let response = await fetch(url, fetchOptions);
 
-    // 2. ถ้าเจอ 401 และไม่ใช่การ Login หรือ Refresh (เพื่อป้องกัน Loop)
+    // ถ้าเจอ 401 และไม่ใช่ path ของ auth (เพื่อกัน loop)
     if (response.status === 401 && !endpoint.includes('/auth/login') && !endpoint.includes('/auth/refresh')) {
+        
+        // กรณีที่มีคนอื่นกำลัง Refresh อยู่ -> ให้รอ (Queue)
+        if (isRefreshing) {
+            return new Promise((resolve, reject) => {
+                failedQueue.push({ resolve, reject });
+            }).then(() => {
+                // เมื่อ Refresh เสร็จแล้ว ให้ลองยิง Request เดิมซ้ำ
+                return fetch(url, fetchOptions);
+            }).catch((err) => {
+                return Promise.reject(err);
+            });
+        }
+
+        // กรณีที่ยังไม่มีใคร Refresh -> เป็นคนเริ่ม
+        isRefreshing = true;
+
         try {
-            // 3. แอบยิงไปขอ Token ใหม่
             const refreshResponse = await fetch(`${BASE_URL}/auth/refresh`, {
                 method: 'POST',
-                credentials: 'include' // แนบ Refresh Token ใน Cookie ไปด้วย
+                credentials: 'include'
             });
 
-            // 4. ถ้า Refresh สำเร็จ
             if (refreshResponse.ok) {
-                // 5. ยิง Request เดิมซ้ำอีกรอบ (Retry)
+                // Refresh สำเร็จ -> ปล่อยคิวที่รออยู่ให้ทำงานต่อได้
+                processQueue(null, true);
+                
+                // ยิง Request ของตัวเองซ้ำ
                 response = await fetch(url, fetchOptions);
+            } else {
+                // Refresh ล้มเหลว -> แจ้ง Error ให้คิวที่รออยู่ทั้งหมด
+                processQueue(new Error('Session expired'), null);
+                // อาจจะสั่ง window.location.href = '/login' ตรงนี้ก็ได้ถ้าต้องการ Force Redirect
             }
         } catch (error) {
-            // ถ้า Refresh ไม่ผ่าน ก็ปล่อยให้ Error 401 ตัวเดิมทำงานต่อไป (เดี๋ยว handleResponse จะ throw error เอง)
-            console.error('Auto refresh failed:', error);
+            processQueue(error, null);
+        } finally {
+            isRefreshing = false;
         }
     }
 

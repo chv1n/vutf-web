@@ -20,14 +20,22 @@ export const RegisterForm = () => {
 
   // 2. ดึง Email จาก SessionStorage (ที่เก็บมาจากขั้นตอน OTP)
   const [email, setEmail] = useState('');
+  
+  // *** เพิ่ม State สำหรับตรวจสอบสิทธิ์การเข้าถึง ***
+  const [isAuthorized, setIsAuthorized] = useState(false);
 
+  // ตรวจสอบสิทธิ์ก่อนแสดงผล
   useEffect(() => {
     const storedEmail = sessionStorage.getItem('registerEmail');
-    if (!storedEmail) {
-      // ถ้าไม่มีอีเมล (User แอบข้ามหน้ามา) ให้เด้งกลับไปเริ่มใหม่
-      navigate('/register/email');
+    const storedToken = sessionStorage.getItem('registrationToken'); // เช็ค Token ที่ได้จาก OTP
+
+    // ถ้าไม่มี Email หรือ ไม่มี Token (แปลว่ายังไม่ผ่าน OTP)
+    if (!storedEmail || !storedToken) {
+      // ดีดกลับไปหน้าแรกทันที (ใช้ replace เพื่อไม่ให้กด Back กลับมาได้)
+      navigate('/register/email', { replace: true });
     } else {
       setEmail(storedEmail);
+      setIsAuthorized(true); // อนุญาตให้แสดงฟอร์ม
     }
   }, [navigate]);
 
@@ -76,10 +84,7 @@ export const RegisterForm = () => {
 
     setLoading(true);
     try {
-      await authService.register({
-        email, // ส่ง email ที่ดึงจาก session
-        ...formData
-      });
+      await authService.register(formData as any);
 
       // Clear Session เมื่อสมัครเสร็จ
       sessionStorage.removeItem('registerEmail');

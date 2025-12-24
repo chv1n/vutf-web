@@ -21,6 +21,12 @@ interface VerifyOtpResponse {
   registrationToken: string;
 }
 
+interface ApiResponse<T> {
+  success: boolean;
+  data: T;
+  message?: string;
+}
+
 export interface UserProfile {
   id: string;
   email: string;
@@ -40,7 +46,7 @@ export const authService = {
   },
 
   getMe: async () => {
-    return api.get<UserProfile>('/auth/me');
+    return api.get<ApiResponse<UserProfile>>('/auth/me');
   },
 
   // ขอ OTP

@@ -1,5 +1,5 @@
 // src/components/features/auth/LoginForm.tsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
 import { authService } from '../../../services/auth.service';
@@ -10,7 +10,7 @@ import { FiMail, FiLock, FiAlertCircle } from 'react-icons/fi';
 
 export const LoginForm = () => {
     const navigate = useNavigate(); // Hook สำหรับสั่งเปลี่ยนหน้า
-    const { login } = useAuth();
+    const { login, user, isAuthenticated, isLoading: authLoading } = useAuth();
 
     // State ข้อมูลฟอร์ม
     const [email, setEmail] = useState('');
@@ -19,6 +19,23 @@ export const LoginForm = () => {
     // State สำหรับจัดการ UX (โหลด/เออเร่อ)
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        // เช็คว่าโหลดข้อมูล Auth เสร็จหรือยัง และ ล็อกอินอยู่หรือไม่
+        if (!authLoading && isAuthenticated && user) {
+            const role = user.role?.toLowerCase();
+
+            if (role === 'student') {
+                navigate('/student/dashboard', { replace: true });
+            } else if (role === 'instructor') {
+                navigate('/instructor/dashboard', { replace: true });
+            } else if (role === 'admin') {
+                navigate('/admin/dashboard', { replace: true });
+            } else {
+                navigate('/', { replace: true });
+            }
+        }
+    }, [isAuthenticated, user, authLoading, navigate]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -52,6 +69,10 @@ export const LoginForm = () => {
             setIsLoading(false);
         }
     };
+
+    if (authLoading) {
+        return <div className="min-h-screen flex justify-center items-center">Checking authentication...</div>;
+    }
 
     return (
         <form onSubmit={handleSubmit} className="w-full max-w-md">
