@@ -16,6 +16,7 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import InspectionManagePage from './pages/admin/InspectionManagePage';
 import { UserManagementPage } from './pages/admin/UserManagementPage';
 import { AnnouncementsPage } from './pages/announcements/AnnouncementsPage';
+import { SetupProfilePage } from './pages/register/SetupProfilePage';
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/unauthorized" element={<UnauthorizedPage />} />
           <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="/setup-profile" element={<SetupProfilePage />} />
 
           {/* Registration & Forgot Password Flow*/}
           <Route path="/register/email" element={<RegisterEmailPage />} />
