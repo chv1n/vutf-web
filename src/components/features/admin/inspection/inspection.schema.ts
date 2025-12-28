@@ -1,22 +1,23 @@
 import { z } from 'zod';
 
 export const createInspectionSchema = z.object({
-  title: z
-    .string()
-    .min(1, 'กรุณาระบุหัวข้อ')
-    .max(100, 'หัวข้อต้องไม่เกิน 100 ตัวอักษร'),
+  academicYear: z.string().length(4, 'ระบุปีการศึกษา 4 หลัก (เช่น 2567)'),
+  term: z.string().min(1, 'ระบุเทอม'),
+  roundNumber: z.coerce.number().min(1, 'ลำดับรอบต้องเป็นตัวเลขตั้งแต่ 1 ขึ้นไป'),
+  courseType: z.enum(['PRE_PROJECT', 'PROJECT', 'ALL']),
+  title: z.string().min(1, 'กรุณาระบุหัวข้อ'),
   description: z.string().optional(),
   startDate: z.string().min(1, 'กรุณาระบุวันเริ่มต้น'),
   endDate: z.string().min(1, 'กรุณาระบุวันสิ้นสุด'),
   status: z.enum(['OPEN', 'CLOSED']).optional(),
+  isActive: z.boolean().optional().default(true),
 }).refine((data) => {
-  // Custom Validation: Start Date < End Date
   const start = new Date(data.startDate);
   const end = new Date(data.endDate);
   return start < end;
 }, {
   message: 'วันที่เริ่มต้นต้องมาก่อนวันที่สิ้นสุด',
-  path: ['startDate'], // ชี้เป้าว่า Error ที่ field ไหน
+  path: ['startDate'],
 });
 
 export type CreateInspectionSchema = z.infer<typeof createInspectionSchema>;

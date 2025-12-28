@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, SubmitHandler } from 'react-hook-form'; 
 import { zodResolver } from '@hookform/resolvers/zod';
 import Swal from 'sweetalert2';
+import { FiSave, FiX, FiCalendar, FiType, FiAlignLeft, FiActivity, FiEdit2, FiPlusCircle, FiLayers, FiHash, FiInfo } from 'react-icons/fi';
 import { createInspectionSchema, CreateInspectionSchema } from './inspection.schema';
 import { inspectionService } from '@/services/inspection.service';
 import { InspectionRound } from '@/types/inspection';
@@ -14,123 +15,228 @@ interface Props {
 
 const CreateInspectionForm: React.FC<Props> = ({ initialData, onSuccess, onCancel }) => {
     const [isLoading, setIsLoading] = useState(false);
-    const isEditMode = !!initialData; // เช็คว่าเป็นโหมดแก้ไขไหม
+    const isEditMode = !!initialData;
 
     const {
         register,
         handleSubmit,
         formState: { errors },
-        reset,
-        setValue
+        setValue,
     } = useForm<CreateInspectionSchema>({
-        resolver: zodResolver(createInspectionSchema),
+        resolver: zodResolver(createInspectionSchema) as any, 
+        defaultValues: {
+            status: 'CLOSED',
+            academicYear: String(new Date().getFullYear() + 543), 
+            term: '1',
+            roundNumber: 1,
+            courseType: 'ALL',
+            isActive: true,
+            title: '',
+            description: '',
+            startDate: '',
+            endDate: ''
+        }
     });
 
-    // ถ้ามีข้อมูลเดิม (กดแก้ไข) ให้ยัดข้อมูลลง Form
     useEffect(() => {
         if (initialData) {
+            setValue('academicYear', initialData.academicYear);
+            setValue('term', initialData.term);
+            setValue('roundNumber', Number(initialData.roundNumber));
+            setValue('courseType', initialData.courseType as 'PRE_PROJECT' | 'PROJECT' | 'ALL');
+            
             setValue('title', initialData.title);
-            setValue('description', initialData.description || ''); // ถ้า description ไม่มี ให้ใส่ string ว่าง
-            // แปลงวันที่ให้ html input เข้าใจ (YYYY-MM-DDTHH:mm)
+            setValue('description', initialData.description || '');
             setValue('startDate', new Date(initialData.startDate).toISOString().slice(0, 16));
             setValue('endDate', new Date(initialData.endDate).toISOString().slice(0, 16));
-            setValue('status', initialData.status as 'OPEN' | 'CLOSED');
+            setValue('status', initialData.status);
+            setValue('isActive', initialData.isActive);
         }
     }, [initialData, setValue]);
 
-    const onSubmit = async (data: CreateInspectionSchema) => {
+    const onSubmit: SubmitHandler<CreateInspectionSchema> = async (data) => {
         setIsLoading(true);
         try {
             if (isEditMode && initialData) {
-                // --- กรณีแก้ไข (Update) ---
                 await inspectionService.update(initialData.inspectionId, data);
-                Swal.fire('สำเร็จ', 'แก้ไขข้อมูลเรียบร้อยแล้ว', 'success');
+                Swal.fire({ icon: 'success', title: 'แก้ไขข้อมูลสำเร็จ', showConfirmButton: false, timer: 1500 });
             } else {
-                // --- กรณีสร้างใหม่ (Create) ---
                 await inspectionService.create(data);
-                Swal.fire('สำเร็จ', 'สร้างรอบการตรวจเรียบร้อยแล้ว', 'success');
+                Swal.fire({ icon: 'success', title: 'สร้างรายการสำเร็จ', showConfirmButton: false, timer: 1500 });
             }
             onSuccess();
         } catch (error: any) {
             console.error(error);
-            Swal.fire('ผิดพลาด', error.message || 'ไม่สามารถบันทึกข้อมูลได้', 'error');
+            Swal.fire('ผิดพลาด', error.response?.data?.message || 'ไม่สามารถบันทึกข้อมูลได้', 'error');
         } finally {
             setIsLoading(false);
         }
     };
 
     return (
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 bg-white p-6 rounded-lg shadow-md border border-gray-100">
-            <h2 className="text-xl font-bold text-gray-800 mb-4">
-                {isEditMode ? 'แก้ไขรอบการตรวจ' : 'สร้างรอบการตรวจใหม่'}
-            </h2>
-
-            {/* ... (Input Fields) ... */}
-            {/* Title */}
-            <div>
-                <label className="block text-sm font-medium text-gray-700">หัวข้อ</label>
-                <input
-                    {...register('title')}
-                    type="text"
-                    className={`mt-1 block w-full rounded-md border p-2 text-gray-600 ${errors.title ? 'border-red-500' : 'border-gray-300'
-                        }`}
-                />
-                {errors.title && <span className="text-xs text-red-500">{errors.title.message}</span>}
-            </div>
-
-            {/* Description */}
-            <div>
-                <label className="block text-sm font-medium text-gray-700">รายละเอียด</label>
-                <textarea
-                    {...register('description')}
-                    className="mt-1 block w-full rounded-md border border-gray-300 p-2 text-gray-600"
-                    rows={3}
-                />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Start Date */}
+        <form onSubmit={handleSubmit(onSubmit)} className="bg-white p-6 md:p-8 rounded-2xl shadow-xl border border-gray-100 animate-in fade-in zoom-in duration-300">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-6 border-b border-gray-100 pb-4">
                 <div>
-                    <label className="block text-sm font-medium text-gray-700">วันที่เริ่ม</label>
+                    <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                        {isEditMode ? <FiEdit2 className="text-blue-600" /> : <FiPlusCircle className="text-blue-600" />}
+                        {isEditMode ? 'แก้ไขรอบการตรวจสอบ' : 'สร้างรอบการตรวจสอบใหม่'}
+                    </h2>
+                    <p className="text-gray-500 text-sm mt-1">กำหนดปีการศึกษาและรายละเอียดการสอบ</p>
+                </div>
+            </div>
+
+            {/* Info Alert Box */}
+            <div className="mb-6 bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg flex items-start gap-3">
+                <FiInfo className="text-blue-500 mt-1 min-w-[20px]" size={20} />
+                <div className="text-sm text-blue-800">
+                    <p className="font-semibold">ระบบจัดการสถานะอัตโนมัติ</p>
+                    <p className="opacity-90 mt-0.5 leading-relaxed">
+                        สถานะรอบการส่งเอกสารจะเปลี่ยนเป็น <span className="font-bold text-green-600">OPEN (เปิดรับ)</span> เมื่อถึงเวลาเริ่มต้น 
+                        และจะเปลี่ยนเป็น <span className="font-bold text-red-600">CLOSED (ปิดรับ)</span> เมื่อสิ้นสุดเวลาโดยอัตโนมัติ
+                    </p>
+                </div>
+            </div>
+
+            <div className="space-y-5">
+                {/* --- 1. ส่วนข้อมูลปีการศึกษา --- */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-1.5 flex items-center gap-2">
+                            <FiCalendar className="text-gray-400"/> ปีการศึกษา
+                        </label>
+                        <input {...register('academicYear')} type="text" maxLength={4} className={`block w-full rounded-xl border p-2.5 text-gray-700 shadow-sm outline-none focus:ring-2 focus:ring-blue-100 ${errors.academicYear ? 'border-red-500' : 'border-gray-200'}`} placeholder="เช่น 2567" />
+                        {errors.academicYear && <p className="mt-1 text-xs text-red-500">{errors.academicYear.message}</p>}
+                    </div>
+                    <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-1.5 flex items-center gap-2">
+                            <FiLayers className="text-gray-400"/> เทอม
+                        </label>
+                        <select {...register('term')} className="block w-full rounded-xl border p-2.5 text-gray-700 shadow-sm outline-none focus:ring-2 focus:ring-blue-100 border-gray-200 bg-white cursor-pointer">
+                            <option value="1">เทอม 1</option>
+                            <option value="2">เทอม 2</option>
+                            <option value="3">Summer</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-1.5 flex items-center gap-2">
+                            <FiHash className="text-gray-400"/> ครั้งที่ (Round)
+                        </label>
+                        <input 
+                            {...register('roundNumber')} 
+                            type="number" 
+                            min={1} 
+                            className={`block w-full rounded-xl border p-2.5 text-gray-700 shadow-sm outline-none focus:ring-2 focus:ring-blue-100 ${errors.roundNumber ? 'border-red-500' : 'border-gray-200'}`} 
+                        />
+                        {errors.roundNumber && <p className="mt-1 text-xs text-red-500">{errors.roundNumber.message}</p>}
+                    </div>
+                </div>
+
+                {/* --- 2. ส่วนประเภทโครงงาน --- */}
+                <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">ประเภทโครงงานที่เปิดรับ</label>
+                    <div className="relative">
+                        <select {...register('courseType')} className="block w-full rounded-xl border p-2.5 text-gray-700 shadow-sm outline-none focus:ring-2 focus:ring-blue-100 border-gray-200 bg-white cursor-pointer">
+                            <option value="ALL">🌐 เปิดรับทั้งหมด (All)</option>
+                            <option value="PRE_PROJECT">📘 Pre-Project</option>
+                            <option value="PROJECT">📙 Project</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div className="border-t border-gray-100 my-2"></div>
+
+                {/* --- 3. ข้อมูลทั่วไป --- */}
+                <div className="group">
+                    <label className="block text-sm font-semibold text-gray-700 mb-1.5 flex items-center gap-2">
+                        <FiType className="text-gray-400" /> หัวข้อการตรวจ <span className="text-red-500">*</span>
+                    </label>
                     <input
-                        {...register('startDate')}
-                        type="datetime-local"
-                        className="mt-1 block w-full rounded-md border border-gray-300 p-2 text-gray-600"
+                        {...register('title')}
+                        type="text"
+                        placeholder="เช่น สอบหัวข้อวิทยานิพนธ์ รอบที่ 1"
+                        className={`block w-full rounded-xl border p-2.5 text-gray-700 shadow-sm transition-all focus:ring-2 focus:ring-blue-100 outline-none ${errors.title ? 'border-red-500' : 'border-gray-200'}`}
                     />
-                    {errors.startDate && <span className="text-xs text-red-500">{errors.startDate.message}</span>}
+                    {errors.title && <p className="mt-1 text-xs text-red-500 font-medium">{errors.title.message}</p>}
                 </div>
 
-                {/* End Date */}
                 <div>
-                    <label className="block text-sm font-medium text-gray-700">วันที่สิ้นสุด</label>
-                    <input
-                        {...register('endDate')}
-                        type="datetime-local"
-                        className="mt-1 block w-full rounded-md border border-gray-300 p-2 text-gray-600"
+                    <label className="block text-sm font-semibold text-gray-700 mb-1.5 flex items-center gap-2">
+                        <FiAlignLeft className="text-gray-400" /> รายละเอียดเพิ่มเติม
+                    </label>
+                    <textarea
+                        {...register('description')}
+                        rows={2}
+                        className="block w-full rounded-xl border border-gray-200 p-2.5 text-gray-700 shadow-sm outline-none resize-none"
                     />
-                    {errors.endDate && <span className="text-xs text-red-500">{errors.endDate.message}</span>}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-1.5 flex items-center gap-2">
+                            <FiCalendar className="text-gray-400" /> วันที่เริ่มต้น <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                            {...register('startDate')}
+                            type="datetime-local"
+                            className={`block w-full rounded-xl border p-2.5 text-gray-700 shadow-sm outline-none cursor-pointer ${errors.startDate ? 'border-red-500' : 'border-gray-200'}`}
+                        />
+                        {errors.startDate && <p className="mt-1 text-xs text-red-500">{errors.startDate.message}</p>}
+                    </div>
+                    <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-1.5 flex items-center gap-2">
+                            <FiCalendar className="text-gray-400" /> วันที่สิ้นสุด <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                            {...register('endDate')}
+                            type="datetime-local"
+                            className={`block w-full rounded-xl border p-2.5 text-gray-700 shadow-sm outline-none cursor-pointer ${errors.endDate ? 'border-red-500' : 'border-gray-200'}`}
+                        />
+                        {errors.endDate && <p className="mt-1 text-xs text-red-500">{errors.endDate.message}</p>}
+                    </div>
+                </div>
+
+                {/* Status Selection */}
+                <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1.5 flex items-center gap-2">
+                        <FiActivity className="text-gray-400" /> สถานะเริ่มต้น
+                    </label>
+                    <div className="relative">
+                        <select
+                            {...register('status')}
+                            className="block w-full appearance-none rounded-xl border border-gray-200 bg-gray-50 p-2.5 pr-8 text-gray-700 shadow-sm transition-all focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100 hover:border-blue-300 outline-none cursor-pointer"
+                        >
+                            <option value="CLOSED">🔴 CLOSED (ปิดรับ)</option>
+                            <option value="OPEN">🟢 OPEN (เปิดรับ)</option>
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+                            <svg className="h-4 w-4 fill-current" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" fillRule="evenodd"></path></svg>
+                        </div>
+                    </div>
+                    <p className="mt-1.5 text-xs text-gray-400">
+                        * ท่านสามารถกำหนดสถานะเริ่มต้นเองได้ แต่เมื่อถึงเวลาระบบจะปรับให้อัตโนมัติ
+                    </p>
                 </div>
             </div>
 
-            {isEditMode && (
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">สถานะ (Status)</label>
-                    <select
-                        {...register('status')}
-                        className="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 outline-none"
-                    >
-                        <option value="OPEN">🟢 OPEN (เปิดรับ)</option>
-                        <option value="CLOSED">🔴 CLOSED (ปิดรับ)</option>
-                    </select>
-                </div>
-            )}
-
-            <div className="flex justify-end space-x-2 pt-4">
-                <button type="button" onClick={onCancel} className="px-4 py-2 text-sm text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200">
-                    ยกเลิก
+            <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 mt-8 pt-6 border-t border-gray-100">
+                <button
+                    type="button"
+                    onClick={onCancel}
+                    className="flex items-center justify-center gap-2 px-6 py-2.5 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:text-gray-800 hover:border-gray-300 transition-all cursor-pointer shadow-sm active:scale-95"
+                >
+                    <FiX size={18} /> ยกเลิก
                 </button>
-                <button type="submit" className="px-4 py-2 text-sm text-white bg-blue-600 rounded-md hover:bg-blue-700" disabled={isLoading}>
-                    {isLoading ? 'กำลังบันทึก...' : (isEditMode ? 'บันทึกการแก้ไข' : 'สร้างข้อมูล')}
+                <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="flex items-center justify-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-xl shadow-lg shadow-blue-200 hover:bg-blue-700 hover:shadow-blue-300 transition-all cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed active:scale-95"
+                >
+                    {isLoading ? 'กำลังบันทึก...' : (
+                        <>
+                            <FiSave size={18} /> {isEditMode ? 'บันทึกการแก้ไข' : 'สร้างรายการ'}
+                        </>
+                    )}
                 </button>
             </div>
         </form>

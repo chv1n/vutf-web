@@ -1,31 +1,41 @@
 // src/services/inspection.service.ts
 
 import { api } from './api';
-import { CreateInspectionDto, InspectionRound, InspectionStatus } from '../types/inspection';
-// import { UpdateInspectionRoundDto } from '../modules/inspection_round/dto/update-inspection_round.dto';
+import { CreateInspectionDto, InspectionRound } from '../types/inspection';
+
+// Interface สำหรับรับค่า Query Params
+export interface GetInspectionParams {
+    page?: number;
+    limit?: number;
+    search?: string;
+}
+
+// Interface สำหรับ Response ที่มี Pagination
+export interface GetAllResponse {
+    data: InspectionRound[];
+    meta: {
+        total: number;
+        page: number;
+        lastPage: number;
+        limit: number;
+    };
+}
 
 export const inspectionService = {
-    getAll: async () => {
-        return await api.get<InspectionRound[]>('/inspections');
+    getAll: async (params?: GetInspectionParams) => {
+        const queryString = params 
+            ? '?' + new URLSearchParams(params as any).toString() 
+            : '';
+
+        const response = await api.get<GetAllResponse>(`/inspections${queryString}`);
+        
+        return response;
     },
 
-    getActiveRound: async (): Promise<InspectionRound | null> => {
-        try {
-            const response = await api.get<InspectionRound[]>('/inspections');
-            const rounds = (response as any).data || response;
-
-            // เช็คความชัวร์ว่าเป็น Array ไหม ก่อนสั่ง filter
-            if (!Array.isArray(rounds)) {
-                console.error("Invalid data format (Expected Array):", rounds);
-                return null;
-            }
-
-            const activeRounds = rounds.filter((round: any) => round.status === 'OPEN');
-            return activeRounds.length > 0 ? activeRounds[0] : null;
-        } catch (error) {
-            console.error("Error fetching active round:", error);
-            return null;
-        }
+    getActiveRound: async () => {
+        const response = await api.get<InspectionRound>('/inspections/active');
+        
+        return response;
     },
 
     create: async (data: CreateInspectionDto) => {
