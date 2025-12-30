@@ -5,12 +5,14 @@ export interface User {
   email: string;
   role: 'student' | 'instructor' | 'admin';
   isActive: boolean;
+  createdAt?: string;
+  updatedAt?: string;
   student?: StudentProfile;
   instructor?: InstructorProfile;
 }
 
 export interface StudentProfile {
-  student_uuid: string;
+  student_uuid?: string;
   student_code: string;
   prefix_name: string;
   first_name: string;
@@ -19,14 +21,10 @@ export interface StudentProfile {
 }
 
 export interface InstructorProfile {
-  instructor_uuid: string;
+  instructor_uuid?: string;
   instructor_code: string;
-  firstName: string;
-  lastName: string;
-  hasAccount?: boolean;
-  email?: string | null;
-  user_uuid?: string | null;
-  isActive?: boolean;
+  first_name: string; 
+  last_name: string;
 }
 
 export interface PaginationMeta {

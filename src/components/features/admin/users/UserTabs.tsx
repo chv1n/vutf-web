@@ -11,7 +11,7 @@ export const UserTabs = ({ activeTab, onTabChange }: UserTabsProps) => {
     <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg w-fit mb-6">
       <button
         onClick={() => onTabChange('student')}
-        className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
+        className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all cursor-pointer ${
           activeTab === 'student'
             ? 'bg-white text-blue-600 shadow-sm'
             : 'text-gray-500 hover:text-gray-700'
@@ -21,7 +21,7 @@ export const UserTabs = ({ activeTab, onTabChange }: UserTabsProps) => {
       </button>
       <button
         onClick={() => onTabChange('instructor')}
-        className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
+        className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all cursor-pointer ${
           activeTab === 'instructor'
             ? 'bg-white text-blue-600 shadow-sm'
             : 'text-gray-500 hover:text-gray-700'

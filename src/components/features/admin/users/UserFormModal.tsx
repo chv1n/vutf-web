@@ -1,20 +1,20 @@
-// src/components/features/admin/users/UserFormModal.tsx
 import { useState, useEffect } from 'react';
-import { FiX, FiAlertCircle } from 'react-icons/fi';
+import { FiX, FiAlertCircle, FiLoader } from 'react-icons/fi'; 
+import { User } from '../../../../types/user';
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (data: any) => void;
-  initialData?: any;
+  initialData?: User | null;
   role: 'student' | 'instructor';
+  isSubmitting?: boolean;
 }
 
-export const UserFormModal = ({ isOpen, onClose, onSubmit, initialData, role }: Props) => {
+export const UserFormModal = ({ isOpen, onClose, onSubmit, initialData, role, isSubmitting = false }: Props) => {
   const isEditMode = !!initialData;
   const isAddStudent = role === 'student' && !isEditMode;
   
-  // State
   const [formData, setFormData] = useState({
     email: '', 
     password: '', 
@@ -28,39 +28,36 @@ export const UserFormModal = ({ isOpen, onClose, onSubmit, initialData, role }: 
 
   // Load Data
   useEffect(() => {
-    if (initialData) {
-        if (role === 'student') {
+    if (initialData && isOpen) {
+        if (role === 'student' && initialData.student) {
             setFormData({
                 email: initialData.email || '', 
                 password: '', 
-                prefixName: initialData.student?.prefix_name || 'นาย',
-                firstName: initialData.student?.first_name || '',
-                lastName: initialData.student?.last_name || '',
-                code: initialData.student?.student_code || '',
-                phone: initialData.student?.phone || '',
+                prefixName: initialData.student.prefix_name || 'นาย',
+                firstName: initialData.student.first_name || '',
+                lastName: initialData.student.last_name || '',
+                code: initialData.student.student_code || '',
+                phone: initialData.student.phone || '',
                 isActive: initialData.isActive ?? true
             });
-        } else {
-             // Instructor
+        } else if (role === 'instructor' && initialData.instructor) {
              setFormData({
                 email: initialData.email || '',
                 password: '', 
                 prefixName: '',
-                firstName: initialData.firstName || '',
-                lastName: initialData.lastName || '',
-                code: initialData.instructor_code || '',
+                firstName: initialData.instructor.first_name || '',
+                lastName: initialData.instructor.last_name || '',
+                code: initialData.instructor.instructor_code || '',
                 phone: '',
                 isActive: initialData.isActive ?? true 
             });
         }
-    } else {
-        // Reset Form
+    } else if (!isOpen) {
         setFormData({ email: '', password: '', prefixName: 'นาย', firstName: '', lastName: '', code: '', phone: '', isActive: true });
     }
   }, [initialData, role, isOpen]);
 
-  // --- Validation Logic ---
-
+  // Validation
   const validateBulkEmails = (text: string) => {
     if (!text) return true;
     const emails = text.split(/[\n,\s]+/).filter(e => e.trim() !== '');
@@ -69,7 +66,21 @@ export const UserFormModal = ({ isOpen, onClose, onSubmit, initialData, role }: 
 
   const validateSingleEmail = (email: string) => {
       if (!email) return true; 
-      return email.endsWith('@mail.rmutt.ac.th');
+      if (role === 'student') return email.endsWith('@mail.rmutt.ac.th');
+      if (role === 'instructor') {
+          if (isEditMode && initialData) {
+              const currentEmail = initialData.email;
+              const isEmailChanged = email !== currentEmail;
+              const isPasswordChanged = !!formData.password;
+
+              if (isEmailChanged || isPasswordChanged) {
+                  return email.endsWith('@mail.rmutt.ac.th');
+              }
+              return true;
+          }
+          return true; 
+      }
+      return true; 
   };
 
   const validatePassword = (password: string) => {
@@ -77,7 +88,6 @@ export const UserFormModal = ({ isOpen, onClose, onSubmit, initialData, role }: 
       return true;
   };
 
-  // --- Real-time Errors ---
   const emailError = isAddStudent 
         ? (formData.email && !validateBulkEmails(formData.email))
         : (formData.email && !validateSingleEmail(formData.email));
@@ -86,7 +96,6 @@ export const UserFormModal = ({ isOpen, onClose, onSubmit, initialData, role }: 
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
     if (emailError || passwordError) return;
 
     if (isAddStudent) {
@@ -107,33 +116,28 @@ export const UserFormModal = ({ isOpen, onClose, onSubmit, initialData, role }: 
 
     } else {
         payload.instructorCode = formData.code;
-        
-        if (formData.email) {
+        if (formData.email && formData.email !== initialData?.email) {
              payload.email = formData.email;
         }
-
-        const isNewAccount = !isEditMode || (isEditMode && !initialData.hasAccount);
-        if (isNewAccount && formData.password) {
+        if (!isEditMode && formData.password) {
              payload.password = formData.password;
         }
-
-        if (isEditMode && initialData?.hasAccount) {
+        if (isEditMode) {
             if (formData.password) {
                 payload.password = formData.password;
             }
             payload.isActive = formData.isActive;
         }
     }
-    
     onSubmit(payload);
   };
 
   if (!isOpen) return null;
 
-  const isEmailDisabled = isEditMode && role === 'student';
-  const isCodeDisabled = isEditMode && role === 'student';
-  const showPasswordField = role === 'instructor';
-  const isSubmitDisabled = !!emailError || !!passwordError || (isAddStudent && !formData.email);
+  const isEmailDisabled = isEditMode && role === 'student'; 
+  const isCodeDisabled = isEditMode && role === 'student'; 
+  
+  const isSubmitDisabled = !!emailError || !!passwordError || (isAddStudent && !formData.email) || isSubmitting;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
@@ -143,7 +147,11 @@ export const UserFormModal = ({ isOpen, onClose, onSubmit, initialData, role }: 
           <h2 className="text-xl font-bold text-gray-800">
             {isEditMode ? 'Edit' : (isAddStudent ? 'Invite New' : 'Add New')} {role === 'student' ? 'Student' : 'Instructor'}
           </h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
+          <button 
+            onClick={onClose} 
+            disabled={isSubmitting} 
+            className="text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50 cursor-pointer"
+          >
             <FiX size={24} />
           </button>
         </div>
@@ -221,14 +229,11 @@ export const UserFormModal = ({ isOpen, onClose, onSubmit, initialData, role }: 
             </>
           )}
 
-          {/* --- EMAIL FIELD --- */}
+          {/* Email Field */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
                 Email {role === 'student' ? '(RMUTT Only)' : ''}
-                
-                {/* --- เพิ่มข้อความ (Optional) สำหรับอาจารย์ --- */}
-                {!isEditMode && role === 'instructor' && <span className="text-xs text-gray-400 font-normal ml-2">(Optional)</span>}
-                
+                {!isEditMode && role === 'instructor' && <span className="text-xs text-gray-400 font-normal ml-2">(Optional - Auto Generated if empty)</span>}
                 {isEmailDisabled && <span className="text-xs text-gray-400 font-normal ml-2">(Cannot be changed)</span>}
             </label>
             
@@ -236,7 +241,7 @@ export const UserFormModal = ({ isOpen, onClose, onSubmit, initialData, role }: 
                 <>
                     <textarea 
                         required
-                        className={`w-full px-4 py-2 border rounded-lg focus:ring-2 outline-none text-gray-900 bg-white min-h-[300px] ${
+                        className={`w-full px-4 py-2 border rounded-lg focus:ring-2 outline-none text-gray-900 bg-white min-h-[150px] ${
                             emailError ? 'border-red-500 focus:ring-red-200' : 'border-gray-300 focus:ring-blue-500'
                         }`}
                         placeholder={`student1@mail.rmutt.ac.th\nstudent2@mail.rmutt.ac.th`}
@@ -250,7 +255,7 @@ export const UserFormModal = ({ isOpen, onClose, onSubmit, initialData, role }: 
             ) : (
                 <input 
                     type="email" 
-                    required={!isEditMode && role === 'student'} 
+                    required={role === 'student'} 
                     disabled={isEmailDisabled}
                     className={`w-full px-4 py-2 border rounded-lg focus:ring-2 outline-none text-gray-900 bg-white disabled:bg-gray-100 disabled:text-gray-500 ${
                         emailError ? 'border-red-500 focus:ring-red-200' : 'border-gray-300 focus:ring-blue-500'
@@ -265,27 +270,21 @@ export const UserFormModal = ({ isOpen, onClose, onSubmit, initialData, role }: 
                 <div className="flex items-center gap-1 mt-1.5 text-red-500 animate-fadeIn">
                     <FiAlertCircle size={14} />
                     <span className="text-xs">
-                        อีเมลต้องลงท้ายด้วย @mail.rmutt.ac.th เท่านั้น
+                        {role === 'instructor' && isEditMode 
+                            ? "หากแก้ไขอีเมลหรือรหัสผ่าน ต้องใช้อีเมล @mail.rmutt.ac.th เท่านั้น"
+                            : "อีเมลต้องลงท้ายด้วย @mail.rmutt.ac.th เท่านั้น"
+                        }
                     </span>
                 </div>
             )}
-
-            {isAddStudent && !emailError && (
-                 <p className="text-xs text-blue-500 mt-2">
-                    * ระบบจะส่งอีเมลคำเชิญให้นักศึกษากดตั้งค่ารหัสผ่านและข้อมูลส่วนตัวด้วยตนเอง
-                 </p>
-            )}
           </div>
 
-          {/* --- PASSWORD FIELD --- */}
-          {showPasswordField && (
+          {/* Password Field */}
+          {(!isAddStudent) && (
              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                     Password
-                    
-                    {/* --- เพิ่มข้อความ (Optional) สำหรับอาจารย์ตอนสร้างใหม่ --- */}
-                    {!isEditMode && <span className="text-xs text-gray-400 font-normal ml-2">(Optional)</span>}
-                    
+                    {!isEditMode && role === 'instructor' && <span className="text-xs text-gray-400 font-normal ml-2">(Optional)</span>}
                     {isEditMode && <span className="text-xs text-gray-400 font-normal ml-2">(Leave blank to keep current)</span>}
                 </label>
                 <input 
@@ -297,7 +296,6 @@ export const UserFormModal = ({ isOpen, onClose, onSubmit, initialData, role }: 
                     onChange={e => setFormData({...formData, password: e.target.value})} 
                     placeholder={isEditMode ? "••••••••" : "อย่างน้อย 6 ตัวอักษร"}
                 />
-                
                 {passwordError && (
                     <div className="flex items-center gap-1 mt-1.5 text-red-500 animate-fadeIn">
                         <FiAlertCircle size={14} />
@@ -321,13 +319,29 @@ export const UserFormModal = ({ isOpen, onClose, onSubmit, initialData, role }: 
           )}
 
           <div className="pt-6 flex gap-3">
-             <button type="button" onClick={onClose} className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors">Cancel</button>
+             <button 
+                type="button" 
+                onClick={onClose} 
+                disabled={isSubmitting} 
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors disabled:opacity-50 cursor-pointer"
+             >
+                Cancel
+             </button>
+             
              <button 
                 type="submit" 
                 disabled={isSubmitDisabled}
-                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow-md font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-400 disabled:shadow-none"
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow-md font-medium transition-colors disabled:opacity-70 disabled:cursor-not-allowed disabled:bg-blue-400 disabled:shadow-none flex justify-center items-center gap-2 cursor-pointer"
              >
-                {isAddStudent ? 'Send Invite' : 'Save'}
+                {/* ส่วนแสดงผล Loading */}
+                {isSubmitting ? (
+                    <>
+                        <FiLoader className="animate-spin" />
+                        {isAddStudent ? 'Sending Invite...' : 'Saving...'}
+                    </>
+                ) : (
+                    isAddStudent ? 'Send Invite' : 'Save'
+                )}
              </button>
           </div>
         </form>

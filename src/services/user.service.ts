@@ -1,6 +1,6 @@
 // src/services/user.service.ts
 import { api } from './api'; 
-import { UserResponse, User, InstructorProfile } from '../types/user';
+import { UserResponse, User } from '../types/user';
 
 // Helper function
 const buildQuery = (params: Record<string, any>) => {
@@ -14,57 +14,33 @@ const buildQuery = (params: Record<string, any>) => {
 };
 
 export const userService = {
-  // ดึงรายชื่อนักเรียน
+
   getStudents: async (page = 1, limit = 10, search = '') => {
     const queryString = buildQuery({ page, limit, search, role: 'student' });
     const response = await api.get<UserResponse<User>>(`/users${queryString}`);
     return response; 
   },
 
-  // ดึงรายชื่ออาจารย์
   getInstructors: async (page = 1, limit = 10, search = '') => {
-    const queryString = buildQuery({ page, limit, search });
-    const response = await api.get<UserResponse<InstructorProfile>>(`/users/instructors${queryString}`);
+    const queryString = buildQuery({ page, limit, search, role: 'instructor' });
+    const response = await api.get<UserResponse<User>>(`/users${queryString}`);
     return response;
   },
 
-  // สร้าง Instructor
   createInstructor: async (data: any) => {
-    return await api.post('/users/instructor', data);
+    return await api.post('/instructors', data);
   },
 
-  // ลบ User (Student)
-  deleteUser: async (id: string) => {
-    return await api.delete(`/users/${id}`);
-  },
-
-  // ลบ Instructor
-  deleteInstructor: async (id: string) => {
-    return await api.delete(`/users/instructors/${id}`);
-  },
-
-  // แก้ไข User (Student)
-  updateUser: async (id: string, data: any) => {
-    return await api.patch(`/users/${id}`, data);
-  },
-
-  // แก้ไข Instructor
-  updateInstructor: async (id: string, data: any) => {
-    return await api.patch(`/users/instructors/${id}`, data);
-  },
-
-  // API สำหรับ Invite Student (Admin ใช้)
   inviteStudents: async (emails: string[]) => {
-    const response = await api.post('/users/invite-students', { emails });
+    const response = await api.post('/students/invite', { emails });
     return response.data;
   },
 
   validateInviteToken: async (token: string) => {
-    const response = await api.get<any>(`/users/validate-invite-token?token=${token}`);
+    const response = await api.get<any>(`/students/validate-invite-token?token=${token}`);
     return response.data;
   },
 
-  // API สำหรับ Setup Profile (Student ใช้เมื่อกดลิงก์)
   setupProfile: async (data: {
     token: string;
     password: string;
@@ -73,7 +49,15 @@ export const userService = {
     lastName: string;
     phone: string;
   }) => {
-    const response = await api.post('/users/setup-profile', data);
+    const response = await api.post('/students/setup-profile', data);
     return response.data;
+  },
+
+  deleteUser: async (id: string) => {
+    return await api.delete(`/users/${id}`);
+  },
+
+  updateUser: async (id: string, data: any) => {
+    return await api.patch(`/users/${id}`, data);
   }
 };
