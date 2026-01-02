@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FiPlus, FiArrowRight } from 'react-icons/fi';
+import { FiPlus, FiArrowRight, FiMail } from 'react-icons/fi';
 
 const StudentHome: React.FC = () => {
   const navigate = useNavigate();
@@ -17,7 +17,10 @@ const StudentHome: React.FC = () => {
           </p>
         </div>
 
-        <button className="group relative w-64 h-48 bg-white border-2 border-dashed border-blue-200 rounded-2xl flex flex-col items-center justify-center hover:border-blue-500 hover:bg-blue-50 transition-all cursor-pointer">
+        <button
+          onClick={() => navigate('/student/thesis/create')}
+          className="group relative w-64 h-48 bg-white border-2 border-dashed border-blue-200 rounded-2xl flex flex-col items-center justify-center hover:border-blue-500 hover:bg-blue-50 transition-all cursor-pointer"
+        >
           <div className="mb-4">
             <FiPlus size={48} className="text-gray-400 group-hover:text-blue-600 transition-colors" />
           </div>
@@ -29,19 +32,31 @@ const StudentHome: React.FC = () => {
       </div>
 
 
-      {/* --- Section 2: ปุ่มไปหน้า Upload File (เพิ่มใหม่) --- */}
+      {/* --- Section 2: Quick Actions --- */}
       <div className="flex flex-col items-center mt-6">
-        <p className="text-xs text-gray-400 mb-2 uppercase tracking-wider">
-          Development Mode
+        <p className="text-xs text-gray-400 mb-4 uppercase tracking-wider">
+          Quick Actions
         </p>
 
-        <button
-          onClick={() => navigate('/student/upload')}
-          className="flex items-center gap-2 px-5 py-2 bg-indigo-600 text-white text-sm rounded-full font-medium shadow-md hover:bg-indigo-700 hover:shadow-lg transition-all active:scale-95"
-        >
-          <span>Go to Thesis Upload</span>
-          <FiArrowRight />
-        </button>
+        <div className="flex items-center gap-4">
+          {/* Invitations Button */}
+          <button
+            onClick={() => navigate('/student/invitations')}
+            className="flex items-center gap-2 px-5 py-2 bg-amber-500 text-white text-sm rounded-full font-medium shadow-md hover:bg-amber-600 hover:shadow-lg transition-all active:scale-95"
+          >
+            <FiMail />
+            <span>คำเชิญ</span>
+          </button>
+
+          {/* Upload File Button */}
+          <button
+            onClick={() => navigate('/student/upload')}
+            className="flex items-center gap-2 px-5 py-2 bg-indigo-600 text-white text-sm rounded-full font-medium shadow-md hover:bg-indigo-700 hover:shadow-lg transition-all active:scale-95"
+          >
+            <span>Thesis Upload</span>
+            <FiArrowRight />
+          </button>
+        </div>
       </div>
     </div>
   );
