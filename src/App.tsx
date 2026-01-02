@@ -3,6 +3,8 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { MainLayout } from './components/layout/MainLayout';
 import StudentHome from './pages/student/StudentHome';
 import UploadFile from './pages/student/UploadFile';
+import CreateThesisPage from './pages/student/CreateThesisPage';
+import InvitationsPage from './pages/student/InvitationsPage';
 import { InstructorHome } from './pages/instructor/InstructorHome';
 import LoginPage from './pages/LoginPage';
 import { RegisterEmailPage } from './pages/register/RegisterEmailPage';
@@ -45,6 +47,8 @@ function App() {
               <Route index element={<Navigate to="/student/dashboard" replace />} />
               <Route path="dashboard" element={<StudentHome />} />
               <Route path="upload" element={<UploadFile />} />
+              <Route path="thesis/create" element={<CreateThesisPage />} />
+              <Route path="invitations" element={<InvitationsPage />} />
               <Route path="profile" element={<div>Profile Page</div>} />
               <Route path="report" element={<div>Thesis Report Page</div>} />
               <Route path="announcements" element={<div>Announcements Page</div>} />
