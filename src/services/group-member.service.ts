@@ -4,6 +4,7 @@
 import { api } from './api';
 import {
     GroupMember,
+    ThesisGroup,
     InvitationStatus,
     UpdateInvitationStatusPayload,
     UpdateInvitationStatusResponse,
@@ -108,6 +109,33 @@ export const groupMemberService = {
     getMemberById: async (memberId: string): Promise<GroupMember> => {
         const response = await api.get<{ data: GroupMember }>(
             `/group-member/${memberId}`
+        );
+        return response.data;
+    },
+
+    /**
+     * ดึงรายการกลุ่มของผู้ใช้ปัจจุบัน
+     * 
+     * @returns Promise<ThesisGroup[]>
+     */
+    getMyGroups: async (): Promise<ThesisGroup[]> => {
+        const response = await api.get<{ data: ThesisGroup[] }>(
+            '/group-member/my-group'
+        );
+        return response.data;
+    },
+
+    /**
+     * เชิญสมาชิกใหม่เข้ากลุ่ม
+     * 
+     * @param groupId - รหัสกลุ่ม
+     * @param studentUuid - รหัสนักศึกษา
+     * @returns Promise<GroupMember>
+     */
+    inviteMember: async (groupId: string, studentUuid: string): Promise<GroupMember> => {
+        const response = await api.post<GroupMember>(
+            `/group-member`,
+            { group_id: groupId, student_uuid: studentUuid, role: 'member' }
         );
         return response.data;
     },

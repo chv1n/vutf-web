@@ -114,7 +114,6 @@ export const InvitationCard: React.FC<InvitationCardProps> = ({
                         </div>
                     </div>
 
-                    {/* Status Badge */}
                     <InvitationBadge status={invitation_status} size="md" />
                 </div>
             </div>
@@ -180,7 +179,7 @@ export const InvitationCard: React.FC<InvitationCardProps> = ({
                                 </p>
                             )}
                             {coAdvisors.map((a) => (
-                                <p key={a.id} className="text-sm text-gray-600">
+                                <p key={a.advisor_id} className="text-sm text-gray-600">
                                     {a.instructor?.first_name} {a.instructor?.last_name}
                                     <span className="text-gray-400 text-xs ml-1">(ร่วม)</span>
                                 </p>

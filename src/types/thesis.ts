@@ -80,10 +80,10 @@ export interface GroupMember {
  * ข้อมูลการมอบหมายอาจารย์ที่ปรึกษา
  */
 export interface AdvisorAssignment {
-    id: string;
-    instructor_uuid: string;
+    advisor_id: string;
+    instructor_uuid?: string;
     role: AdvisorRole;
-    group_id: string;
+    group_id?: string;
     // Relations
     instructor?: InstructorInfo;
 }
@@ -97,7 +97,9 @@ export interface AdvisorAssignment {
  */
 export interface StudentInfo {
     student_uuid: string;
-    student_id: string;
+    student_id?: string;
+    student_code?: string;
+    prefix_name?: string;
     first_name: string;
     last_name: string;
     email?: string;

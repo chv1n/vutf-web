@@ -5,6 +5,7 @@ import StudentHome from './pages/student/StudentHome';
 import UploadFile from './pages/student/UploadFile';
 import CreateThesisPage from './pages/student/CreateThesisPage';
 import InvitationsPage from './pages/student/InvitationsPage';
+import GroupManagementPage from './pages/student/GroupManagementPage';
 import { InstructorHome } from './pages/instructor/InstructorHome';
 import LoginPage from './pages/LoginPage';
 import { RegisterEmailPage } from './pages/register/RegisterEmailPage';
@@ -52,6 +53,7 @@ function App() {
               <Route path="upload" element={<UploadFile />} />
               <Route path="thesis/create" element={<CreateThesisPage />} />
               <Route path="invitations" element={<InvitationsPage />} />
+              <Route path="group-management" element={<GroupManagementPage />} />
               <Route path="profile" element={<div>Profile Page</div>} />
               <Route path="report" element={<div>Thesis Report Page</div>} />
               <Route path="announcements" element={<AnnouncementsPage />} />

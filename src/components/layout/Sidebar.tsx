@@ -1,9 +1,9 @@
 // src/components/layout/Sidebar.tsx
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
-    FiHome, FiUser, FiFileText, FiCalendar, FiBell,
+    FiHome, FiUser, FiFileText, FiBell, FiUsers,
     FiSettings, FiLogOut, FiX, FiList, FiFolder,
-    FiTrendingUp, FiClipboard, FiMessageSquare,
+    FiTrendingUp, FiClipboard,
 } from 'react-icons/fi';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -13,7 +13,7 @@ export const STUDENT_MENU = [
     { icon: FiUser, label: 'Profile', path: '/student/profile' },
     { icon: FiFileText, label: 'Thesis Report', path: '/student/report' },
     // { icon: FiCalendar, label: 'Calendar', path: '/student/calendar' },
-    { icon: FiBell, label: 'Announcements', path: '/student/announcements' },
+    { icon: FiUsers, label: 'Group Management', path: '/student/group-management' },
     { icon: FiSettings, label: 'Settings', path: '/student/settings' },
 ];
 
@@ -109,8 +109,8 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
                                 const shouldBeActive = isActive || isHomeActive;
 
                                 return `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 font-medium ${shouldBeActive
-                                        ? 'bg-blue-600 text-white shadow-md shadow-blue-200 translate-x-1'
-                                        : 'text-gray-500 hover:bg-gray-50 hover:text-blue-600'
+                                    ? 'bg-blue-600 text-white shadow-md shadow-blue-200 translate-x-1'
+                                    : 'text-gray-500 hover:bg-gray-50 hover:text-blue-600'
                                     }`;
                             }}
                         >
