@@ -57,12 +57,12 @@ export const AdvisorSelectSection: React.FC<AdvisorSelectSectionProps> = ({
     const addAdvisor = (instructor: InstructorInfo) => {
         // ตรวจสอบว่าซ้ำหรือไม่
         const isAlreadySelected = selectedAdvisors.some(
-            (a) => a.instructor_id === instructor.instructor_id
+            (a) => a.instructor_uuid === instructor.instructor_uuid
         );
 
         if (!isAlreadySelected) {
             const newAdvisor: FormAdvisor = {
-                instructor_id: instructor.instructor_id,
+                instructor_uuid: instructor.instructor_uuid,
                 role: selectedRole,
                 instructorInfo: instructor,
             };
@@ -74,25 +74,27 @@ export const AdvisorSelectSection: React.FC<AdvisorSelectSectionProps> = ({
     };
 
     // ลบอาจารย์
-    const removeAdvisor = (instructorId: string) => {
+    const removeAdvisor = (instructorUuid: string) => {
         const updatedAdvisors = selectedAdvisors.filter(
-            (a) => a.instructor_id !== instructorId
+            (a) => a.instructor_uuid !== instructorUuid
         );
         setValue('advisors', updatedAdvisors);
     };
 
     // เปลี่ยน role ของอาจารย์
-    const changeAdvisorRole = (instructorId: string, newRole: AdvisorRole) => {
+    const changeAdvisorRole = (instructorUuid: string, newRole: AdvisorRole) => {
         const updatedAdvisors = selectedAdvisors.map((a) =>
-            a.instructor_id === instructorId ? { ...a, role: newRole } : a
+            a.instructor_uuid === instructorUuid ? { ...a, role: newRole } : a
         );
         setValue('advisors', updatedAdvisors);
     };
 
+
     // กรองผลลัพธ์ที่เลือกแล้วออก
     const filteredResults = results.filter(
-        (instructor) => !selectedAdvisors.some((a) => a.instructor_id === instructor.instructor_id)
+        (instructor) => !selectedAdvisors.some((a) => a.instructor_uuid === instructor.instructor_uuid)
     );
+
 
     return (
         <section className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
@@ -122,13 +124,13 @@ export const AdvisorSelectSection: React.FC<AdvisorSelectSectionProps> = ({
             </div>
 
             {/* Role Selection */}
-            <div className="flex gap-2 mb-4">
+            {/* <div className="flex gap-2 mb-4">
                 <button
                     type="button"
                     onClick={() => setSelectedRole(AdvisorRole.MAIN)}
                     className={`flex-1 py-2 px-4 rounded-xl text-sm font-medium transition-all duration-200 ${selectedRole === AdvisorRole.MAIN
-                            ? 'bg-purple-600 text-white shadow-lg shadow-purple-200'
-                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        ? 'bg-purple-600 text-white shadow-lg shadow-purple-200'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                         }`}
                 >
                     <FiAward className="inline-block w-4 h-4 mr-2" />
@@ -138,14 +140,14 @@ export const AdvisorSelectSection: React.FC<AdvisorSelectSectionProps> = ({
                     type="button"
                     onClick={() => setSelectedRole(AdvisorRole.CO)}
                     className={`flex-1 py-2 px-4 rounded-xl text-sm font-medium transition-all duration-200 ${selectedRole === AdvisorRole.CO
-                            ? 'bg-purple-600 text-white shadow-lg shadow-purple-200'
-                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        ? 'bg-purple-600 text-white shadow-lg shadow-purple-200'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                         }`}
                 >
                     <FiUsers className="inline-block w-4 h-4 mr-2" />
                     ที่ปรึกษาร่วม
                 </button>
-            </div>
+            </div> */}
 
             {/* Search Input */}
             <div className="relative mb-4" ref={dropdownRef}>
@@ -185,7 +187,7 @@ export const AdvisorSelectSection: React.FC<AdvisorSelectSectionProps> = ({
                             ) : filteredResults.length > 0 ? (
                                 <ul className="max-h-60 overflow-y-auto">
                                     {filteredResults.map((instructor) => (
-                                        <li key={instructor.instructor_id}>
+                                        <li key={instructor.instructor_uuid}>
                                             <button
                                                 type="button"
                                                 onClick={() => addAdvisor(instructor)}
@@ -203,8 +205,8 @@ export const AdvisorSelectSection: React.FC<AdvisorSelectSectionProps> = ({
                                                     </p>
                                                 </div>
                                                 <span className={`px-2 py-1 text-xs font-medium rounded-lg ${selectedRole === AdvisorRole.MAIN
-                                                        ? 'bg-purple-100 text-purple-700'
-                                                        : 'bg-gray-100 text-gray-600'
+                                                    ? 'bg-purple-100 text-purple-700'
+                                                    : 'bg-gray-100 text-gray-600'
                                                     }`}>
                                                     {selectedRole === AdvisorRole.MAIN ? 'หลัก' : 'ร่วม'}
                                                 </span>
@@ -236,7 +238,7 @@ export const AdvisorSelectSection: React.FC<AdvisorSelectSectionProps> = ({
                 <AnimatePresence mode="popLayout">
                     {selectedAdvisors.map((advisor) => (
                         <motion.div
-                            key={advisor.instructor_id}
+                            key={advisor.instructor_uuid}
                             layout
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
@@ -245,8 +247,8 @@ export const AdvisorSelectSection: React.FC<AdvisorSelectSectionProps> = ({
                             className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-gray-50 to-white border border-gray-100 rounded-xl group"
                         >
                             <div className={`w-10 h-10 rounded-full flex items-center justify-center ${advisor.role === AdvisorRole.MAIN
-                                    ? 'bg-gradient-to-br from-purple-100 to-purple-200'
-                                    : 'bg-gradient-to-br from-gray-100 to-gray-200'
+                                ? 'bg-gradient-to-br from-purple-100 to-purple-200'
+                                : 'bg-gradient-to-br from-gray-100 to-gray-200'
                                 }`}>
                                 {advisor.role === AdvisorRole.MAIN ? (
                                     <FiAward className="w-5 h-5 text-purple-600" />
@@ -258,7 +260,7 @@ export const AdvisorSelectSection: React.FC<AdvisorSelectSectionProps> = ({
                                 <p className="text-sm font-medium text-gray-900 truncate">
                                     {advisor.instructorInfo
                                         ? `${advisor.instructorInfo.first_name} ${advisor.instructorInfo.last_name}`
-                                        : advisor.instructor_id
+                                        : advisor.instructor_uuid
                                     }
                                 </p>
                                 <p className="text-xs text-gray-500 truncate">
@@ -269,10 +271,10 @@ export const AdvisorSelectSection: React.FC<AdvisorSelectSectionProps> = ({
                             {/* Role Toggle */}
                             <select
                                 value={advisor.role}
-                                onChange={(e) => changeAdvisorRole(advisor.instructor_id, e.target.value as AdvisorRole)}
+                                onChange={(e) => changeAdvisorRole(advisor.instructor_uuid, e.target.value as AdvisorRole)}
                                 className={`px-3 py-1.5 text-xs font-medium rounded-lg border-0 cursor-pointer transition-colors ${advisor.role === AdvisorRole.MAIN
-                                        ? 'bg-purple-100 text-purple-700'
-                                        : 'bg-gray-100 text-gray-600'
+                                    ? 'bg-purple-100 text-purple-700'
+                                    : 'bg-gray-100 text-gray-600'
                                     }`}
                             >
                                 <option value={AdvisorRole.MAIN}>ที่ปรึกษาหลัก</option>
@@ -281,7 +283,7 @@ export const AdvisorSelectSection: React.FC<AdvisorSelectSectionProps> = ({
 
                             <button
                                 type="button"
-                                onClick={() => removeAdvisor(advisor.instructor_id)}
+                                onClick={() => removeAdvisor(advisor.instructor_uuid)}
                                 className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
                             >
                                 <FiX className="w-4 h-4" />

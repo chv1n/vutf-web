@@ -81,7 +81,7 @@ export interface GroupMember {
  */
 export interface AdvisorAssignment {
     id: string;
-    instructor_id: string;
+    instructor_uuid: string;
     role: AdvisorRole;
     group_id: string;
     // Relations
@@ -107,10 +107,14 @@ export interface StudentInfo {
  * ข้อมูลอาจารย์ (สำหรับ search/display)
  */
 export interface InstructorInfo {
-    instructor_id: string;
+    instructor_uuid: string;
+    instructor_code: string;
     first_name: string;
     last_name: string;
-    email?: string;
+    full_name: string;
+    email?: string | null;
+    is_active: boolean;
+    create_at: string;
     department?: string;
 }
 
@@ -140,7 +144,7 @@ export interface CreateGroupMemberDto {
  * ข้อมูลอาจารย์ที่ปรึกษาสำหรับสร้างกลุ่ม
  */
 export interface CreateAdvisorDto {
-    instructor_id: string;
+    instructor_uuid: string;
     role: AdvisorRole;
 }
 
@@ -201,7 +205,7 @@ export interface FormGroupMember {
  * ข้อมูลอาจารย์ใน Form (รวม InstructorInfo สำหรับแสดงผล)
  */
 export interface FormAdvisor {
-    instructor_id: string;
+    instructor_uuid: string;
     role: AdvisorRole;
     instructorInfo?: InstructorInfo; // สำหรับแสดงผลใน UI
 }

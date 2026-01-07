@@ -66,7 +66,7 @@ export function useStudentSearch(
         setError(null);
 
         try {
-            const response = await api.get<{ data: StudentInfo[] }>('/users/students', {
+            const response = await api.get<{ data: StudentInfo[] }>('/students', {
                 search: searchQuery,
                 limit: 10,
             });

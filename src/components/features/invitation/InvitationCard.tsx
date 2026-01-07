@@ -61,12 +61,12 @@ export const InvitationCard: React.FC<InvitationCardProps> = ({
         });
     };
 
-    // Get main advisor
-    const mainAdvisor = advisors.find((a) => a.role === AdvisorRole.MAIN);
-    const coAdvisors = advisors.filter((a) => a.role === AdvisorRole.CO);
+    // Get main advisor (with defensive check)
+    const mainAdvisor = advisors?.find((a) => a.role === AdvisorRole.MAIN);
+    const coAdvisors = advisors?.filter((a) => a.role === AdvisorRole.CO) || [];
 
-    // Get other members (excluding owner)
-    const otherMembers = members.filter((m) => m.role === GroupMemberRole.MEMBER);
+    // Get other members (excluding owner) - with defensive check
+    const otherMembers = members?.filter((m) => m.role === GroupMemberRole.MEMBER) || [];
 
     const CardWrapper = animated ? motion.div : 'div';
     const animationProps = animated
@@ -96,16 +96,16 @@ export const InvitationCard: React.FC<InvitationCardProps> = ({
                         {/* Thesis Info */}
                         <div className="flex-1 min-w-0">
                             <h3 className="text-lg font-bold text-gray-900 truncate">
-                                {thesis.thesis_name_th}
+                                {thesis?.thesis_name_th || 'ไม่มีชื่อวิทยานิพนธ์'}
                             </h3>
                             <p className="text-sm text-gray-500 truncate mt-0.5">
-                                {thesis.thesis_name_en}
+                                {thesis?.thesis_name_en || '-'}
                             </p>
                             <div className="flex items-center gap-2 mt-2">
                                 <span className="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs font-medium rounded">
-                                    {thesis.thesis_code}
+                                    {thesis?.thesis_code || '-'}
                                 </span>
-                                {thesis.graduation_year && (
+                                {thesis?.graduation_year && (
                                     <span className="text-xs text-gray-400">
                                         ปี {thesis.graduation_year}
                                     </span>

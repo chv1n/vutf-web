@@ -40,7 +40,7 @@ interface UseInstructorSearchReturn {
  * const { query, setQuery, results, isLoading } = useInstructorSearch();
  * 
  * <input value={query} onChange={(e) => setQuery(e.target.value)} />
- * {results.map(instructor => <InstructorOption key={instructor.instructor_id} {...instructor} />)}
+ * {results.map(instructor => <InstructorOption key={instructor.instructor_uuid} {...instructor} />)}
  */
 export function useInstructorSearch(
     options: UseInstructorSearchOptions = {}
@@ -66,7 +66,7 @@ export function useInstructorSearch(
         setError(null);
 
         try {
-            const response = await api.get<{ data: InstructorInfo[] }>('/users/instructors', {
+            const response = await api.get<{ data: InstructorInfo[] }>('/instructors', {
                 search: searchQuery,
                 limit: 10,
             });

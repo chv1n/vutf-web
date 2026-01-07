@@ -88,7 +88,7 @@ export const CreateThesisForm: React.FC = () => {
                     role: GroupMemberRole.MEMBER,
                 })),
                 advisor: data.advisors.map((a) => ({
-                    instructor_id: a.instructor_id,
+                    instructor_uuid: a.instructor_uuid,
                     role: a.role,
                 })),
             };
