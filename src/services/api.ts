@@ -37,6 +37,7 @@ const customFetch = async (endpoint: string, options: RequestInit = {}): Promise
             ...options.headers,
         }
     };
+    console.log('Fetching:', url);
 
     let response = await fetch(url, fetchOptions);
 

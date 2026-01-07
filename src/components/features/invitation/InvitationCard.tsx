@@ -61,12 +61,12 @@ export const InvitationCard: React.FC<InvitationCardProps> = ({
         });
     };
 
-    // Get main advisor
-    const mainAdvisor = advisors.find((a) => a.role === AdvisorRole.MAIN);
-    const coAdvisors = advisors.filter((a) => a.role === AdvisorRole.CO);
+    // Get main advisor (with defensive check)
+    const mainAdvisor = advisors?.find((a) => a.role === AdvisorRole.MAIN);
+    const coAdvisors = advisors?.filter((a) => a.role === AdvisorRole.CO) || [];
 
-    // Get other members (excluding owner)
-    const otherMembers = members.filter((m) => m.role === GroupMemberRole.MEMBER);
+    // Get other members (excluding owner) - with defensive check
+    const otherMembers = members?.filter((m) => m.role === GroupMemberRole.MEMBER) || [];
 
     const CardWrapper = animated ? motion.div : 'div';
     const animationProps = animated
@@ -96,16 +96,16 @@ export const InvitationCard: React.FC<InvitationCardProps> = ({
                         {/* Thesis Info */}
                         <div className="flex-1 min-w-0">
                             <h3 className="text-lg font-bold text-gray-900 truncate">
-                                {thesis.thesis_name_th}
+                                {thesis?.thesis_name_th || 'ไม่มีชื่อวิทยานิพนธ์'}
                             </h3>
                             <p className="text-sm text-gray-500 truncate mt-0.5">
-                                {thesis.thesis_name_en}
+                                {thesis?.thesis_name_en || '-'}
                             </p>
                             <div className="flex items-center gap-2 mt-2">
                                 <span className="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs font-medium rounded">
-                                    {thesis.thesis_code}
+                                    {thesis?.thesis_code || '-'}
                                 </span>
-                                {thesis.graduation_year && (
+                                {thesis?.graduation_year && (
                                     <span className="text-xs text-gray-400">
                                         ปี {thesis.graduation_year}
                                     </span>
@@ -114,7 +114,6 @@ export const InvitationCard: React.FC<InvitationCardProps> = ({
                         </div>
                     </div>
 
-                    {/* Status Badge */}
                     <InvitationBadge status={invitation_status} size="md" />
                 </div>
             </div>
@@ -164,7 +163,7 @@ export const InvitationCard: React.FC<InvitationCardProps> = ({
                 )}
 
                 {/* Advisors */}
-                <div className="flex items-start gap-3">
+                {/* <div className="flex items-start gap-3">
                     <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                         <FiAward className="w-4 h-4 text-purple-600" />
                     </div>
@@ -180,14 +179,14 @@ export const InvitationCard: React.FC<InvitationCardProps> = ({
                                 </p>
                             )}
                             {coAdvisors.map((a) => (
-                                <p key={a.id} className="text-sm text-gray-600">
+                                <p key={a.advisor_id} className="text-sm text-gray-600">
                                     {a.instructor?.first_name} {a.instructor?.last_name}
                                     <span className="text-gray-400 text-xs ml-1">(ร่วม)</span>
                                 </p>
                             ))}
                         </div>
                     </div>
-                </div>
+                </div> */}
 
                 {/* Invited At */}
                 <div className="flex items-center gap-3 pt-2 border-t border-gray-50">
