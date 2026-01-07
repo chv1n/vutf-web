@@ -52,12 +52,12 @@ export interface Thesis {
  */
 export interface ThesisGroup {
     group_id: string;
-    created_by: string;
+    created_by?: string | { user_uuid: string }; // Optional, can be ID string or object
     status: boolean;
     created_at: string;
     thesis: Thesis;
     members: GroupMember[];
-    advisor: AdvisorAssignment[];
+    advisor: Advisor[];
 }
 
 /**
@@ -79,12 +79,17 @@ export interface GroupMember {
 /**
  * ข้อมูลการมอบหมายอาจารย์ที่ปรึกษา
  */
-export interface AdvisorAssignment {
+export interface Advisor {
+    advisor_id: string;
+    role: AdvisorRole;
+    instructor: InstructorInfo;
+}
+
+export interface AdvisorAssignment { // Keep for backward compatibility if needed, else remove or alias
     advisor_id: string;
     instructor_uuid?: string;
     role: AdvisorRole;
     group_id?: string;
-    // Relations
     instructor?: InstructorInfo;
 }
 
@@ -159,11 +164,28 @@ export interface CreateThesisGroupPayload {
     advisor: CreateAdvisorDto[];
 }
 
-/**
- * Response หลังสร้างกลุ่มสำเร็จ
- */
+// ============================================
+// DTOs - THESIS GROUP OPERATIONS
+// ============================================
+
 export interface CreateThesisGroupResponse {
+    success: boolean;
     message: string;
+}
+
+export interface UpdateThesisDto {
+    thesis_name_th?: string;
+    thesis_name_en?: string;
+    graduation_year?: number;
+}
+
+export interface AddAdvisorDto {
+    instructor_uuid: string;
+    role: AdvisorRole;
+}
+
+export interface UpdateAdvisorDto {
+    role: AdvisorRole;
 }
 
 // ============================================

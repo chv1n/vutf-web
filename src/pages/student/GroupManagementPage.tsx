@@ -2,6 +2,7 @@
 // หน้าจัดการกลุ่มวิทยานิพนธ์
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiUsers, FiPlus, FiMail, FiRefreshCw, FiLoader, FiInbox } from 'react-icons/fi';
 import { useTitle } from '@/hooks/useTitle';
@@ -9,13 +10,13 @@ import { useAuth } from '@/contexts/AuthContext';
 
 // Components
 import { GroupTable, GroupTableData } from '@/components/features/group/GroupTable';
-import { GroupDetailModal } from '@/components/features/group/GroupDetailModal';
+// import { GroupDetailModal } from '@/components/features/group/GroupDetailModal';
 import { CreateThesisForm } from '@/components/features/thesis/CreateThesisForm';
 import { InvitationCard } from '@/components/features/invitation/InvitationCard';
 
 // Services & Types
 import { groupMemberService } from '@/services/group-member.service';
-import { InvitationCardData, InvitationStatus, ThesisGroup, GroupMemberRole } from '@/types/thesis';
+import { InvitationCardData, InvitationStatus, GroupMemberRole } from '@/types/thesis';
 
 type TabType = 'my-groups' | 'create' | 'invitations';
 
@@ -43,6 +44,21 @@ const GroupManagementPage: React.FC = () => {
     useTitle('จัดการกลุ่มวิทยานิพนธ์');
 
     const [activeTab, setActiveTab] = useState<TabType>('my-groups');
+    const [invitationCount, setInvitationCount] = useState(0);
+
+    // Fetch invitation count
+    const fetchInvitationCount = useCallback(async () => {
+        try {
+            const invitations = await groupMemberService.getPendingInvitations();
+            setInvitationCount(invitations.length);
+        } catch (error) {
+            console.error('Error fetching invitation count:', error);
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchInvitationCount();
+    }, [fetchInvitationCount]);
 
     // Tab configuration
     const tabs: TabConfig[] = [
@@ -109,6 +125,11 @@ const GroupManagementPage: React.FC = () => {
                                 >
                                     <Icon className="w-4 h-4" />
                                     {tab.label}
+                                    {tab.key === 'invitations' && invitationCount > 0 && (
+                                        <span className="ml-1 px-1.5 py-0.5 bg-red-500 text-white text-xs font-bold rounded-full min-w-[1.25rem] text-center">
+                                            {invitationCount}
+                                        </span>
+                                    )}
                                 </button>
                             );
                         })}
@@ -126,7 +147,7 @@ const GroupManagementPage: React.FC = () => {
                     >
                         {activeTab === 'my-groups' && <MyGroupsTab />}
                         {activeTab === 'create' && <CreateGroupTab />}
-                        {activeTab === 'invitations' && <InvitationsTab />}
+                        {activeTab === 'invitations' && <InvitationsTab onUpdate={fetchInvitationCount} />}
                     </motion.div>
                 </AnimatePresence>
             </div>
@@ -143,16 +164,15 @@ const GroupManagementPage: React.FC = () => {
  */
 const MyGroupsTab: React.FC = () => {
     const { user } = useAuth();
-    const [rawGroups, setRawGroups] = useState<ThesisGroup[]>([]);
+    const navigate = useNavigate();
     const [groups, setGroups] = useState<GroupTableData[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [selectedGroup, setSelectedGroup] = useState<ThesisGroup | null>(null);
 
     const fetchGroups = useCallback(async () => {
         setIsLoading(true);
         try {
             const data = await groupMemberService.getMyGroups();
-            setRawGroups(data);
+
 
             // Transform to GroupTableData
             const tableData: GroupTableData[] = data.map((group) => {
@@ -160,7 +180,9 @@ const MyGroupsTab: React.FC = () => {
                 const currentMember = group.members?.find(
                     (m) => m.student_uuid === user?.id
                 );
-                const isOwner = currentMember?.role === GroupMemberRole.OWNER;
+                // Check ownership by role or creator
+                const creatorId = typeof group.created_by === 'object' ? group.created_by?.user_uuid : group.created_by;
+                const isOwner = (currentMember?.role?.toLowerCase() === GroupMemberRole.OWNER.toLowerCase()) || (creatorId === user?.id);
 
                 return {
                     group_id: group.group_id,
@@ -185,25 +207,10 @@ const MyGroupsTab: React.FC = () => {
     }, [fetchGroups]);
 
     const handleView = (groupId: string) => {
-        const group = rawGroups.find((g) => g.group_id === groupId);
-        if (group) {
-            setSelectedGroup(group);
-        }
+        navigate(`/student/groups/${groupId}`);
     };
 
-    const handleCloseDetail = () => {
-        setSelectedGroup(null);
-    };
 
-    const handleMemberInvited = () => {
-        // Refresh groups after inviting member
-        fetchGroups();
-    };
-
-    // Check if current user is owner of selected group
-    const isOwnerOfSelectedGroup = selectedGroup?.members?.some(
-        (m) => m.student_uuid === user?.id && m.role === GroupMemberRole.OWNER
-    ) || false;
 
     return (
         <>
@@ -235,15 +242,6 @@ const MyGroupsTab: React.FC = () => {
                 </div>
             </div>
 
-            {/* Group Detail Modal */}
-            {selectedGroup && (
-                <GroupDetailModal
-                    group={selectedGroup}
-                    onClose={handleCloseDetail}
-                    isOwner={isOwnerOfSelectedGroup}
-                    onMemberInvited={handleMemberInvited}
-                />
-            )}
         </>
     );
 };
@@ -273,7 +271,11 @@ const CreateGroupTab: React.FC = () => {
 /**
  * InvitationsTab - ดูคำเชิญ
  */
-const InvitationsTab: React.FC = () => {
+interface InvitationsTabProps {
+    onUpdate?: () => void;
+}
+
+const InvitationsTab: React.FC<InvitationsTabProps> = ({ onUpdate }) => {
     const [invitations, setInvitations] = useState<InvitationCardData[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -285,12 +287,13 @@ const InvitationsTab: React.FC = () => {
         try {
             const data = await groupMemberService.getMyInvitations();
             setInvitations(data);
+            onUpdate?.(); // Notify parent to update badge count
         } catch (err) {
             setError(err instanceof Error ? err.message : 'เกิดข้อผิดพลาดในการโหลดข้อมูล');
         } finally {
             setIsLoading(false);
         }
-    }, []);
+    }, [onUpdate]);
 
     useEffect(() => {
         fetchInvitations();
@@ -310,6 +313,7 @@ const InvitationsTab: React.FC = () => {
                     : inv
             )
         );
+        onUpdate?.(); // Update badge count immediately
     };
 
     // Filter pending invitations

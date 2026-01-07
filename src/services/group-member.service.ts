@@ -81,10 +81,20 @@ export const groupMemberService = {
      * @returns Promise<InvitationCardData[]>
      */
     getMyInvitations: async (): Promise<InvitationCardData[]> => {
-        const response = await api.get<{ data: InvitationCardData[] }>(
+        const response = await api.get<{ data: any[] }>(
             '/group-member/my-invitations'
         );
-        return response.data;
+
+        // Map API response to InvitationCardData
+        return response.data.map((item: any) => ({
+            member_id: item.member_id,
+            invitation_status: item.invitation_status,
+            invited_at: item.invited_at,
+            thesis: item.group?.thesis || null,
+            owner: typeof item.group?.created_by === 'object' ? item.group.created_by.student : undefined,
+            members: item.group?.members || [],
+            advisors: item.group?.advisor || [],
+        }));
     },
 
     /**
@@ -93,11 +103,21 @@ export const groupMemberService = {
      * @returns Promise<InvitationCardData[]>
      */
     getPendingInvitations: async (): Promise<InvitationCardData[]> => {
-        const response = await api.get<{ data: InvitationCardData[] }>(
+        const response = await api.get<{ data: any[] }>(
             '/group-member/my-invitations',
             { status: 'pending' }
         );
-        return response.data;
+
+        // Map API response to InvitationCardData
+        return response.data.map((item: any) => ({
+            member_id: item.member_id,
+            invitation_status: item.invitation_status,
+            invited_at: item.invited_at,
+            thesis: item.group?.thesis || null,
+            owner: typeof item.group?.created_by === 'object' ? item.group.created_by.student : undefined,
+            members: item.group?.members || [],
+            advisors: item.group?.advisor || [],
+        }));
     },
 
     /**
@@ -134,10 +154,23 @@ export const groupMemberService = {
      */
     inviteMember: async (groupId: string, studentUuid: string): Promise<GroupMember> => {
         const response = await api.post<GroupMember>(
-            `/group-member`,
-            { group_id: groupId, student_uuid: studentUuid, role: 'member' }
+            `/group-member/${groupId}/invite`,
+            { student_uuid: studentUuid }
         );
         return response.data;
+    },
+
+    /**
+     * ลบสมาชิกออกจากกลุ่ม
+     * 
+     * @param groupId - รหัสกลุ่ม
+     * @param memberId - รหัสสมาชิก
+     */
+    removeMember: async (groupId: string, memberId: string) => {
+        const response = await api.delete<{ success: boolean; message: string }>(
+            `/group-member/${groupId}/member/${memberId}`
+        );
+        return response;
     },
 };
 

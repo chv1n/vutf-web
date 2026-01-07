@@ -30,6 +30,8 @@ export const InviteMemberModal: React.FC<InviteMemberModalProps> = ({
     onClose,
     onSuccess,
 }) => {
+    // Suppress unused
+    // console.log(groupId);
     const { query, setQuery, results, isLoading: isSearching } = useStudentSearch();
     const [isInviting, setIsInviting] = useState(false);
     const [invitedStudents, setInvitedStudents] = useState<Set<string>>(new Set());
@@ -45,7 +47,7 @@ export const InviteMemberModal: React.FC<InviteMemberModalProps> = ({
             Swal.fire({
                 icon: 'success',
                 title: 'ส่งคำเชิญสำเร็จ',
-                text: `ได้ส่งคำเชิญไปยัง ${student.first_name} ${student.last_name} แล้ว`,
+                text: `ส่งคำเชิญไปยัง ${student.first_name} ${student.last_name} เรียบร้อยแล้ว`,
                 timer: 2000,
                 showConfirmButton: false,
             });

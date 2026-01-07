@@ -163,7 +163,7 @@ export const InvitationCard: React.FC<InvitationCardProps> = ({
                 )}
 
                 {/* Advisors */}
-                <div className="flex items-start gap-3">
+                {/* <div className="flex items-start gap-3">
                     <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                         <FiAward className="w-4 h-4 text-purple-600" />
                     </div>
@@ -186,7 +186,7 @@ export const InvitationCard: React.FC<InvitationCardProps> = ({
                             ))}
                         </div>
                     </div>
-                </div>
+                </div> */}
 
                 {/* Invited At */}
                 <div className="flex items-center gap-3 pt-2 border-t border-gray-50">

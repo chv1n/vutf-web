@@ -65,7 +65,7 @@ export const GroupTable: React.FC<GroupTableProps> = ({
     const getStatusLabel = (status: GroupTableData['status']) => {
         switch (status) {
             case 'active':
-                return 'กำลังดำเนินการ';
+                return 'ดำเนินการสำเร็จ';
             case 'pending':
                 return 'รอดำเนินการ';
             case 'completed':

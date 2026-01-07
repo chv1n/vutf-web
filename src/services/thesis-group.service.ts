@@ -6,6 +6,9 @@ import {
     CreateThesisGroupPayload,
     CreateThesisGroupResponse,
     ThesisGroup,
+    UpdateThesisDto,
+    AddAdvisorDto,
+    AdvisorRole,
 } from '@/types/thesis';
 
 /**
@@ -57,6 +60,55 @@ export const thesisGroupService = {
     getThesisGroupById: async (groupId: string): Promise<ThesisGroup> => {
         const response = await api.get<{ data: ThesisGroup }>(`/thesis-group/${groupId}`);
         return response.data;
+    },
+
+    /**
+     * แก้ไขข้อมูล Thesis (Title, Graduation Year)
+     * @param thesisId - รหัสวิทยานิพนธ์ (ไม่ใช่ groupId)
+     * @param data - ข้อมูลที่ต้องการแก้ไข
+     */
+    updateThesisInfo: async (thesisId: string, data: UpdateThesisDto) => {
+        const response = await api.patch<{ success: boolean; message: string }>(
+            `/thesis/${thesisId}`,
+            data
+        );
+        return response;
+    },
+
+    // =========================================================
+    // Advisor Management
+    // =========================================================
+
+    /**
+     * เพิ่มอาจารย์ที่ปรึกษา
+     */
+    addAdvisor: async (groupId: string, data: AddAdvisorDto) => {
+        const response = await api.post<any>(
+            `/advisor/${groupId}`,
+            data
+        );
+        return response.data;
+    },
+
+    /**
+     * แก้ไข Role อาจารย์ที่ปรึกษา
+     */
+    updateAdvisor: async (groupId: string, advisorId: string, role: AdvisorRole) => {
+        const response = await api.put<{ success: boolean; data: any }>(
+            `/advisor/${groupId}/${advisorId}`,
+            { role }
+        );
+        return response;
+    },
+
+    /**
+     * ลบอาจารย์ที่ปรึกษา
+     */
+    removeAdvisor: async (groupId: string, advisorId: string) => {
+        const response = await api.delete<{ success: boolean; message: string }>(
+            `/advisor/${groupId}/${advisorId}`
+        );
+        return response;
     },
 };
 
