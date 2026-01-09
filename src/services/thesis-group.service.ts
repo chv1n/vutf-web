@@ -64,15 +64,15 @@ export const thesisGroupService = {
 
     /**
      * แก้ไขข้อมูล Thesis (Title, Graduation Year)
-     * @param thesisId - รหัสวิทยานิพนธ์ (ไม่ใช่ groupId)
+     * @param groupId - รหัสวิทยานิพนธ์ (ไม่ใช่ groupId)
      * @param data - ข้อมูลที่ต้องการแก้ไข
      */
-    updateThesisInfo: async (thesisId: string, data: UpdateThesisDto) => {
+    updateThesisInfo: async (groupId: string, data: UpdateThesisDto) => {
         const response = await api.patch<{ success: boolean; message: string }>(
-            `/thesis/${thesisId}`,
+            `/thesis-group/${groupId}/thesis`,
             data
         );
-        return response;
+        return response.data;
     },
 
     // =========================================================

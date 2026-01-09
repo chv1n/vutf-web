@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiUsers, FiAward, FiFileText, FiArrowLeft, FiLoader } from 'react-icons/fi';
+import { FiUsers, FiAward, FiFileText, FiArrowLeft, FiLoader, FiAlertCircle } from 'react-icons/fi';
 import { useTitle } from '@/hooks/useTitle';
 import { useAuth } from '@/contexts/AuthContext';
 import { thesisGroupService } from '@/services/thesis-group.service';
@@ -85,8 +85,30 @@ const GroupDetailPage: React.FC = () => {
                     </div>
                 </div>
 
+                {/* แสดง Alert เมื่อกลุ่มถูกปฏิเสธ*/}
+                {group.status === 'rejected' && group.rejection_reason && (
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="mb-6 p-4 bg-red-50 border border-red-200 rounded-2xl flex items-start gap-3 shadow-sm"
+                    >
+                        <div className="mt-0.5">
+                            <FiAlertCircle className="w-5 h-5 text-red-500" />
+                        </div>
+                        <div>
+                            <h3 className="text-sm font-bold text-red-800">กลุ่มของคุณถูกปฏิเสธการอนุมัติ</h3>
+                            <p className="text-sm text-red-700 mt-1">
+                                <span className="font-semibold">เหตุผล:</span> {group.rejection_reason}
+                            </p>
+                            <p className="text-sm text-red-600 mt-2 italic">
+                                * กรุณาแก้ไขข้อมูลตามเหตุผลที่แจ้ง และกดบันทึกการเปลี่ยนแปลงเพื่อส่งให้แอดมินตรวจสอบอีกครั้ง
+                            </p>
+                        </div>
+                    </motion.div>
+                )}
+
                 {/* Tabs */}
-                <div className="flex bg-white p-1.5 rounded-xl shadow-sm border border-gray-100 mb-6 w-fit">
+                <div className="flex bg-white p-1.5 rounded-xl shadow-sm border border-gray-100 mb-6 w-fit max-w-full overflow-x-auto">
                     {tabs.map((tab) => {
                         const Icon = tab.icon;
                         const isActive = activeTab === tab.key;
@@ -94,13 +116,18 @@ const GroupDetailPage: React.FC = () => {
                             <button
                                 key={tab.key}
                                 onClick={() => setActiveTab(tab.key as TabType)}
-                                className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all ${isActive
-                                    ? 'bg-blue-50 text-blue-600 shadow-sm'
-                                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
+                                className={`flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 rounded-lg text-sm font-medium transition-all shrink-0 ${isActive
+                                        ? 'bg-blue-50 text-blue-600 shadow-sm'
+                                        : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
                                     }`}
+                                title={tab.label}
                             >
-                                <Icon className="w-4 h-4" />
-                                {tab.label}
+                                <Icon className="w-5 h-5 sm:w-4 sm:h-4" />
+
+                                {/* ซ่อนข้อความในจอเล็ก (hidden) และแสดงในจอขนาด sm ขึ้นไป (sm:block) */}
+                                <span className="hidden sm:block">
+                                    {tab.label}
+                                </span>
                             </button>
                         );
                     })}
@@ -156,6 +183,7 @@ const GroupDetailPage: React.FC = () => {
                                 isOwner={isOwner}
                                 currentUserId={user?.id || ''}
                                 onUpdate={fetchGroup}
+                            // groupStatus={group.status}
                             />
                         )}
 
