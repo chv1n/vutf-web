@@ -56,21 +56,21 @@ export const InvitationBadge: React.FC<InvitationBadgeProps> = ({
     const sizeConfig = {
         sm: {
             padding: 'px-2 py-0.5',
-            fontSize: 'text-xs',
+            fontSize: 'text-[10px] sm:text-xs',
             iconSize: 'w-3 h-3',
             gap: 'gap-1',
         },
         md: {
-            padding: 'px-3 py-1',
-            fontSize: 'text-sm',
-            iconSize: 'w-4 h-4',
-            gap: 'gap-1.5',
+            padding: 'px-2 py-0.5 sm:px-3 sm:py-1',
+            fontSize: 'text-[10px] sm:text-sm',
+            iconSize: 'w-3 h-3 sm:w-4 sm:h-4',
+            gap: 'gap-1 sm:gap-1.5',
         },
         lg: {
-            padding: 'px-4 py-1.5',
-            fontSize: 'text-base',
-            iconSize: 'w-5 h-5',
-            gap: 'gap-2',
+            padding: 'px-3 py-1 sm:px-4 sm:py-1.5',
+            fontSize: 'text-sm sm:text-base',
+            iconSize: 'w-4 h-4 sm:w-5 sm:h-5',
+            gap: 'gap-1.5 sm:gap-2',
         },
     };
 

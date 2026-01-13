@@ -30,6 +30,25 @@ export enum AdvisorRole {
     CO = 'co'
 }
 
+/**
+ * ประเภทของรายวิชา
+ */
+export enum CourseType {
+    PRE_PROJECT = 'PRE_PROJECT',
+    PROJECT = 'PROJECT',
+    ALL = 'ALL'
+}
+
+/**
+ * สถานะของกลุ่มวิทยานิพนธ์
+ */
+export enum ThesisGroupStatus {
+    INCOMPLETE = 'incomplete',
+    PENDING = 'pending',
+    APPROVED = 'approved',
+    REJECTED = 'rejected',
+}
+
 // ============================================
 // ENTITIES
 // ============================================
@@ -43,6 +62,9 @@ export interface Thesis {
     thesis_name_th: string;
     thesis_name_en: string;
     graduation_year: number | null;
+    course_type: CourseType;       
+    start_academic_year: number;    
+    start_term: number;
     file_url: string | null;
     created_at: string;
 }
@@ -53,11 +75,14 @@ export interface Thesis {
 export interface ThesisGroup {
     group_id: string;
     created_by?: string | { user_uuid: string }; // Optional, can be ID string or object
-    status: boolean;
+    status: ThesisGroupStatus | string;
+    approved_at?: string | null;
+    rejection_reason?: string | null;
     created_at: string;
     thesis: Thesis;
     members: GroupMember[];
     advisor: Advisor[];
+    totalMemberCount?: number;
 }
 
 /**
@@ -137,6 +162,9 @@ export interface CreateThesisDto {
     thesis_name_th: string;
     thesis_name_en: string;
     graduation_year?: number;
+    course_type: CourseType;       
+    start_academic_year: number;    
+    start_term: number;
 }
 
 /**
@@ -177,6 +205,9 @@ export interface UpdateThesisDto {
     thesis_name_th?: string;
     thesis_name_en?: string;
     graduation_year?: number;
+    course_type?: CourseType;
+    start_academic_year?: number;
+    start_term?: number;
 }
 
 export interface AddAdvisorDto {
@@ -244,6 +275,9 @@ export interface CreateThesisGroupFormData {
     graduation_year?: number;
     group_members: FormGroupMember[];
     advisors: FormAdvisor[];
+    course_type: CourseType;       
+    start_academic_year: number;    
+    start_term: number;
 }
 
 // ============================================
