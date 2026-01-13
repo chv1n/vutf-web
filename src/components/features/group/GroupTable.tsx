@@ -14,6 +14,8 @@ export interface GroupTableData {
     thesis_code: string;
     thesis_name_th: string;
     member_count: number;
+    totalMemberCount?: number;
+    members?: any[];
     status: 'incomplete' | 'pending' | 'approved' | 'rejected' | string;
     role: 'owner' | 'member';
     created_at: string;
@@ -84,6 +86,15 @@ export const GroupTable: React.FC<GroupTableProps> = ({
         return role === 'owner'
             ? 'bg-purple-100 text-purple-700'
             : 'bg-gray-100 text-gray-600';
+    };
+
+    const getDisplayMemberCount = (group: GroupTableData) => {
+        // Priority 1: นับสดจาก Array members (ถ้ามี) โดยตัดคน Reject ออก
+        if (group.members && Array.isArray(group.members)) {
+             return group.members.filter((m: any) => m.invitation_status !== 'rejected').length;
+        }
+        // Priority 2: ใช้ค่าจาก Backend ถ้าส่งมา
+        return group.totalMemberCount ?? group.member_count ?? 0;
     };
 
     // Loading state
@@ -158,7 +169,7 @@ export const GroupTable: React.FC<GroupTableProps> = ({
                             <td className="py-4 px-4 text-center">
                                 <div className="inline-flex items-center gap-1.5 text-gray-600">
                                     <FiUsers className="w-4 h-4" />
-                                    <span className="text-sm font-medium">{group.member_count}</span>
+                                    <span className="text-sm font-medium">{getDisplayMemberCount(group)}</span>
                                 </div>
                             </td>
                             <td className="py-4 px-4 text-center">
@@ -224,7 +235,7 @@ export const GroupTable: React.FC<GroupTableProps> = ({
                                 {group.thesis_name_th}
                             </h3>
                             <div className="flex items-center gap-3 text-gray-500 text-[12px]">
-                                <span className="flex items-center gap-1"><FiUsers className="w-3 h-3" /> {group.member_count} สมาชิก</span>
+                                <span className="flex items-center gap-1"><FiUsers className="w-3 h-3" /> {getDisplayMemberCount(group)} สมาชิก</span>
                                 <span>•</span>
                                 <span className={`font-semibold ${getStatusStyle(group.status).split(' ')[1]}`}>
                                     {getStatusLabel(group.status)}

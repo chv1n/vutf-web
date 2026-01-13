@@ -200,6 +200,8 @@ const MyGroupsTab: React.FC = () => {
                     thesis_code: group.thesis?.thesis_code || '-',
                     thesis_name_th: group.thesis?.thesis_name_th || 'ไม่มีชื่อ',
                     member_count: group.members?.length || 0,
+                    totalMemberCount: group.totalMemberCount,
+                    members: group.members,
                     status: group.status,
                     role: isOwner ? 'owner' : 'member',
                     created_at: group.created_at,

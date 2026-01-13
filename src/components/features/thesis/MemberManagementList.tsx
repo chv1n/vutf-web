@@ -24,6 +24,10 @@ export const MemberManagementList: React.FC<MemberManagementListProps> = ({
 }) => {
     const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
 
+    const activeMemberCount = members.filter(
+        (m) => m.invitation_status !== InvitationStatus.REJECTED
+    ).length;
+
     const handleRemoveMember = async (member: GroupMember) => {
         const result = await Swal.fire({
             title: 'ต้องการลบสมาชิก?',
@@ -78,7 +82,7 @@ export const MemberManagementList: React.FC<MemberManagementListProps> = ({
                         <FiUsers className="w-5 h-5 text-emerald-600" />
                     </div>
                     <div>
-                        <h2 className="text-lg font-bold text-gray-900">สมาชิกกลุ่ม ({members.length})</h2>
+                        <h2 className="text-lg font-bold text-gray-900">สมาชิกกลุ่ม ({activeMemberCount})</h2>
                         <p className="text-sm text-gray-500">จัดการสมาชิกในกลุ่ม</p>
                     </div>
                 </div>

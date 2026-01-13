@@ -82,6 +82,7 @@ export interface ThesisGroup {
     thesis: Thesis;
     members: GroupMember[];
     advisor: Advisor[];
+    totalMemberCount?: number;
 }
 
 /**
