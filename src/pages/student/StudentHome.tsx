@@ -8,8 +8,13 @@ import { motion } from 'framer-motion';
 
 // Services & Types
 import { announcementService } from '@/services/announcement.service';
+import { inspectionService } from '@/services/inspection.service';
 import { Announcement } from '@/types/announcement';
+import { InspectionRound } from '@/types/inspection';
 import { useDebounce } from '@/hooks/useDebounce';
+
+// Components
+import { ActiveInspectionCard } from '@/components/features/inspection';
 
 // Helper: Format date
 const formatDateDisplay = (dateString: string) => {
@@ -35,6 +40,9 @@ const StudentHome: React.FC = () => {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Active Inspection Round state
+  const [activeRound, setActiveRound] = useState<InspectionRound | null>(null);
   const debouncedSearch = useDebounce(searchTerm, 500);
 
   // Fetch announcements
@@ -53,6 +61,21 @@ const StudentHome: React.FC = () => {
 
     fetchAnnouncements();
   }, [debouncedSearch]);
+
+  // Fetch active inspection round
+  useEffect(() => {
+    const fetchActiveRound = async () => {
+      try {
+        const data = await inspectionService.getActiveRound();
+        setActiveRound(data);
+      } catch (error) {
+        // ไม่มี active round - ไม่ต้องแสดง error
+        setActiveRound(null);
+      }
+    };
+
+    fetchActiveRound();
+  }, []);
 
   return (
     <div className="w-full min-h-[80vh] space-y-8">
@@ -88,7 +111,12 @@ const StudentHome: React.FC = () => {
         </div>
       </motion.div>
 
-      {/* --- Section 2: Announcements --- */}
+      {/* --- Section 2: Active Inspection Round --- */}
+      {activeRound && (
+        <ActiveInspectionCard round={activeRound} size="md" />
+      )}
+
+      {/* --- Section 3: Announcements --- */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

@@ -23,19 +23,19 @@ export interface GetAllResponse {
 
 export const inspectionService = {
     getAll: async (params?: GetInspectionParams) => {
-        const queryString = params 
-            ? '?' + new URLSearchParams(params as any).toString() 
+        const queryString = params
+            ? '?' + new URLSearchParams(params as any).toString()
             : '';
 
         const response = await api.get<GetAllResponse>(`/inspections${queryString}`);
-        
+
         return response;
     },
 
-    getActiveRound: async () => {
-        const response = await api.get<InspectionRound>('/inspections/active');
-        
-        return response;
+    getActiveRound: async (): Promise<InspectionRound> => {
+        const response = await api.get<{ success: boolean; data: InspectionRound }>('/inspections/active');
+
+        return response.data;
     },
 
     create: async (data: CreateInspectionDto) => {
