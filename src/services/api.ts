@@ -29,7 +29,7 @@ const handleResponse = async (response: Response) => {
 
 const customFetch = async (endpoint: string, options: RequestInit = {}): Promise<Response> => {
     const url = `${BASE_URL}${endpoint}`;
-    
+
     const fetchOptions: RequestInit = {
         ...options,
         credentials: 'include',
@@ -43,7 +43,7 @@ const customFetch = async (endpoint: string, options: RequestInit = {}): Promise
 
     // ถ้าเจอ 401 และไม่ใช่ path ของ auth (เพื่อกัน loop)
     if (response.status === 401 && !endpoint.includes('/auth/login') && !endpoint.includes('/auth/refresh')) {
-        
+
         // กรณีที่มีคนอื่นกำลัง Refresh อยู่ -> ให้รอ (Queue)
         if (isRefreshing) {
             return new Promise((resolve, reject) => {
@@ -68,7 +68,7 @@ const customFetch = async (endpoint: string, options: RequestInit = {}): Promise
             if (refreshResponse.ok) {
                 // Refresh สำเร็จ -> ปล่อยคิวที่รออยู่ให้ทำงานต่อได้
                 processQueue(null, true);
-                
+
                 // ยิง Request ของตัวเองซ้ำ
                 response = await fetch(url, fetchOptions);
             } else {
@@ -142,6 +142,15 @@ export const api = {
     delete: async <T>(endpoint: string): Promise<T> => {
         const response = await customFetch(endpoint, {
             method: 'DELETE',
+        });
+        return handleResponse(response);
+    },
+
+    postFormData: async <T>(endpoint: string, formData: FormData): Promise<T> => {
+        const response = await customFetch(endpoint, {
+            method: 'POST',
+            body: formData,
+            // ไม่ต้องตั้ง Content-Type เพราะ browser จะจัดการ boundary ให้เอง
         });
         return handleResponse(response);
     },

@@ -14,6 +14,7 @@ export const STUDENT_MENU = [
     { icon: FiFileText, label: 'Thesis Report', path: '/student/report' },
     // { icon: FiCalendar, label: 'Calendar', path: '/student/calendar' },
     { icon: FiUsers, label: 'Group Management', path: '/student/group-management' },
+    { icon: FiClipboard, label: 'Inspection Round', path: '/student/inspections' },
     { icon: FiSettings, label: 'Settings', path: '/student/settings' },
 ];
 
