@@ -1,8 +1,9 @@
+// src/components/features/thesis/ThesisInfoEditForm.tsx
 import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { FiFileText, FiSave, FiLoader } from 'react-icons/fi';
 import Swal from 'sweetalert2';
-import { Thesis, UpdateThesisDto } from '@/types/thesis';
+import { Thesis, UpdateThesisDto, CourseType } from '@/types/thesis'; 
 import { thesisGroupService } from '@/services/thesis-group.service';
 
 interface ThesisInfoEditFormProps {
@@ -13,7 +14,7 @@ interface ThesisInfoEditFormProps {
 
 export const ThesisInfoEditForm: React.FC<ThesisInfoEditFormProps> = ({
     thesis,
-    groupId: _groupId,
+    groupId,
     onUpdate,
 }) => {
     // Suppress unused
@@ -30,6 +31,9 @@ export const ThesisInfoEditForm: React.FC<ThesisInfoEditFormProps> = ({
             thesis_name_th: thesis.thesis_name_th,
             thesis_name_en: thesis.thesis_name_en,
             graduation_year: thesis.graduation_year || undefined,
+            course_type: thesis.course_type,
+            start_academic_year: thesis.start_academic_year,
+            start_term: thesis.start_term,
         },
     });
 
@@ -38,13 +42,16 @@ export const ThesisInfoEditForm: React.FC<ThesisInfoEditFormProps> = ({
             thesis_name_th: thesis.thesis_name_th,
             thesis_name_en: thesis.thesis_name_en,
             graduation_year: thesis.graduation_year || undefined,
+            course_type: thesis.course_type,
+            start_academic_year: thesis.start_academic_year,
+            start_term: thesis.start_term,
         });
     }, [thesis, reset]);
 
     const onSubmit = async (data: UpdateThesisDto) => {
         setIsSubmitting(true);
         try {
-            await thesisGroupService.updateThesisInfo(thesis.thesis_id, data);
+            await thesisGroupService.updateThesisInfo(groupId, data);
 
             Swal.fire({
                 icon: 'success',
@@ -87,6 +94,40 @@ export const ThesisInfoEditForm: React.FC<ThesisInfoEditFormProps> = ({
                     <label className="block text-sm font-medium text-gray-700 mb-1">รหัสวิทยานิพนธ์</label>
                     <div className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-500 text-sm">
                         {thesis.thesis_code}
+                    </div>
+                </div>
+
+                {/* --- เพิ่มส่วนนี้: Grid สำหรับ Course Type, Start Year, Term --- */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-blue-50/50 rounded-2xl border border-blue-100/50">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">ประเภทวิชา <span className="text-red-500">*</span></label>
+                        <select
+                            className="text-black w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                            {...register('course_type', { required: 'ระบุประเภทวิชา' })}
+                        >
+                            <option value={CourseType.PRE_PROJECT}>Pre-Project</option>
+                            <option value={CourseType.PROJECT}>Project</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">ปีที่เริ่ม <span className="text-red-500">*</span></label>
+                        <select
+                            className="text-black w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                            {...register('start_academic_year', { required: 'ระบุปีที่เริ่ม', valueAsNumber: true })}
+                        >
+                            {yearOptions.map(y => <option key={y} value={y}>{y}</option>)}
+                        </select>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">เทอมที่เริ่ม <span className="text-red-500">*</span></label>
+                        <select
+                            className="text-black w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                            {...register('start_term', { required: 'ระบุเทอม', valueAsNumber: true })}
+                        >
+                            <option value={1}>1</option>
+                            <option value={2}>2</option>
+                            <option value={3}>3 (ฤดูร้อน)</option>
+                        </select>
                     </div>
                 </div>
 

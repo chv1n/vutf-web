@@ -23,6 +23,7 @@ import InspectionManagePage from './pages/admin/InspectionManagePage';
 import { UserManagementPage } from './pages/admin/UserManagementPage';
 import { AnnouncementsPage } from './pages/announcements/AnnouncementsPage';
 import { SetupProfilePage } from './pages/register/SetupProfilePage';
+import { ThesisTopicPage } from './pages/admin/ThesisTopicPage';
 
 function App() {
   return (
@@ -82,6 +83,7 @@ function App() {
               <Route index element={<Navigate to="/admin/dashboard" replace />} />
               <Route path="dashboard" element={<AdminDashboard />} />
               <Route path="users" element={<UserManagementPage />} />
+              <Route path="topics" element={<ThesisTopicPage />} />
               <Route path="inspections" element={<InspectionManagePage />} />
               <Route path="announcements" element={<AnnouncementsPage />} />
             </Route>

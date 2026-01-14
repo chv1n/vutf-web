@@ -82,6 +82,9 @@ export const CreateThesisForm: React.FC = () => {
                     thesis_name_th: data.thesis_name_th,
                     thesis_name_en: data.thesis_name_en,
                     graduation_year: data.graduation_year,
+                    course_type: data.course_type,
+                    start_academic_year: data.start_academic_year,
+                    start_term: data.start_term,
                 },
                 group_member: data.group_members.map((m) => ({
                     student_uuid: m.student_uuid,
@@ -166,36 +169,38 @@ export const CreateThesisForm: React.FC = () => {
                 <AdvisorSelectSection watch={watch} setValue={setValue} errors={errors} />
 
                 {/* Action Buttons */}
-                <div className="flex items-center justify-between pt-4">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-6">
+                    {/* ปุ่มย้อนกลับ: ปรับขนาดให้เล็กลงในมือถือด้วย py-2.5 และ text-sm */}
                     <button
                         type="button"
                         onClick={() => navigate(-1)}
-                        className="flex items-center gap-2 px-6 py-3 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl font-medium transition-all duration-200"
+                        className="order-2 sm:order-1 flex items-center justify-center gap-2 w-full sm:w-auto px-5 py-2.5 sm:px-6 sm:py-3 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl font-medium text-sm sm:text-base transition-all duration-200"
                     >
-                        <FiArrowLeft className="w-5 h-5" />
+                        <FiArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
                         ย้อนกลับ
                     </button>
 
+                    {/* ปุ่มสร้างกลุ่ม: ปรับลดขนาดลงเพื่อให้สมดุลกับหน้าจอมือถือ */}
                     <button
                         type="submit"
                         disabled={isSubmitting}
                         className={`
-              flex items-center gap-2 px-8 py-3 rounded-xl font-semibold text-white
-              transition-all duration-200 shadow-lg
-              ${isSubmitting
+            order-1 sm:order-2 flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-2.5 sm:px-8 sm:py-3 rounded-xl font-semibold text-white text-sm sm:text-base
+            transition-all duration-200 shadow-lg
+            ${isSubmitting
                                 ? 'bg-gray-400 cursor-not-allowed'
                                 : 'bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 shadow-blue-200 hover:shadow-xl hover:-translate-y-0.5'
                             }
-            `}
+        `}
                     >
                         {isSubmitting ? (
                             <>
-                                <FiLoader className="w-5 h-5 animate-spin" />
+                                <FiLoader className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
                                 กำลังสร้าง...
                             </>
                         ) : (
                             <>
-                                <FiSend className="w-5 h-5" />
+                                <FiSend className="w-4 h-4 sm:w-5 sm:h-5" />
                                 สร้างกลุ่มวิทยานิพนธ์
                             </>
                         )}

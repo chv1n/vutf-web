@@ -99,19 +99,24 @@ export const AdvisorSelectSection: React.FC<AdvisorSelectSectionProps> = ({
     return (
         <section className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
             {/* Header */}
-            <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-purple-200">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                    {/* Icon */}
+                    <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-purple-200 shrink-0">
                         <FiAward className="w-5 h-5 text-white" />
                     </div>
+
+                    {/* Text Group */}
                     <div>
-                        <h2 className="text-lg font-bold text-gray-900">อาจารย์ที่ปรึกษา</h2>
-                        <p className="text-sm text-gray-500">เลือกอาจารย์ที่ปรึกษาวิทยานิพนธ์</p>
+                        <h2 className="text-lg font-bold text-gray-900 leading-tight">อาจารย์ที่ปรึกษา</h2>
+                        <p className="text-sm text-gray-500 mt-1">เลือกอาจารย์ที่ปรึกษาวิทยานิพนธ์</p>
                     </div>
                 </div>
-                <div className="flex items-center gap-2">
+
+                {/* Status & Count Badges */}
+                <div className="flex flex-wrap items-center gap-2">
                     {!hasMainAdvisor && (
-                        <span className="px-3 py-1 bg-amber-100 text-amber-700 text-xs font-medium rounded-full">
+                        <span className="px-3 py-1 bg-amber-100 text-amber-700 text-xs font-medium rounded-full border border-amber-200">
                             ต้องมีที่ปรึกษาหลัก
                         </span>
                     )}
@@ -191,26 +196,36 @@ export const AdvisorSelectSection: React.FC<AdvisorSelectSectionProps> = ({
                                             <button
                                                 type="button"
                                                 onClick={() => addAdvisor(instructor)}
-                                                className="w-full px-4 py-3 flex items-center gap-3 hover:bg-gray-50 transition-colors text-left"
+                                                className="w-full px-4 py-3 flex items-center gap-3 hover:bg-gray-50 transition-colors text-left border-b border-gray-50 last:border-0"
                                             >
-                                                <div className="w-10 h-10 bg-gradient-to-br from-purple-100 to-purple-200 rounded-full flex items-center justify-center">
+                                                {/* 1. ซ่อนรูปโปรไฟล์ในจอเล็ก */}
+                                                <div className="hidden sm:flex w-10 h-10 bg-gradient-to-br from-purple-100 to-purple-200 rounded-full items-center justify-center shrink-0">
                                                     <FiUser className="w-5 h-5 text-purple-600" />
                                                 </div>
+
+                                                {/* 2. ส่วนข้อมูลชื่อ - จะแสดงผลได้เต็มที่มากขึ้นในมือถือ */}
                                                 <div className="flex-1 min-w-0">
-                                                    <p className="text-sm font-medium text-gray-900 truncate">
+                                                    <p className="text-sm font-semibold text-gray-900 truncate">
                                                         {instructor.first_name} {instructor.last_name}
                                                     </p>
-                                                    <p className="text-xs text-gray-500 truncate">
-                                                        {instructor.department || instructor.email || 'อาจารย์'}
+                                                    <p className="text-[11px] text-gray-500 truncate">
+                                                        {instructor.department || 'อาจารย์'}
                                                     </p>
                                                 </div>
-                                                <span className={`px-2 py-1 text-xs font-medium rounded-lg ${selectedRole === AdvisorRole.MAIN
-                                                    ? 'bg-purple-100 text-purple-700'
-                                                    : 'bg-gray-100 text-gray-600'
-                                                    }`}>
-                                                    {selectedRole === AdvisorRole.MAIN ? 'หลัก' : 'ร่วม'}
-                                                </span>
-                                                <FiPlus className="w-5 h-5 text-purple-500 flex-shrink-0" />
+
+                                                {/* 3. ส่วน Role และ ปุ่มบวก - ซ่อนทั้งหมดในจอเล็ก */}
+                                                <div className="hidden sm:flex items-center gap-2 shrink-0 ml-2">
+                                                    <span className={`px-2 py-0.5 text-[10px] font-bold rounded-md ${selectedRole === AdvisorRole.MAIN
+                                                        ? 'bg-purple-100 text-purple-700'
+                                                        : 'bg-gray-100 text-gray-600'
+                                                        }`}>
+                                                        {selectedRole === AdvisorRole.MAIN ? 'หลัก' : 'ร่วม'}
+                                                    </span>
+                                                    <FiPlus className="w-5 h-5 text-purple-500" />
+                                                </div>
+
+                                                {/* เพิ่มเติม: ในมือถืออาจจะใส่ไอคอนบวกเล็กๆ ไว้ขวาสุดแทนเพื่อให้รู้ว่ากดเพิ่มได้ (ถ้าต้องการ) */}
+                                                <FiPlus className="sm:hidden w-4 h-4 text-purple-400 shrink-0" />
                                             </button>
                                         </li>
                                     ))}
@@ -244,50 +259,56 @@ export const AdvisorSelectSection: React.FC<AdvisorSelectSectionProps> = ({
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.95 }}
                             transition={{ duration: 0.2 }}
-                            className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-gray-50 to-white border border-gray-100 rounded-xl group"
+                            className="flex flex-col sm:flex-row sm:items-center gap-3 px-4 py-3 bg-gradient-to-r from-gray-50 to-white border border-gray-100 rounded-xl group"
                         >
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${advisor.role === AdvisorRole.MAIN
-                                ? 'bg-gradient-to-br from-purple-100 to-purple-200'
-                                : 'bg-gradient-to-br from-gray-100 to-gray-200'
-                                }`}>
-                                {advisor.role === AdvisorRole.MAIN ? (
-                                    <FiAward className="w-5 h-5 text-purple-600" />
-                                ) : (
-                                    <FiUser className="w-5 h-5 text-gray-600" />
-                                )}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-gray-900 truncate">
-                                    {advisor.instructorInfo
-                                        ? `${advisor.instructorInfo.first_name} ${advisor.instructorInfo.last_name}`
-                                        : advisor.instructor_uuid
-                                    }
-                                </p>
-                                <p className="text-xs text-gray-500 truncate">
-                                    {advisor.instructorInfo?.department || 'อาจารย์'}
-                                </p>
+                            {/* Icon + ชื่อ */}
+                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                                <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${advisor.role === AdvisorRole.MAIN
+                                        ? 'bg-gradient-to-br from-purple-100 to-purple-200'
+                                        : 'bg-gradient-to-br from-gray-100 to-gray-200'
+                                    }`}>
+                                    {advisor.role === AdvisorRole.MAIN ? (
+                                        <FiAward className="w-5 h-5 text-purple-600" />
+                                    ) : (
+                                        <FiUser className="w-5 h-5 text-gray-600" />
+                                    )}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-medium text-gray-900 truncate">
+                                        {advisor.instructorInfo
+                                            ? `${advisor.instructorInfo.first_name} ${advisor.instructorInfo.last_name}`
+                                            : advisor.instructor_uuid
+                                        }
+                                    </p>
+                                    <p className="text-xs text-gray-500 truncate">
+                                        {advisor.instructorInfo?.department || 'อาจารย์'}
+                                    </p>
+                                </div>
                             </div>
 
-                            {/* Role Toggle */}
-                            <select
-                                value={advisor.role}
-                                onChange={(e) => changeAdvisorRole(advisor.instructor_uuid, e.target.value as AdvisorRole)}
-                                className={`px-3 py-1.5 text-xs font-medium rounded-lg border-0 cursor-pointer transition-colors ${advisor.role === AdvisorRole.MAIN
-                                    ? 'bg-purple-100 text-purple-700'
-                                    : 'bg-gray-100 text-gray-600'
-                                    }`}
-                            >
-                                <option value={AdvisorRole.MAIN}>ที่ปรึกษาหลัก</option>
-                                <option value={AdvisorRole.CO}>ที่ปรึกษาร่วม</option>
-                            </select>
+                            {/* Role Toggle + ปุ่มลบ */}
+                            <div className="flex items-center justify-between sm:justify-end gap-2 pt-2 sm:pt-0 border-t sm:border-0 border-gray-100">
+                                <select
+                                    value={advisor.role}
+                                    onChange={(e) => changeAdvisorRole(advisor.instructor_uuid, e.target.value as AdvisorRole)}
+                                    className={`flex-1 sm:flex-initial px-3 py-1.5 text-xs font-medium rounded-lg border-0 cursor-pointer transition-colors ${advisor.role === AdvisorRole.MAIN
+                                            ? 'bg-purple-100 text-purple-700'
+                                            : 'bg-gray-100 text-gray-600'
+                                        }`}
+                                >
+                                    <option value={AdvisorRole.MAIN}>ที่ปรึกษาหลัก</option>
+                                    <option value={AdvisorRole.CO}>ที่ปรึกษาร่วม</option>
+                                </select>
 
-                            <button
-                                type="button"
-                                onClick={() => removeAdvisor(advisor.instructor_uuid)}
-                                className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
-                            >
-                                <FiX className="w-4 h-4" />
-                            </button>
+                                <button
+                                    type="button"
+                                    onClick={() => removeAdvisor(advisor.instructor_uuid)}
+                                    // ปรับ opacity-100 ในมือถือเพื่อให้มองเห็นปุ่มลบได้ทันที
+                                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+                                >
+                                    <FiX className="w-4 h-4" />
+                                </button>
+                            </div>
                         </motion.div>
                     ))}
                 </AnimatePresence>

@@ -95,10 +95,11 @@ export const InvitationActions: React.FC<InvitationActionsProps> = ({
             const err = error instanceof Error ? error : new Error('เกิดข้อผิดพลาด');
 
             Swal.fire({
-                icon: 'error',
-                title: 'เกิดข้อผิดพลาด',
+                icon: 'info',
+                title: 'คุณมีกลุ่มโครงงานอยู่แล้ว',
                 text: err.message,
-                confirmButtonColor: '#ef4444',
+                confirmButtonText: 'รับทราบ',
+                confirmButtonColor: '#3085d6',
             });
 
             onError?.(err);
@@ -158,7 +159,7 @@ export const InvitationActions: React.FC<InvitationActionsProps> = ({
     const isLoading = isAccepting || isRejecting;
 
     return (
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3">
             {/* Accept Button */}
             <motion.button
                 type="button"
@@ -167,7 +168,7 @@ export const InvitationActions: React.FC<InvitationActionsProps> = ({
                 whileHover={{ scale: isLoading ? 1 : 1.02 }}
                 whileTap={{ scale: isLoading ? 1 : 0.98 }}
                 className={`
-          flex items-center gap-2 ${sizing.padding} ${sizing.fontSize}
+          w-full sm:w-auto flex items-center justify-center gap-2 ${sizing.padding} ${sizing.fontSize}
           font-medium rounded-xl transition-all duration-200
           ${isLoading
                         ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
@@ -191,7 +192,7 @@ export const InvitationActions: React.FC<InvitationActionsProps> = ({
                 whileHover={{ scale: isLoading ? 1 : 1.02 }}
                 whileTap={{ scale: isLoading ? 1 : 0.98 }}
                 className={`
-          flex items-center gap-2 ${sizing.padding} ${sizing.fontSize}
+          w-full sm:w-auto flex items-center justify-center gap-2 ${sizing.padding} ${sizing.fontSize}
           font-medium rounded-xl transition-all duration-200
           ${isLoading
                         ? 'bg-gray-100 text-gray-400 cursor-not-allowed'

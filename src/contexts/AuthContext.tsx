@@ -1,3 +1,4 @@
+// src/contexts/AuthContext.tsx
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { authService, UserProfile } from '../services/auth.service';
 
@@ -36,20 +37,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // Wrapper Login
   const login = async (credentials: any) => {
-    const res = await authService.login(credentials);
-    // Login สำเร็จ -> เรียก getMe อีกรอบ หรือ set user จาก response login เลยก็ได้
-    if(res.data) {
-        setUser(res.data as unknown as UserProfile); 
+    try {
+      // ยิง API Login เพื่อให้ Backend set cookie (httpOnly)
+      await authService.login(credentials);
+      // ดึงข้อมูล User ปัจจุบันมาเก็บใน Context
+      await checkAuth();
+
+    } catch (error) {
+      throw error;
     }
   };
 
   // Wrapper Logout
   const logout = async () => {
     try {
-        await authService.logout();
+      await authService.logout();
     } finally {
-        setUser(null);
-        window.location.href = '/login'; // Hard refresh ไปหน้า login
+      setUser(null);
+      window.location.href = '/login'; // Hard refresh ไปหน้า login
     }
   };
 

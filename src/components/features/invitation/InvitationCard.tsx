@@ -85,28 +85,29 @@ export const InvitationCard: React.FC<InvitationCardProps> = ({
             className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden"
         >
             {/* Header */}
-            <div className="p-5 border-b border-gray-50">
-                <div className="flex items-start justify-between gap-4">
-                    <div className="flex items-start gap-4 flex-1 min-w-0">
-                        {/* Icon */}
-                        <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-200 flex-shrink-0">
-                            <FiFileText className="w-6 h-6 text-white" />
+            <div className="p-4 sm:p-5 border-b border-gray-50">
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                    <div className="flex items-start gap-3 sm:gap-4 flex-1 min-w-0">
+                        {/* Icon - ปรับขนาดให้เล็กลงเล็กน้อยในมือถือ แต่ยังคงความเด่น */}
+                        <div className="w-8 h-8 sm:w-12 sm:h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg shadow-blue-200 flex-shrink-0">
+                            <FiFileText className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
                         </div>
 
                         {/* Thesis Info */}
                         <div className="flex-1 min-w-0">
-                            <h3 className="text-lg font-bold text-gray-900 truncate">
+                            <h3 className="text-base sm:text-lg font-bold text-gray-900 truncate leading-tight">
                                 {thesis?.thesis_name_th || 'ไม่มีชื่อวิทยานิพนธ์'}
                             </h3>
-                            <p className="text-sm text-gray-500 truncate mt-0.5">
+                            <p className="text-xs sm:text-sm text-gray-500 truncate mt-1">
                                 {thesis?.thesis_name_en || '-'}
                             </p>
-                            <div className="flex items-center gap-2 mt-2">
-                                <span className="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs font-medium rounded">
+
+                            <div className="flex flex-wrap items-center gap-2 mt-2">
+                                <span className="px-2 py-0.5 bg-gray-100 text-gray-600 text-[10px] sm:text-xs font-medium rounded">
                                     {thesis?.thesis_code || '-'}
                                 </span>
                                 {thesis?.graduation_year && (
-                                    <span className="text-xs text-gray-400">
+                                    <span className="text-[10px] sm:text-xs text-gray-400">
                                         ปี {thesis.graduation_year}
                                     </span>
                                 )}
@@ -114,7 +115,10 @@ export const InvitationCard: React.FC<InvitationCardProps> = ({
                         </div>
                     </div>
 
-                    <InvitationBadge status={invitation_status} size="md" />
+                    {/* Invitation Badge - ในมือถือจะขยับมาอยู่บรรทัดใหม่ หรือมุมขวาบนตามความเหมาะสม */}
+                    <div className="flex sm:block justify-end shrink-0">
+                        <InvitationBadge status={invitation_status} size="md" />
+                    </div>
                 </div>
             </div>
 

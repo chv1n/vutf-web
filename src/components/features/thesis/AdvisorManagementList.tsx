@@ -56,7 +56,7 @@ export const AdvisorManagementList: React.FC<AdvisorManagementListProps> = ({
 
     return (
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
                         <FiAward className="w-5 h-5 text-purple-600" />
@@ -69,7 +69,7 @@ export const AdvisorManagementList: React.FC<AdvisorManagementListProps> = ({
                 {isOwner && (
                     <button
                         onClick={() => setIsAddModalOpen(true)}
-                        className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700 transition-colors"
+                        className="flex items-center justify-center gap-2 px-4 py-2 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700 transition-colors w-full sm:w-auto"
                     >
                         <FiUserPlus /> เพิ่มอาจารย์
                     </button>
@@ -78,21 +78,21 @@ export const AdvisorManagementList: React.FC<AdvisorManagementListProps> = ({
 
             <div className="space-y-3">
                 {advisors.map((advisor) => (
-                    <div key={advisor.advisor_id} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100">
+                    <div key={advisor.advisor_id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100 gap-4">
                         <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center text-purple-600">
-                                <FiAward className="w-6 h-6" />
+                            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 shrink-0">
+                                <FiAward className="w-5 h-5 sm:w-6 sm:h-6" />
                             </div>
-                            <div>
-                                <h3 className="font-semibold text-gray-900">
+                            <div className="min-w-0">
+                                <h3 className="font-semibold text-gray-900 text-sm sm:text-base truncate">
                                     {advisor.instructor?.first_name} {advisor.instructor?.last_name}
                                 </h3>
-                                <div className="flex items-center gap-2 mt-1">
-                                    <span className="text-sm text-gray-500">{advisor.instructor?.instructor_code}</span>
+                                <div className="flex flex-wrap items-center gap-2 mt-1">
+                                    <span className="text-xs sm:text-sm text-gray-500">{advisor.instructor?.instructor_code}</span>
                                     {!isOwner && (
-                                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${advisor.role === AdvisorRole.MAIN
-                                            ? 'bg-purple-100 text-purple-700 border border-purple-200'
-                                            : 'bg-gray-200 text-gray-600'
+                                        <span className={`text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${advisor.role === AdvisorRole.MAIN
+                                                ? 'bg-purple-100 text-purple-700 border border-purple-200'
+                                                : 'bg-gray-200 text-gray-600'
                                             }`}>
                                             {advisor.role === AdvisorRole.MAIN ? 'ที่ปรึกษาหลัก' : 'ที่ปรึกษาร่วม'}
                                         </span>
@@ -102,12 +102,12 @@ export const AdvisorManagementList: React.FC<AdvisorManagementListProps> = ({
                         </div>
 
                         {isOwner && (
-                            <div className="flex items-center gap-2">
-                                <div className="relative">
+                            <div className="flex items-center justify-between sm:justify-end gap-2 pt-3 sm:pt-0 border-t sm:border-none border-gray-200">
+                                <div className="relative flex-1 sm:flex-initial">
                                     <select
                                         value={advisor.role}
                                         onChange={(e) => handleUpdateRole(advisor, e.target.value as AdvisorRole)}
-                                        className="appearance-none bg-gray-50 border border-gray-200 text-gray-700 py-1.5 px-3 pr-8 rounded-lg text-xs font-medium focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 cursor-pointer"
+                                        className="appearance-none w-full bg-white sm:bg-gray-50 border border-gray-200 text-gray-700 py-1.5 px-3 pr-8 rounded-lg text-xs font-medium focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 cursor-pointer"
                                     >
                                         <option value={AdvisorRole.MAIN}>ที่ปรึกษาหลัก</option>
                                         <option value={AdvisorRole.CO}>ที่ปรึกษาร่วม</option>
@@ -118,17 +118,17 @@ export const AdvisorManagementList: React.FC<AdvisorManagementListProps> = ({
                                 </div>
                                 <button
                                     onClick={() => handleRemoveAdvisor(advisor)}
-                                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors shrink-0"
                                     title="ลบ"
                                 >
-                                    <FiTrash2 className="w-4 h-4" />
+                                    <FiTrash2 className="w-5 h-5 sm:w-4 sm:h-4" />
                                 </button>
                             </div>
                         )}
                     </div>
                 ))}
                 {advisors.length === 0 && (
-                    <div className="text-center py-6 text-gray-500 bg-gray-50 rounded-xl border-dashed border border-gray-200">
+                    <div className="text-center py-6 text-gray-500 bg-gray-50 rounded-xl border-dashed border border-gray-200 text-sm">
                         ยังไม่มีอาจารย์ที่ปรึกษา
                     </div>
                 )}
