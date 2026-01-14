@@ -9,6 +9,7 @@ import GroupManagementPage from './pages/student/GroupManagementPage';
 import GroupDetailPage from './pages/student/GroupDetailPage';
 import GroupSubmissionPage from './pages/student/GroupSubmissionPage';
 import InspectionRoundPage from './pages/student/InspectionRoundPage';
+import ThesisReportPage from './pages/student/ThesisReportPage';
 import { InstructorHome } from './pages/instructor/InstructorHome';
 import LoginPage from './pages/LoginPage';
 import { RegisterEmailPage } from './pages/register/RegisterEmailPage';
@@ -62,7 +63,7 @@ function App() {
               <Route path="groups/:groupId/submissions" element={<GroupSubmissionPage />} />
               <Route path="inspections" element={<InspectionRoundPage />} />
               <Route path="profile" element={<div>Profile Page</div>} />
-              <Route path="report" element={<div>Thesis Report Page</div>} />
+              <Route path="report" element={<ThesisReportPage />} />
               <Route path="announcements" element={<AnnouncementsPage />} />
               <Route path="settings" element={<div>Setting Page</div>} />
             </Route>
