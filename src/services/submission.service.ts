@@ -2,7 +2,7 @@
 // Service สำหรับจัดการ Submission API
 
 import { api } from './api';
-import type { Submission, SubmissionFileUrl } from '@/types/submission';
+import { Submission, SubmissionFileUrl, SubmissionResponse, SubmissionFilterParams, SubmissionDetail, } from '../types/submission';
 
 /**
  * Submission Service
@@ -52,8 +52,9 @@ export const submissionService = {
      * @param id - Submission ID
      * @returns Promise<Submission>
      */
-    async getById(id: number): Promise<Submission> {
-        return api.get<Submission>(`/submissions/${id}`);
+    async getById(id: number): Promise<SubmissionDetail> {
+        const response = await api.get<{ data: SubmissionDetail }>(`/submissions/${id}`);
+        return response.data;
     },
 
     /**
@@ -66,4 +67,25 @@ export const submissionService = {
     async getFileUrl(id: number): Promise<SubmissionFileUrl> {
         return api.get<SubmissionFileUrl>(`/submissions/${id}/file`);
     },
+
+    /**
+       * ดึงข้อมูล Submission ทั้งหมด (รองรับ Filter & Pagination)
+       */
+    getAll: async (params: SubmissionFilterParams): Promise<SubmissionResponse> => {
+        return api.get<SubmissionResponse>('/submissions', params);
+    },
+
+    /**
+      * อัปเดตคอมเมนต์ (ไม่ต้องเปลี่ยนสถานะ)
+      */
+    async updateComment(id: number, comment: string) {
+        return api.patch(`/submissions/${id}/comment`, { comment });
+    },
+
+    /**
+     * ส่งคำร้องขอตรวจสอบ (Verification)
+     */
+    verify: async (id: number) => {
+        return api.post(`/submissions/${id}/verify`, {});
+    }
 };

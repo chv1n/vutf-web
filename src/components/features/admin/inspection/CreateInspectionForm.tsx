@@ -6,6 +6,7 @@ import { FiSave, FiX, FiCalendar, FiType, FiAlignLeft, FiActivity, FiEdit2, FiPl
 import { createInspectionSchema, CreateInspectionSchema } from './inspection.schema';
 import { inspectionService } from '@/services/inspection.service';
 import { InspectionRound } from '@/types/inspection';
+import { showApiErrorAlert } from '@/utils/error-handler';
 
 interface Props {
     initialData?: InspectionRound | null;
@@ -67,7 +68,7 @@ const CreateInspectionForm: React.FC<Props> = ({ initialData, onSuccess, onCance
             onSuccess();
         } catch (error: any) {
             console.error(error);
-            Swal.fire('ผิดพลาด', error.response?.data?.message || 'ไม่สามารถบันทึกข้อมูลได้', 'error');
+            showApiErrorAlert(error, 'บันทึกข้อมูลไม่สำเร็จ');
         } finally {
             setIsLoading(false);
         }
