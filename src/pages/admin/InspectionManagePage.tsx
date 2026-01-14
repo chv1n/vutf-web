@@ -8,6 +8,7 @@ import {
 import CreateInspectionForm from '@/components/features/admin/inspection/CreateInspectionForm';
 import { inspectionService } from '@/services/inspection.service';
 import { InspectionRound } from '@/types/inspection';
+import { showApiErrorAlert } from '@/utils/error-handler';
 
 // --- Types ---
 interface MetaData {
@@ -444,7 +445,7 @@ const InspectionManagePage = () => {
             fetchInspections(meta.page, searchQuery, true, filters);
             Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'อัปเดตสถานะสำเร็จ', showConfirmButton: false, timer: 1500 });
         } catch (error) {
-            Swal.fire('ผิดพลาด', 'ไม่สามารถเปลี่ยนสถานะได้', 'error');
+            showApiErrorAlert(error, 'เปลี่ยนสถานะไม่สำเร็จ');
         }
     };
 
@@ -466,7 +467,7 @@ const InspectionManagePage = () => {
                     fetchInspections(meta.page, searchQuery, false, filters);
                     Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'ลบข้อมูลสำเร็จ', showConfirmButton: false, timer: 1500 });
                 } catch (error: any) {
-                    Swal.fire('แจ้งเตือน', error.response?.data?.message || 'ลบไม่ได้', 'error');
+                    showApiErrorAlert(error, 'ลบข้อมูลไม่สำเร็จ');
                 }
             }
         });

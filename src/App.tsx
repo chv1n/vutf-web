@@ -10,7 +10,7 @@ import GroupDetailPage from './pages/student/GroupDetailPage';
 import GroupSubmissionPage from './pages/student/GroupSubmissionPage';
 import InspectionRoundPage from './pages/student/InspectionRoundPage';
 import ThesisReportPage from './pages/student/ThesisReportPage';
-import { InstructorHome } from './pages/instructor/InstructorHome';
+import { DashboardPage as InstructorDashboard } from './pages/instructor/DashboardPage';
 import LoginPage from './pages/LoginPage';
 import { RegisterEmailPage } from './pages/register/RegisterEmailPage';
 import { VerifyOtpPage } from './pages/register/VerifyOtpPage';
@@ -25,6 +25,7 @@ import { UserManagementPage } from './pages/admin/UserManagementPage';
 import { AnnouncementsPage } from './pages/announcements/AnnouncementsPage';
 import { SetupProfilePage } from './pages/register/SetupProfilePage';
 import { ThesisTopicPage } from './pages/admin/ThesisTopicPage';
+import { SubmissionDetailPage } from './pages/instructor/SubmissionDetailPage';
 
 function App() {
   return (
@@ -73,7 +74,8 @@ function App() {
           <Route element={<ProtectedRoute allowedRoles={['instructor']} />}>
             <Route path="/instructor" element={<MainLayout />}>
               <Route index element={<Navigate to="/instructor/dashboard" replace />} />
-              <Route path="dashboard" element={<InstructorHome />} />
+              <Route path="dashboard" element={<InstructorDashboard />} />
+              <Route path="submission/:id" element={<SubmissionDetailPage />} />
               <Route path="announcements" element={<AnnouncementsPage />} />
             </Route>
           </Route>
