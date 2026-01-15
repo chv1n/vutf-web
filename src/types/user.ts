@@ -1,5 +1,5 @@
 // src/types/user.ts
-
+import { ClassSection } from './class-section';
 export interface User {
   user_uuid: string;
   email: string;
@@ -18,6 +18,8 @@ export interface StudentProfile {
   first_name: string;
   last_name: string;
   phone: string;
+  sectionId: number;
+  section?: ClassSection;
 }
 
 export interface InstructorProfile {

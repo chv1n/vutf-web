@@ -1,5 +1,5 @@
 // src/services/user.service.ts
-import { api } from './api'; 
+import { api } from './api';
 import { UserResponse, User } from '../types/user';
 
 // Helper function
@@ -15,10 +15,24 @@ const buildQuery = (params: Record<string, any>) => {
 
 export const userService = {
 
-  getStudents: async (page = 1, limit = 10, search = '') => {
-    const queryString = buildQuery({ page, limit, search, role: 'student' });
+  getStudents: async (
+    page = 1,
+    limit = 10,
+    search = '',
+    filters?: { academicYear?: string; term?: string; sectionId?: number }
+  ) => {
+    const queryString = buildQuery({
+      page,
+      limit,
+      search,
+      role: 'student',
+      academicYear: filters?.academicYear,
+      term: filters?.term,
+      sectionId: filters?.sectionId
+    });
+
     const response = await api.get<UserResponse<User>>(`/users${queryString}`);
-    return response; 
+    return response;
   },
 
   getInstructors: async (page = 1, limit = 10, search = '') => {
@@ -48,8 +62,19 @@ export const userService = {
     firstName: string;
     lastName: string;
     phone: string;
+    sectionId: number;
   }) => {
-    const response = await api.post('/students/setup-profile', data);
+    const payload = {
+      token: data.token,
+      password: data.password,
+      prefixName: data.prefixName,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      phone: data.phone,
+      section_id: data.sectionId
+    };
+
+    const response = await api.post('/students/setup-profile', payload);
     return response.data;
   },
 
