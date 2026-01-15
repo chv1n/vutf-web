@@ -1,303 +1,305 @@
+// src/pages/admin/UserManagementPage.tsx
 import { useState, useEffect } from 'react';
-import { FiPlus, FiSearch, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
-import Swal from 'sweetalert2';
+import { FiPlus, FiSearch, FiFilter, FiRotateCcw } from 'react-icons/fi';
 
+// Components
 import { UserTabs } from '../../components/features/admin/users/UserTabs';
 import { UserTable } from '../../components/features/admin/users/UserTable';
+import { SectionTable } from '../../components/features/admin/class-sections/SectionTable';
+import { Pagination } from '../../components/common/Pagination';
+
+// Modals
 import { UserFormModal } from '../../components/features/admin/users/UserFormModal';
-import { userService } from '../../services/user.service';
+import { SectionFormModal } from '../../components/features/admin/class-sections/SectionFormModal';
+
+// Hooks (Logic)
+import { useUserManagement } from '../../hooks/admin/useUserManagement';
+import { useSectionManagement } from '../../hooks/admin/useSectionManagement';
 import { useDebounce } from '../../hooks/useDebounce';
+
+// Services (เรียกใช้เพื่อดึงข้อมูลลง Dropdown)
+import { classSectionService } from '../../services/class-section.service';
+
+// Types
 import { User } from '../../types/user';
+import { ClassSection } from '../../types/class-section';
 
 export const UserManagementPage = () => {
-  const [activeTab, setActiveTab] = useState<'student' | 'instructor'>('student');
-  const [data, setData] = useState<User[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  // --- UI State ---
+  const [activeTab, setActiveTab] = useState<'student' | 'instructor' | 'section'>('student');
   const [searchTerm, setSearchTerm] = useState('');
-
-  // Pagination State
   const [page, setPage] = useState(1);
-  const [limit] = useState(10);
-  const [meta, setMeta] = useState<any>(null);
-
-  // Modal State
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
-
-  // Debounce Search
+  const limit = 10;
   const debouncedSearch = useDebounce(searchTerm, 500);
 
-  // Loading state for Save/Invite action
-  const [isSaving, setIsSaving] = useState(false);
+  // --- Filter State (เพิ่มใหม่) ---
+  const [selectedYear, setSelectedYear] = useState('');
+  const [selectedTerm, setSelectedTerm] = useState('');
+  const [selectedSectionId, setSelectedSectionId] = useState('');
+  const [dropdownSections, setDropdownSections] = useState<ClassSection[]>([]);
 
-  const fetchData = async () => {
-    setIsLoading(true);
-    try {
-      let res;
-      if (activeTab === 'student') {
-        res = await userService.getStudents(page, limit, debouncedSearch);
-      } else {
-        res = await userService.getInstructors(page, limit, debouncedSearch);
-      }
+  // --- Modal State ---
+  const [isUserModalOpen, setIsUserModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
-      setData(res.data);
-      setMeta(res.meta);
+  const [isSectionModalOpen, setIsSectionModalOpen] = useState(false);
+  const [selectedSection, setSelectedSection] = useState<ClassSection | null>(null);
 
-    } catch (error) {
-      console.error(error);
-      Swal.fire('Error', 'ไม่สามารถดึงข้อมูลได้ กรุณาลองใหม่', 'error');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // --- Custom Hooks ---
+  const userMgr = useUserManagement();
+  const sectionMgr = useSectionManagement();
 
+  // --- Effects ---
   useEffect(() => {
-    setPage(1);
-  }, [activeTab, debouncedSearch]);
+    setPage(1); // Reset page when tab or search changes
+  }, [activeTab, debouncedSearch, selectedYear, selectedTerm, selectedSectionId]);
 
+  // Effect: โหลดรายชื่อ Section มาใส่ Dropdown (ทำครั้งเดียวตอนโหลดหน้า)
   useEffect(() => {
-    fetchData();
-  }, [activeTab, debouncedSearch, page]);
-
-  const handleDetail = (user: User) => {
-    let infoHtml = '';
-
-    if (activeTab === 'student' && user.student) {
-      const s = user.student;
-      infoHtml = `
-            <div style="text-align: left; font-size: 0.95rem; line-height: 1.6;">
-                <p><strong>ชื่อ-นามสกุล:</strong> ${s.prefix_name || ''}${s.first_name} ${s.last_name}</p>
-                <p><strong>รหัสนักศึกษา:</strong> ${s.student_code || '-'}</p>
-                <p><strong>อีเมล:</strong> ${user.email}</p>
-                <p><strong>เบอร์โทร:</strong> ${s.phone || '-'}</p>
-                <p><strong>สถานะบัญชี:</strong> ${user.isActive ? '<span style="color:green">ใช้งานปกติ</span>' : '<span style="color:red">ถูกระงับ/ยังไม่ยืนยัน</span>'}</p>
-            </div>
-        `;
-    } else if (activeTab === 'instructor' && user.instructor) {
-      const i = user.instructor;
-      infoHtml = `
-            <div style="text-align: left; font-size: 0.95rem; line-height: 1.6;">
-                <p><strong>ชื่อ-นามสกุล:</strong> ${i.first_name} ${i.last_name}</p>
-                <p><strong>รหัสอาจารย์:</strong> ${i.instructor_code || '-'}</p>
-                <p><strong>อีเมล:</strong> ${user.email || 'ไม่มีบัญชีผู้ใช้'}</p>
-                <p><strong>สถานะบัญชี:</strong> ${user.isActive ? '<span style="color:green">ใช้งานปกติ</span>' : '<span style="color:red">ถูกระงับ</span>'}</p>
-            </div>
-        `;
-    }
-
-    Swal.fire({
-      title: 'รายละเอียดผู้ใช้',
-      html: infoHtml,
-      icon: 'info',
-      confirmButtonText: 'ปิด',
-      confirmButtonColor: '#3b82f6'
-    });
-  };
-
-  const handleDelete = async (id: string) => {
-    const result = await Swal.fire({
-      title: 'ยืนยันการปิดใช้งานบัญชี?',
-      text: "บัญชีนี้จะถูกระงับการใช้งาน (Inactive) แต่ข้อมูลประวัติจะยังคงอยู่ในระบบ",
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#3085d6',
-      confirmButtonText: 'ยืนยันการปิดใช้งาน',
-      cancelButtonText: 'ยกเลิก'
-    });
-
-    if (result.isConfirmed) {
+    const loadSectionsForDropdown = async () => {
       try {
-        await userService.deleteUser(id); 
-
-        Swal.fire('ดำเนินการสำเร็จ', 'บัญชีผู้ใช้ถูกระงับการใช้งานแล้ว', 'success');
-        fetchData();
-      } catch (error: any) {
-        Swal.fire('เกิดข้อผิดพลาด', error.response?.data?.message || 'ไม่สามารถดำเนินการได้', 'error');
+        const res = await classSectionService.getAll({ page: 1, limit: 1000 });
+        setDropdownSections(res.data);
+      } catch (error) {
+        console.error("Failed to load sections for dropdown", error);
       }
+    };
+    loadSectionsForDropdown();
+  }, []);
+
+  // Effect: Fetch Data หลัก
+  useEffect(() => {
+    if (activeTab === 'section') {
+      sectionMgr.fetchSections(page, limit, debouncedSearch, {
+        academic_year: selectedYear ? Number(selectedYear) : undefined,
+        term: selectedTerm || undefined
+      });
+    } else {
+      userMgr.fetchUsers(activeTab, page, limit, debouncedSearch, {
+        academicYear: selectedYear,
+        term: selectedTerm,
+        sectionId: selectedSectionId ? Number(selectedSectionId) : undefined
+      });
     }
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, debouncedSearch, page, selectedYear, selectedTerm, selectedSectionId]);
 
-  const handleSave = async (formData: any) => {
-    setIsSaving(true); 
-
-    try {
-      if (selectedUser) {
-        // แก้ไข (Update)
-        await userService.updateUser(selectedUser.user_uuid, formData);
-        setIsModalOpen(false);
-        fetchData();
-        Swal.fire('บันทึกสำเร็จ', 'แก้ไขข้อมูลเรียบร้อยแล้ว', 'success');
-
-      } else {
-        // เพิ่มใหม่ (Create)
-        if (activeTab === 'student') {
-          // Invite นักศึกษา
-          const rawEmails = formData.email || '';
-          const emailList = rawEmails.split(/[\n,\s]+/).map((e: string) => e.trim()).filter((e: string) => e !== '');
-
-          if (emailList.length === 0) {
-            Swal.fire('แจ้งเตือน', 'กรุณาระบุอีเมลอย่างน้อย 1 รายการ', 'warning');
-            setIsSaving(false); 
-            return;
-          }
-
-          const res: any = await userService.inviteStudents(emailList);
-
-          setIsModalOpen(false);
-          fetchData();
-
-          const results = res.results || [];
-          const successCount = results.filter((r: any) => r.status === 'success' || r.status === 'resent').length;
-          const failCount = results.filter((r: any) => r.status === 'failed' || r.status === 'warning').length;
-
-          if (failCount === 0) {
-            Swal.fire('ส่งคำเชิญสำเร็จ', `ส่งลิงก์ครบทั้ง ${successCount} รายการเรียบร้อยแล้ว`, 'success');
-          } else {
-            const failedEmails = results
-              .filter((r: any) => r.status === 'failed' || r.status === 'warning')
-              .map((r: any) => r.email)
-              .join(', ');
-
-            Swal.fire({
-              title: 'ดำเนินการเสร็จสิ้น',
-              html: `
-                  <div style="text-align: left;">
-                      <p style="color: green; margin-bottom: 5px;">✔ ส่งสำเร็จ: ${successCount} รายการ</p>
-                      <p style="color: red; margin-bottom: 5px;">❌ มีบัญชีนี้อยู่ในระบบแล้ว: ${failCount} รายการ</p> 
-                      <hr style="margin: 10px 0; border-color: #eee;">
-                      <p style="font-size: 0.9em; color: #666; word-break: break-all;">
-                          <strong>รายการที่ไม่ถูกส่ง:</strong><br/>
-                          ${failedEmails.length > 150 ? failedEmails.substring(0, 150) + '...' : failedEmails}
-                      </p>
-                  </div>
-                `,
-              icon: 'info'
-            });
-          }
-
-        } else {
-          // สร้างอาจารย์ใหม่ (Create Instructor)
-          await userService.createInstructor(formData);
-          setIsModalOpen(false);
-          fetchData();
-          Swal.fire('บันทึกสำเร็จ', 'เพิ่มข้อมูลอาจารย์เรียบร้อยแล้ว', 'success');
-        }
-      }
-
-    } catch (error: any) {
-      console.error('Save Error:', error);
-      let msg = error.response?.data?.message;
-
-      if (!msg) {
-        msg = error.message;
-      }
-
-      if (!msg || msg === 'Network Error') {
-        msg = 'เกิดข้อผิดพลาดในการบันทึกข้อมูล กรุณาลองใหม่อีกครั้ง';
-      }
-
-      if (typeof msg === 'string' && (msg.includes('email already exists') || msg.includes('UQ_'))) {
-        Swal.fire('บันทึกไม่สำเร็จ', 'อีเมลหรือรหัสประจำตัวนี้มีอยู่ในระบบแล้ว', 'warning');
-      } else {
-        Swal.fire('Error', msg, 'error');
-      }
-    } finally {
-      setIsSaving(false); 
-    }
-  };
-
+  // --- Handlers ---
   const handleAddNew = () => {
-    setSelectedUser(null);
-    setIsModalOpen(true);
+    if (activeTab === 'section') {
+      setSelectedSection(null);
+      setIsSectionModalOpen(true);
+    } else {
+      setSelectedUser(null);
+      setIsUserModalOpen(true);
+    }
   };
 
-  const handleEdit = (user: User) => {
-    setSelectedUser(user);
-    setIsModalOpen(true);
+  const handleResetFilters = () => {
+    setSearchTerm('');
+    setSelectedYear('');
+    setSelectedTerm('');
+    setSelectedSectionId('');
+    setPage(1);
   };
 
   return (
     <div className="max-w-7xl mx-auto pb-10 px-4">
-      {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 pt-6">
+      {/* 1. Header Section */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 pt-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">จัดการข้อมูลผู้ใช้งาน</h1>
-          <p className="text-gray-500 text-sm mt-1">เพิ่ม ลบ แก้ไข ข้อมูลนักศึกษาและอาจารย์</p>
+          <h1 className="text-2xl font-bold text-gray-800">จัดการข้อมูลระบบ</h1>
+          <p className="text-gray-500 text-sm mt-1">จัดการข้อมูล นักศึกษา อาจารย์ และกลุ่มเรียน</p>
         </div>
         <button
           onClick={handleAddNew}
-          className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 font-medium cursor-pointer"
+          className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all shadow-lg font-medium cursor-pointer"
         >
-          <FiPlus size={20} /> เพิ่มผู้ใช้งานใหม่
+          <FiPlus size={20} />
+          {activeTab === 'section' ? 'เพิ่มกลุ่มเรียน' : 'เพิ่มผู้ใช้งาน'}
         </button>
       </div>
 
-      {/* Controls Section */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-        <UserTabs activeTab={activeTab} onTabChange={setActiveTab} />
+      {/* 2. Controls Section (Search & Filters on Top, Tabs on Bottom) */}
+      <div className="flex flex-col gap-6 mb-6">
 
-        <div className="relative w-full sm:w-72">
-          <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-          <input
-            type="text"
-            placeholder="ค้นหา ชื่อ, อีเมล, รหัส..."
-            className="w-full pl-10 pr-4 py-2 text-gray-600 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+        {/* --- ค้นหา และ ตัวกรอง --- */}
+        <div className="flex flex-col lg:flex-row justify-between items-center gap-4 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+
+          {/* ค้นหา */}
+          <div className="relative w-full lg:w-80">
+            <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              placeholder={activeTab === 'section' ? "ค้นหารหัสกลุ่มเรียน..." : "ค้นหา ชื่อ, อีเมล, รหัส..."}
+              className="w-full pl-10 pr-4 py-2 text-gray-600 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+
+          {/* ตัวกรอง (แสดงเฉพาะ Student และ Section) */}
+          <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto justify-end">
+            {(activeTab === 'student' || activeTab === 'section') && (
+              <>
+                <div className="flex items-center gap-2 px-3 py-2 text-gray-400 text-sm italic">
+                  <FiFilter /> กรองข้อมูล:
+                </div>
+
+                {/* ปีการศึกษา */}
+                <select
+                  value={selectedYear}
+                  onChange={(e) => setSelectedYear(e.target.value)}
+                  className="px-3 py-2 text-gray-600 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white min-w-[100px]"
+                >
+                  <option value="">ทุกปีการศึกษา</option>
+                  {[...new Set(dropdownSections.map(s => s.academic_year))]
+                    .sort((a, b) => b - a)
+                    .map(year => (
+                      <option key={year} value={String(year)}>{year}</option>
+                    ))
+                  }
+                </select>
+
+                {/* เทอม */}
+                <select
+                  value={selectedTerm}
+                  onChange={(e) => setSelectedTerm(e.target.value)}
+                  className="px-3 py-2 text-gray-600 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white min-w-[100px]"
+                >
+                  <option value="">ทุกเทอม</option>
+                  <option value="1">เทอม 1</option>
+                  <option value="2">เทอม 2</option>
+                  <option value="3">เทอม 3 (Summer)</option>
+                </select>
+
+                {/* กลุ่มเรียน (แสดงเฉพาะแท็บนักศึกษา) */}
+                {activeTab === 'student' && (
+                  <select
+                    value={selectedSectionId}
+                    onChange={(e) => setSelectedSectionId(e.target.value)}
+                    className="px-3 py-2 text-gray-600 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white min-w-[150px]"
+                  >
+                    <option value="">ทุกกลุ่มเรียน</option>
+                    {dropdownSections
+                      .filter(s =>
+                        (!selectedYear || s.academic_year === Number(selectedYear)) &&
+                        (!selectedTerm || String(s.term) === selectedTerm)
+                      )
+                      .map(section => (
+                        <option key={section.section_id} value={section.section_id}>
+                          {section.section_name}
+                        </option>
+                      ))
+                    }
+                  </select>
+                )}
+
+                {/* ปุ่มรีเซ็ตค่า (แสดงเฉพาะเมื่อมีการเลือกค่าใดค่าหนึ่ง) */}
+                {(searchTerm || selectedYear || selectedTerm || selectedSectionId) && (
+                  <button
+                    onClick={handleResetFilters}
+                    className="flex items-center gap-1.5 px-3 py-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors text-sm font-medium"
+                    title="ล้างตัวกรองทั้งหมด"
+                  >
+                    <FiRotateCcw size={14} /> รีเซ็ต
+                  </button>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* --- แถบ (Tabs) --- */}
+        <div className="flex items-center">
+          <UserTabs activeTab={activeTab} onTabChange={setActiveTab} />
         </div>
       </div>
 
-      {/* Table Section */}
-      <UserTable
-        data={data}
-        role={activeTab}
-        isLoading={isLoading}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-        onDetail={handleDetail}
+      {/* 3. Content Table Section */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        {activeTab === 'section' ? (
+          <SectionTable
+            data={sectionMgr.data}
+            isLoading={sectionMgr.isLoading}
+            onEdit={(item) => { setSelectedSection(item); setIsSectionModalOpen(true); }}
+            onDelete={(id) => sectionMgr.deleteSection(id, () => sectionMgr.fetchSections(page, limit, debouncedSearch, {
+              academic_year: selectedYear ? Number(selectedYear) : undefined,
+              term: selectedTerm || undefined
+            }))}
+            onRefresh={() => sectionMgr.fetchSections(page, limit, debouncedSearch, {
+              academic_year: selectedYear ? Number(selectedYear) : undefined,
+              term: selectedTerm || undefined
+            })}
+          />
+        ) : (
+          <UserTable
+            data={userMgr.data}
+            role={activeTab}
+            isLoading={userMgr.isLoading}
+            onEdit={(user) => { setSelectedUser(user); setIsUserModalOpen(true); }}
+            onDelete={(id) => userMgr.deleteUser(id, () => userMgr.fetchUsers(activeTab, page, limit, debouncedSearch, {
+              academicYear: selectedYear,
+              term: selectedTerm,
+              sectionId: selectedSectionId ? Number(selectedSectionId) : undefined
+            }))}
+            onDetail={(user) => userMgr.showDetail(user, activeTab)}
+            onRefresh={() => userMgr.fetchUsers(activeTab, page, limit, debouncedSearch, {
+              academicYear: selectedYear,
+              term: selectedTerm,
+              sectionId: selectedSectionId ? Number(selectedSectionId) : undefined
+            })}
+          />
+        )}
+      </div>
+
+      {/* 4. Pagination */}
+      <div className="mt-6">
+        <Pagination
+          page={page}
+          setPage={setPage}
+          limit={limit}
+          meta={activeTab === 'section' ? sectionMgr.meta : userMgr.meta}
+        />
+      </div>
+
+      {/* Modals */}
+      <UserFormModal
+        isOpen={isUserModalOpen}
+        onClose={() => setIsUserModalOpen(false)}
+        role={activeTab === 'section' ? 'student' : activeTab}
+        initialData={selectedUser}
+        isSubmitting={userMgr.isSaving}
+        onSubmit={(formData) =>
+          userMgr.saveUser(
+            formData,
+            activeTab as 'student' | 'instructor',
+            !!selectedUser,
+            selectedUser?.user_uuid,
+            () => {
+              setIsUserModalOpen(false);
+              userMgr.fetchUsers(activeTab as any, page, limit, debouncedSearch, {
+                academicYear: selectedYear,
+                term: selectedTerm,
+                sectionId: selectedSectionId ? Number(selectedSectionId) : undefined
+              });
+            }
+          )
+        }
       />
 
-      {/* Pagination UI */}
-      {meta && meta.totalPages > 0 && (
-        <div className="flex items-center justify-between mt-6 px-2">
-          <div className="text-sm text-gray-500">
-            แสดง <span className="font-medium">{(page - 1) * limit + 1}</span> ถึง <span className="font-medium">{Math.min(page * limit, meta.totalItems)}</span> จากทั้งหมด <span className="font-medium">{meta.totalItems}</span> รายการ
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setPage(p => Math.max(1, p - 1))}
-              disabled={page === 1}
-              className="p-2 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors"
-            >
-              <FiChevronLeft size={20} className="text-gray-600" />
-            </button>
-
-            <div className="px-4 py-2 bg-blue-50 text-blue-600 font-medium rounded-lg text-sm">
-              หน้า {page} / {meta.totalPages}
-            </div>
-
-            <button
-              onClick={() => setPage(p => Math.min(meta.totalPages, p + 1))}
-              disabled={page === meta.totalPages}
-              className="p-2 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors"
-            >
-              <FiChevronRight size={20} className="text-gray-600" />
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Modal */}
-      <UserFormModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        role={activeTab}
-        initialData={selectedUser}
-        onSubmit={handleSave}
-        isSubmitting={isSaving} 
+      <SectionFormModal
+        isOpen={isSectionModalOpen}
+        onClose={() => setIsSectionModalOpen(false)}
+        initialData={selectedSection}
+        isSubmitting={sectionMgr.isSaving}
+        onSubmit={(formData) =>
+          sectionMgr.saveSection(
+            formData,
+            selectedSection?.section_id,
+            () => { setIsSectionModalOpen(false); sectionMgr.fetchSections(page, limit, debouncedSearch); }
+          )
+        }
       />
     </div>
   );

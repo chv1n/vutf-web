@@ -34,9 +34,9 @@ export const SubmissionHeaderCard: React.FC<Props> = ({ data }) => {
                         </span>
                     </div>
 
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium border ${data.status === 'PENDING' ? 'bg-yellow-50 text-yellow-700 border-yellow-200' :
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium border ${data.status === 'PENDING' ? 'bg-gray-50 text-gray-700 border-gray-200' :
                         data.status === 'COMPLETED' || data.status === 'IN_PROGRESS' ? 'bg-green-50 text-green-700 border-green-200' :
-                            'bg-gray-50 text-gray-600 border-gray-200'
+                            'bg-yellow-50 text-yellow-600 border-yellow-200'
                         }`}>
                         {data.status}
                     </span>

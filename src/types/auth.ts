@@ -1,3 +1,4 @@
+// src/types/auth.ts
 // (Request)
 export interface LoginRequest {
   email: string;
@@ -26,6 +27,7 @@ export interface RegisterRequest {
   phone: string;
   password: string;
   confirmPassword: string;
+  sectionId: number;
 }
 
 export interface RegisterResponse {
