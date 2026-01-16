@@ -121,7 +121,7 @@ export const DashboardPage = () => {
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
-      <div className="mb-8">
+      <div className="mb-8 animate-enter-down">
         <h1 className="text-2xl font-bold text-gray-800">Submission Dashboard</h1>
         <p className="text-gray-500">จัดการและตรวจสอบไฟล์งานของนักศึกษา</p>
       </div>
