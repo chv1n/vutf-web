@@ -22,6 +22,7 @@ export const STUDENT_MENU = [
 export const INSTRUCTOR_MENU = [
     { icon: FiHome, label: 'Home', path: '/instructor/dashboard' },
     { icon: FiUser, label: 'Profile', path: '/instructor/profile' },
+    { icon: FiUsers, label: 'Advised Groups', path: '/instructor/groups' },
     { icon: FiFileText, label: 'Thesis Report', path: '/instructor/report' },
     // { icon: FiCalendar, label: 'Calendar', path: '/instructor/calendar' },
     { icon: FiBell, label: 'Announcements', path: '/instructor/announcements' },

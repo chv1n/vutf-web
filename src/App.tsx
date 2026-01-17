@@ -26,6 +26,9 @@ import { AnnouncementsPage } from './pages/announcements/AnnouncementsPage';
 import { SetupProfilePage } from './pages/register/SetupProfilePage';
 import { ThesisTopicPage } from './pages/admin/ThesisTopicPage';
 import { SubmissionDetailPage } from './pages/instructor/SubmissionDetailPage';
+import { StudentProfilePage } from './pages/student/StudentProfilePage';
+import { InstructorProfilePage } from './pages/instructor/InstructorProfilePage';
+import { MyAdvisedGroupsPage } from './pages/instructor/MyAdvisedGroupsPage';
 
 function App() {
   return (
@@ -63,7 +66,7 @@ function App() {
               <Route path="groups/:groupId" element={<GroupDetailPage />} />
               <Route path="groups/:groupId/submissions" element={<GroupSubmissionPage />} />
               <Route path="inspections" element={<InspectionRoundPage />} />
-              <Route path="profile" element={<div>Profile Page</div>} />
+              <Route path="profile" element={<StudentProfilePage />} />
               <Route path="report" element={<ThesisReportPage />} />
               <Route path="announcements" element={<AnnouncementsPage />} />
               <Route path="settings" element={<div>Setting Page</div>} />
@@ -75,6 +78,8 @@ function App() {
             <Route path="/instructor" element={<MainLayout />}>
               <Route index element={<Navigate to="/instructor/dashboard" replace />} />
               <Route path="dashboard" element={<InstructorDashboard />} />
+              <Route path="profile" element={<InstructorProfilePage />} />
+              <Route path="groups" element={<MyAdvisedGroupsPage />} />
               <Route path="submission/:id" element={<SubmissionDetailPage />} />
               <Route path="announcements" element={<AnnouncementsPage />} />
             </Route>

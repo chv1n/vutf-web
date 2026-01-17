@@ -82,7 +82,7 @@ export const SubmissionFilters: React.FC<Props> = ({ filters, onChange }) => {
         <div className="flex flex-col gap-6 mb-8">
 
             {/* Status Tabs (Modern Pills Style) */}
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3 animate-enter-up">
                 {statusTabs.map((tab) => {
                     const isActive = filters.status === tab.value;
 
@@ -112,7 +112,7 @@ export const SubmissionFilters: React.FC<Props> = ({ filters, onChange }) => {
             </div>
 
             {/* Filter Card */}
-            <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col lg:flex-row gap-5 items-start lg:items-center justify-between transition-all hover:shadow-md">
+            <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col lg:flex-row gap-5 items-start lg:items-center justify-between transition-all hover:shadow-md animate-enter-down">
 
                 {/* Search Section */}
                 <div className="w-full lg:w-[300px] xl:w-[400px]">
