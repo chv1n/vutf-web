@@ -52,8 +52,8 @@ const GroupDetailPage: React.FC = () => {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <FiLoader className="w-10 h-10 text-blue-500 animate-spin" />
+            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center transition-colors">
+                <FiLoader className="w-10 h-10 text-blue-500 dark:text-blue-400 animate-spin" />
             </div>
         );
     }
@@ -67,21 +67,21 @@ const GroupDetailPage: React.FC = () => {
     ];
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900/30 transition-colors">
             <div className="max-w-5xl mx-auto px-4 py-8">
                 <button
                     onClick={() => navigate(-1)}
-                    className="flex items-center gap-2 text-gray-500 hover:text-gray-900 mb-6 transition-colors"
+                    className="flex items-center gap-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white mb-6 transition-colors"
                 >
                     <FiArrowLeft /> ย้อนกลับ
                 </button>
 
                 <div className="flex items-center justify-between mb-8">
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-900">
+                        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                             {group.thesis.thesis_name_th || 'ไม่มีชื่อโครงงาน'}
                         </h1>
-                        <p className="text-gray-500 mt-1">{group.thesis.thesis_name_en || '-'}</p>
+                        <p className="text-gray-500 dark:text-gray-400 mt-1">{group.thesis.thesis_name_en || '-'}</p>
                     </div>
                 </div>
 
@@ -90,17 +90,17 @@ const GroupDetailPage: React.FC = () => {
                     <motion.div
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="mb-6 p-4 bg-red-50 border border-red-200 rounded-2xl flex items-start gap-3 shadow-sm"
+                        className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl flex items-start gap-3 shadow-sm transition-colors"
                     >
                         <div className="mt-0.5">
-                            <FiAlertCircle className="w-5 h-5 text-red-500" />
+                            <FiAlertCircle className="w-5 h-5 text-red-500 dark:text-red-400" />
                         </div>
                         <div>
-                            <h3 className="text-sm font-bold text-red-800">กลุ่มของคุณถูกปฏิเสธการอนุมัติ</h3>
-                            <p className="text-sm text-red-700 mt-1">
+                            <h3 className="text-sm font-bold text-red-800 dark:text-red-200">กลุ่มของคุณถูกปฏิเสธการอนุมัติ</h3>
+                            <p className="text-sm text-red-700 dark:text-red-300 mt-1">
                                 <span className="font-semibold">เหตุผล:</span> {group.rejection_reason}
                             </p>
-                            <p className="text-sm text-red-600 mt-2 italic">
+                            <p className="text-sm text-red-600 dark:text-red-400 mt-2 italic">
                                 * กรุณาแก้ไขข้อมูลตามเหตุผลที่แจ้ง และกดบันทึกการเปลี่ยนแปลงเพื่อส่งให้แอดมินตรวจสอบอีกครั้ง
                             </p>
                         </div>
@@ -108,7 +108,7 @@ const GroupDetailPage: React.FC = () => {
                 )}
 
                 {/* Tabs */}
-                <div className="flex bg-white p-1.5 rounded-xl shadow-sm border border-gray-100 mb-6 w-fit max-w-full overflow-x-auto">
+                <div className="flex bg-white dark:bg-gray-800 p-1.5 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 mb-6 w-fit max-w-full overflow-x-auto transition-colors">
                     {tabs.map((tab) => {
                         const Icon = tab.icon;
                         const isActive = activeTab === tab.key;
@@ -117,8 +117,8 @@ const GroupDetailPage: React.FC = () => {
                                 key={tab.key}
                                 onClick={() => setActiveTab(tab.key as TabType)}
                                 className={`flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 rounded-lg text-sm font-medium transition-all shrink-0 ${isActive
-                                        ? 'bg-blue-50 text-blue-600 shadow-sm'
-                                        : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
+                                    ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 shadow-sm'
+                                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'
                                     }`}
                                 title={tab.label}
                             >
@@ -150,25 +150,25 @@ const GroupDetailPage: React.FC = () => {
                                     onUpdate={fetchGroup} // In real app use fetchGroup. For now mock: () => handleUpdateMock(...)
                                 />
                             ) : (
-                                <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                                    <h2 className="text-lg font-bold text-gray-900 mb-4">ข้อมูลวิทยานิพนธ์</h2>
+                                <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 transition-colors">
+                                    <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">ข้อมูลวิทยานิพนธ์</h2>
                                     <div className="space-y-4">
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-500">ชื่อภาษาไทย</label>
-                                            <p className="text-gray-900">{group.thesis.thesis_name_th}</p>
+                                            <label className="block text-sm font-medium text-gray-500 dark:text-gray-400">ชื่อภาษาไทย</label>
+                                            <p className="text-gray-900 dark:text-white">{group.thesis.thesis_name_th}</p>
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-500">ชื่อภาษาอังกฤษ</label>
-                                            <p className="text-gray-900">{group.thesis.thesis_name_en}</p>
+                                            <label className="block text-sm font-medium text-gray-500 dark:text-gray-400">ชื่อภาษาอังกฤษ</label>
+                                            <p className="text-gray-900 dark:text-white">{group.thesis.thesis_name_en}</p>
                                         </div>
                                         <div className="flex gap-8">
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-500">รหัสวิทยานิพนธ์</label>
-                                                <p className="text-gray-900">{group.thesis.thesis_code}</p>
+                                                <label className="block text-sm font-medium text-gray-500 dark:text-gray-400">รหัสวิทยานิพนธ์</label>
+                                                <p className="text-gray-900 dark:text-white">{group.thesis.thesis_code}</p>
                                             </div>
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-500">ปีการศึกษา</label>
-                                                <p className="text-gray-900">{group.thesis.graduation_year || '-'}</p>
+                                                <label className="block text-sm font-medium text-gray-500 dark:text-gray-400">ปีการศึกษา</label>
+                                                <p className="text-gray-900 dark:text-white">{group.thesis.graduation_year || '-'}</p>
                                             </div>
                                         </div>
                                     </div>

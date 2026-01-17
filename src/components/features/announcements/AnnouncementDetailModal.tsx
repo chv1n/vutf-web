@@ -36,11 +36,11 @@ export const AnnouncementDetailModal = ({ isOpen, onClose, data }: Props) => {
       />
 
       {/* 2. Modal Content */}
-      <div className="relative w-full max-w-3xl bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-fade-in-up">
+      <div className="relative w-full max-w-3xl bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-fade-in-up transition-colors">
         
         {/* --- Image Section --- */}
         {data.imgBase64 && (
-          <div className="relative w-full bg-gray-100 flex justify-center border-b border-gray-100">
+          <div className="relative w-full bg-gray-100 dark:bg-gray-900 flex justify-center border-b border-gray-100 dark:border-gray-700">
             <img 
               src={data.imgBase64} 
               alt={data.title} 
@@ -52,46 +52,46 @@ export const AnnouncementDetailModal = ({ isOpen, onClose, data }: Props) => {
         {/* --- Floating Close Button --- */}
         <button 
           onClick={onClose} 
-          className="absolute top-4 right-4 p-2 rounded-full bg-black/20 hover:bg-black/40 text-white backdrop-blur-md transition-all z-10"
+          className="absolute top-4 right-4 p-2 rounded-full bg-black/20 hover:bg-black/40 dark:bg-black/40 dark:hover:bg-black/60 text-white backdrop-blur-md transition-all z-10"
         >
           <FiX size={20} />
         </button>
 
         {/* --- Content Section --- */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-6 sm:p-8">
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-6 sm:p-8 bg-white dark:bg-gray-800">
           
           {/* Header Data */}
           <div className="mb-6">
-            <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 mb-3">
-               <span className="bg-blue-50 text-blue-700 px-2.5 py-0.5 rounded-md font-semibold text-xs border border-blue-100">
+            <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 dark:text-gray-400 mb-3">
+               <span className="bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 px-2.5 py-0.5 rounded-md font-semibold text-xs border border-blue-100 dark:border-blue-800">
                  ANNOUNCEMENT
                </span>
                <span className="flex items-center gap-1.5">
-                 <FiCalendar className="text-gray-400" /> {date}
+                 <FiCalendar className="text-gray-400 dark:text-gray-500" /> {date}
                </span>
                <span className="flex items-center gap-1.5">
-                 <FiClock className="text-gray-400" /> {time}
+                 <FiClock className="text-gray-400 dark:text-gray-500" /> {time}
                </span>
             </div>
             
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-tight">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white leading-tight">
               {data.title}
             </h2>
           </div>
 
-          <div className="h-px w-full bg-gray-100 mb-6" />
+          <div className="h-px w-full bg-gray-100 dark:bg-gray-700 mb-6" />
 
           {/* Description */}
-          <div className="prose prose-blue max-w-none text-gray-600 leading-relaxed whitespace-pre-wrap">
+          <div className="prose prose-blue dark:prose-invert max-w-none text-gray-600 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
             {data.description}
           </div>
         </div>
 
         {/* --- Footer --- */}
-        <div className="px-6 py-4 border-t border-gray-50 bg-gray-50 flex justify-end">
+        <div className="px-6 py-4 border-t border-gray-50 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex justify-end">
           <button
             onClick={onClose}
-            className="px-6 py-2 bg-white border border-gray-200 text-gray-700 font-medium rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm active:scale-95"
+            className="px-6 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 font-medium rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-500 transition-all shadow-sm active:scale-95"
           >
             Close
           </button>

@@ -28,10 +28,8 @@ import {
 
 /**
  * GroupSubmissionPage - หน้าส่งไฟล์ Submission
- * 
- * Single Responsibility: จัดการ UI สำหรับส่งไฟล์ตาม Inspection Round
- * 
- * Features:
+ * * Single Responsibility: จัดการ UI สำหรับส่งไฟล์ตาม Inspection Round
+ * * Features:
  * - แสดงรอบตรวจที่เปิดอยู่ (Active Inspection Round)
  * - ปุ่มส่งไฟล์ (แสดงเฉพาะ OWNER)
  * - แสดง submission history
@@ -166,8 +164,8 @@ const GroupSubmissionPage: React.FC = () => {
     // Loading state
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <FiLoader className="w-10 h-10 text-blue-500 animate-spin" />
+            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center transition-colors">
+                <FiLoader className="w-10 h-10 text-blue-500 dark:text-blue-400 animate-spin" />
             </div>
         );
     }
@@ -177,23 +175,23 @@ const GroupSubmissionPage: React.FC = () => {
     const submissionStatus = getSubmissionStatusMessage();
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900/30 transition-colors">
             <div className="max-w-4xl mx-auto px-4 py-8">
                 {/* Back Button */}
                 <button
                     onClick={() => navigate(-1)}
-                    className="flex items-center gap-2 text-gray-500 hover:text-gray-900 mb-6 transition-colors"
+                    className="flex items-center gap-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white mb-6 transition-colors"
                 >
                     <FiArrowLeft /> ย้อนกลับ
                 </button>
 
                 {/* Header */}
                 <div className="mb-8">
-                    <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
-                        <FiUploadCloud className="w-8 h-8 text-blue-500" />
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+                        <FiUploadCloud className="w-8 h-8 text-blue-500 dark:text-blue-400" />
                         ส่งไฟล์ตรวจความก้าวหน้า
                     </h1>
-                    <p className="text-gray-500 mt-2">
+                    <p className="text-gray-500 dark:text-gray-400 mt-2">
                         โครงงาน: {group.thesis.thesis_name_th || 'ไม่มีชื่อ'}
                     </p>
                 </div>
@@ -203,27 +201,27 @@ const GroupSubmissionPage: React.FC = () => {
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-6"
+                        className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 mb-6 transition-colors"
                     >
                         <div className="flex items-start gap-4">
-                            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-200 flex-shrink-0">
+                            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-200 dark:shadow-none flex-shrink-0">
                                 <FiClipboard className="w-6 h-6 text-white" />
                             </div>
                             <div className="flex-1">
-                                <h2 className="text-lg font-bold text-gray-900">
+                                <h2 className="text-lg font-bold text-gray-900 dark:text-white">
                                     {activeRound.title}
                                 </h2>
-                                <p className="text-sm text-gray-500 mt-1">
+                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                                     {activeRound.description || `รอบที่ ${activeRound.roundNumber} - ${activeRound.term}/${activeRound.academicYear}`}
                                 </p>
 
                                 <div className="flex flex-wrap gap-4 mt-4">
-                                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                                        <FiCalendar className="w-4 h-4 text-gray-400" />
+                                    <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                                        <FiCalendar className="w-4 h-4 text-gray-400 dark:text-gray-500" />
                                         <span>เริ่ม: {formatDate(activeRound.startDate)}</span>
                                     </div>
-                                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                                        <FiCalendar className="w-4 h-4 text-gray-400" />
+                                    <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                                        <FiCalendar className="w-4 h-4 text-gray-400 dark:text-gray-500" />
                                         <span>สิ้นสุด: {formatDate(activeRound.endDate)}</span>
                                     </div>
                                 </div>
@@ -233,8 +231,8 @@ const GroupSubmissionPage: React.FC = () => {
                                     <span className={`
                     inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
                     ${activeRound.status === 'OPEN' && activeRound.isActive
-                                            ? 'bg-emerald-100 text-emerald-700'
-                                            : 'bg-gray-100 text-gray-600'
+                                            ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400'
+                                            : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
                                         }
                   `}>
                                         {activeRound.status === 'OPEN' && activeRound.isActive ? 'เปิดรับไฟล์' : 'ปิดรับไฟล์'}
@@ -250,10 +248,10 @@ const GroupSubmissionPage: React.FC = () => {
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="flex items-center gap-3 px-5 py-4 bg-amber-50 border border-amber-100 rounded-xl mb-6"
+                        className="flex items-center gap-3 px-5 py-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800 rounded-xl mb-6 transition-colors"
                     >
-                        <FiAlertCircle className="w-5 h-5 text-amber-500 flex-shrink-0" />
-                        <p className="text-amber-700">{roundError}</p>
+                        <FiAlertCircle className="w-5 h-5 text-amber-500 dark:text-amber-400 flex-shrink-0" />
+                        <p className="text-amber-700 dark:text-amber-300">{roundError}</p>
                     </motion.div>
                 )}
 
@@ -263,21 +261,21 @@ const GroupSubmissionPage: React.FC = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         className={`
-              flex items-center gap-3 px-5 py-4 rounded-xl mb-6
-              ${submissionStatus.type === 'info' ? 'bg-blue-50 border border-blue-100' : ''}
-              ${submissionStatus.type === 'warning' ? 'bg-amber-50 border border-amber-100' : ''}
-              ${submissionStatus.type === 'error' ? 'bg-red-50 border border-red-100' : ''}
+              flex items-center gap-3 px-5 py-4 rounded-xl mb-6 transition-colors
+              ${submissionStatus.type === 'info' ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800' : ''}
+              ${submissionStatus.type === 'warning' ? 'bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800' : ''}
+              ${submissionStatus.type === 'error' ? 'bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800' : ''}
             `}
                     >
                         <FiAlertCircle className={`w-5 h-5 flex-shrink-0
-              ${submissionStatus.type === 'info' ? 'text-blue-500' : ''}
-              ${submissionStatus.type === 'warning' ? 'text-amber-500' : ''}
-              ${submissionStatus.type === 'error' ? 'text-red-500' : ''}
+              ${submissionStatus.type === 'info' ? 'text-blue-500 dark:text-blue-400' : ''}
+              ${submissionStatus.type === 'warning' ? 'text-amber-500 dark:text-amber-400' : ''}
+              ${submissionStatus.type === 'error' ? 'text-red-500 dark:text-red-400' : ''}
             `} />
                         <p className={`
-              ${submissionStatus.type === 'info' ? 'text-blue-700' : ''}
-              ${submissionStatus.type === 'warning' ? 'text-amber-700' : ''}
-              ${submissionStatus.type === 'error' ? 'text-red-700' : ''}
+              ${submissionStatus.type === 'info' ? 'text-blue-700 dark:text-blue-300' : ''}
+              ${submissionStatus.type === 'warning' ? 'text-amber-700 dark:text-amber-300' : ''}
+              ${submissionStatus.type === 'error' ? 'text-red-700 dark:text-red-300' : ''}
             `}>{submissionStatus.message}</p>
                     </motion.div>
                 )}
@@ -288,10 +286,10 @@ const GroupSubmissionPage: React.FC = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 }}
-                        className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-6"
+                        className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 mb-6 transition-colors"
                     >
-                        <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2 mb-4">
-                            <FiUploadCloud className="w-5 h-5 text-blue-500" />
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2 mb-4">
+                            <FiUploadCloud className="w-5 h-5 text-blue-500 dark:text-blue-400" />
                             ส่งไฟล์
                         </h3>
                         <SubmissionUploadForm
@@ -307,10 +305,10 @@ const GroupSubmissionPage: React.FC = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
-                    className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100"
+                    className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 transition-colors"
                 >
-                    <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2 mb-4">
-                        <FiFileText className="w-5 h-5 text-emerald-500" />
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2 mb-4">
+                        <FiFileText className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
                         ประวัติการส่งไฟล์
                     </h3>
                     <SubmissionList

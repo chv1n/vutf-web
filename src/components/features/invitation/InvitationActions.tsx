@@ -20,10 +20,8 @@ interface InvitationActionsProps {
 
 /**
  * InvitationActions - ปุ่ม Accept/Reject คำเชิญ
- * 
- * Single Responsibility: จัดการ UI และ logic สำหรับ accept/reject
- * 
- * Features:
+ * * Single Responsibility: จัดการ UI และ logic สำหรับ accept/reject
+ * * Features:
  * - ปุ่ม "ตอบรับ" และ "ปฏิเสธ"
  * - Confirm dialog ก่อนดำเนินการ
  * - Loading state
@@ -72,6 +70,11 @@ export const InvitationActions: React.FC<InvitationActionsProps> = ({
             cancelButtonColor: '#6b7280',
             confirmButtonText: 'ตอบรับ',
             cancelButtonText: 'ยกเลิก',
+            customClass: {
+                popup: 'dark:bg-gray-800 dark:text-white',
+                title: 'dark:text-white',
+                htmlContainer: 'dark:text-gray-300'
+            }
         });
 
         if (!result.isConfirmed) return;
@@ -88,6 +91,11 @@ export const InvitationActions: React.FC<InvitationActionsProps> = ({
                 timer: 2000,
                 timerProgressBar: true,
                 confirmButtonColor: '#10b981',
+                customClass: {
+                    popup: 'dark:bg-gray-800 dark:text-white',
+                    title: 'dark:text-white',
+                    htmlContainer: 'dark:text-gray-300'
+                }
             });
 
             onSuccess?.('accept');
@@ -100,6 +108,11 @@ export const InvitationActions: React.FC<InvitationActionsProps> = ({
                 text: err.message,
                 confirmButtonText: 'รับทราบ',
                 confirmButtonColor: '#3085d6',
+                customClass: {
+                    popup: 'dark:bg-gray-800 dark:text-white',
+                    title: 'dark:text-white',
+                    htmlContainer: 'dark:text-gray-300'
+                }
             });
 
             onError?.(err);
@@ -121,6 +134,11 @@ export const InvitationActions: React.FC<InvitationActionsProps> = ({
             cancelButtonColor: '#6b7280',
             confirmButtonText: 'ปฏิเสธ',
             cancelButtonText: 'ยกเลิก',
+            customClass: {
+                popup: 'dark:bg-gray-800 dark:text-white',
+                title: 'dark:text-white',
+                htmlContainer: 'dark:text-gray-300'
+            }
         });
 
         if (!result.isConfirmed) return;
@@ -137,6 +155,11 @@ export const InvitationActions: React.FC<InvitationActionsProps> = ({
                 timer: 2000,
                 timerProgressBar: true,
                 confirmButtonColor: '#10b981',
+                customClass: {
+                    popup: 'dark:bg-gray-800 dark:text-white',
+                    title: 'dark:text-white',
+                    htmlContainer: 'dark:text-gray-300'
+                }
             });
 
             onSuccess?.('reject');
@@ -148,6 +171,11 @@ export const InvitationActions: React.FC<InvitationActionsProps> = ({
                 title: 'เกิดข้อผิดพลาด',
                 text: err.message,
                 confirmButtonColor: '#ef4444',
+                customClass: {
+                    popup: 'dark:bg-gray-800 dark:text-white',
+                    title: 'dark:text-white',
+                    htmlContainer: 'dark:text-gray-300'
+                }
             });
 
             onError?.(err);
@@ -171,8 +199,8 @@ export const InvitationActions: React.FC<InvitationActionsProps> = ({
           w-full sm:w-auto flex items-center justify-center gap-2 ${sizing.padding} ${sizing.fontSize}
           font-medium rounded-xl transition-all duration-200
           ${isLoading
-                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                        : 'bg-emerald-500 text-white hover:bg-emerald-600 shadow-lg shadow-emerald-200 hover:shadow-xl'
+                        ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                        : 'bg-emerald-500 dark:bg-emerald-600 text-white hover:bg-emerald-600 dark:hover:bg-emerald-500 shadow-lg shadow-emerald-200 dark:shadow-none hover:shadow-xl'
                     }
         `}
             >
@@ -195,8 +223,8 @@ export const InvitationActions: React.FC<InvitationActionsProps> = ({
           w-full sm:w-auto flex items-center justify-center gap-2 ${sizing.padding} ${sizing.fontSize}
           font-medium rounded-xl transition-all duration-200
           ${isLoading
-                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                        : 'bg-white text-red-500 border border-red-200 hover:bg-red-50 hover:border-red-300'
+                        ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                        : 'bg-white dark:bg-gray-800 text-red-500 dark:text-red-400 border border-red-200 dark:border-red-900/50 hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-300 dark:hover:border-red-800'
                     }
         `}
             >

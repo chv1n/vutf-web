@@ -16,12 +16,12 @@ export const AdvisedGroupDetail: React.FC<AdvisedGroupDetailProps> = ({ data }) 
     switch (status) {
       case 'PASSED':
       case 'APPROVED':
-        return <span className="px-3 py-1 bg-green-100 text-green-700 border border-green-200 rounded-full text-sm font-bold flex items-center gap-1"><FiCheckCircle /> สอบผ่าน</span>;
+        return <span className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800 rounded-full text-sm font-bold flex items-center gap-1"><FiCheckCircle /> สอบผ่าน</span>;
       case 'FAILED':
-        return <span className="px-3 py-1 bg-red-100 text-red-700 border border-red-200 rounded-full text-sm font-bold flex items-center gap-1"><FiAlertCircle /> ไม่ผ่าน</span>;
+        return <span className="px-3 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800 rounded-full text-sm font-bold flex items-center gap-1"><FiAlertCircle /> ไม่ผ่าน</span>;
       case 'IN_PROGRESS':
       default:
-        return <span className="px-3 py-1 bg-blue-100 text-blue-700 border border-blue-200 rounded-full text-sm font-bold flex items-center gap-1"><FiActivity /> กำลังดำเนินการ</span>;
+        return <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800 rounded-full text-sm font-bold flex items-center gap-1"><FiActivity /> กำลังดำเนินการ</span>;
     }
   };
 
@@ -29,18 +29,18 @@ export const AdvisedGroupDetail: React.FC<AdvisedGroupDetailProps> = ({ data }) 
   const getSubmissionStatusBadge = (status: string) => {
     switch (status) {
       case 'WAITING_FOR_SUBMISSION':
-        return <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded-md text-xs font-medium">ยังไม่ส่ง</span>;
+        return <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md text-xs font-medium">ยังไม่ส่ง</span>;
       case 'PENDING':
-        return <span className="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-md text-xs font-medium">รอตรวจสอบ</span>;
+        return <span className="px-2 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 rounded-md text-xs font-medium">รอตรวจสอบ</span>;
       case 'IN_PROGRESS':
-        return <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-md text-xs font-medium">กำลังตรวจ</span>;
+        return <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-md text-xs font-medium">กำลังตรวจ</span>;
       case 'COMPLETED':
-        return <span className="px-2 py-1 bg-green-100 text-green-700 rounded-md text-xs font-medium flex items-center gap-1 w-fit"><FiCheckCircle /> ตรวจแล้ว</span>;
+        return <span className="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-md text-xs font-medium flex items-center gap-1 w-fit"><FiCheckCircle /> ตรวจแล้ว</span>;
       case 'OVERDUE':
-        return <span className="px-2 py-1 bg-red-100 text-red-700 rounded-md text-xs font-medium flex items-center gap-1 w-fit"><FiAlertCircle /> เลยกำหนด</span>;
+        return <span className="px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-md text-xs font-medium flex items-center gap-1 w-fit"><FiAlertCircle /> เลยกำหนด</span>;
       case 'MISSING':
       default:
-        return <span className="px-2 py-1 bg-gray-100 text-gray-500 rounded-md text-xs font-medium">ยังไม่ส่ง</span>;
+        return <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-md text-xs font-medium">ยังไม่ส่ง</span>;
     }
   };
 
@@ -53,10 +53,10 @@ export const AdvisedGroupDetail: React.FC<AdvisedGroupDetailProps> = ({ data }) 
     <div className="space-y-6 animate-fade-in-up">
 
       {/* 1. ส่วนข้อมูลทั่วไป (Card บน) */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-        <div className="bg-gradient-to-r from-gray-50 to-white px-6 py-4 border-b border-gray-100 flex justify-between items-center">
-          <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-            <FiBook className="text-blue-600" /> ข้อมูลกลุ่มปริญญานิพนธ์
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-colors">
+        <div className="bg-gradient-to-r from-gray-50 to-white dark:from-gray-700/50 dark:to-gray-800 px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
+          <h2 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
+            <FiBook className="text-blue-600 dark:text-blue-400" /> ข้อมูลกลุ่มปริญญานิพนธ์
           </h2>
           {/* แสดงสถานะโครงงานตรงนี้ (Thesis Status) */}
           <div>
@@ -67,26 +67,26 @@ export const AdvisedGroupDetail: React.FC<AdvisedGroupDetailProps> = ({ data }) 
         <div className="p-6 grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
             <div>
-              <label className="text-sm text-gray-400 font-medium uppercase tracking-wide">ชื่อโครงงาน</label>
-              <p className="text-xl font-bold text-gray-800 mt-1">{thesisName}</p>
+              <label className="text-sm text-gray-400 dark:text-gray-500 font-medium uppercase tracking-wide">ชื่อโครงงาน</label>
+              <p className="text-xl font-bold text-gray-800 dark:text-white mt-1">{thesisName}</p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-blue-50/50 p-4 rounded-xl border border-blue-100">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-blue-50/50 dark:bg-blue-900/10 p-4 rounded-xl border border-blue-100 dark:border-blue-900/30 transition-colors">
               <div>
-                <label className="flex items-center gap-1 text-sm text-blue-600 mb-1"><FiHash /> รหัสโครงงาน</label>
-                <p className="font-semibold text-gray-800">{thesisCode}</p>
+                <label className="flex items-center gap-1 text-sm text-blue-600 dark:text-blue-400 mb-1"><FiHash /> รหัสโครงงาน</label>
+                <p className="font-semibold text-gray-800 dark:text-gray-200">{thesisCode}</p>
               </div>
               <div>
-                <label className="flex items-center gap-1 text-sm text-blue-600 mb-1"><FiClock /> ปีการศึกษา</label>
-                <p className="font-semibold text-gray-800">
+                <label className="flex items-center gap-1 text-sm text-blue-600 dark:text-blue-400 mb-1"><FiClock /> ปีการศึกษา</label>
+                <p className="font-semibold text-gray-800 dark:text-gray-200">
                   {academicYear ? `${academicYear}/${term}` : '-'}
                 </p>
               </div>
               <div>
-                <label className="flex items-center gap-1 text-sm text-blue-600 mb-1">
+                <label className="flex items-center gap-1 text-sm text-blue-600 dark:text-blue-400 mb-1">
                   <FiTag /> ประเภทโครงงาน
                 </label>
-                <p className={`font-semibold ${courseType === 'PROJECT' ? 'text-gray-700' : 'text-gray-700'
+                <p className={`font-semibold ${courseType === 'PROJECT' ? 'text-gray-700 dark:text-gray-300' : 'text-gray-700 dark:text-gray-300'
                   }`}>
                   {courseType}
                 </p>
@@ -95,15 +95,15 @@ export const AdvisedGroupDetail: React.FC<AdvisedGroupDetailProps> = ({ data }) 
           </div>
 
           <div className="lg:col-span-1">
-            <div className="bg-gray-50 rounded-xl p-5 h-full border border-gray-100">
-              <h3 className="text-sm font-bold text-gray-700 flex items-center gap-2 mb-4 uppercase tracking-wider">
+            <div className="bg-gray-50 dark:bg-gray-700/30 rounded-xl p-5 h-full border border-gray-100 dark:border-gray-700 transition-colors">
+              <h3 className="text-sm font-bold text-gray-700 dark:text-gray-300 flex items-center gap-2 mb-4 uppercase tracking-wider">
                 <FiUsers /> รายชื่อสมาชิก
               </h3>
               <ul className="space-y-3">
                 {students.map((student, idx) => (
-                  <li key={idx} className="bg-white p-3 rounded-lg shadow-sm border border-gray-100">
-                    <p className="text-sm font-bold text-gray-800">{student.name}</p>
-                    <p className="text-xs text-gray-500 font-mono">{student.code}</p>
+                  <li key={idx} className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow-sm border border-gray-100 dark:border-gray-600 transition-colors">
+                    <p className="text-sm font-bold text-gray-800 dark:text-white">{student.name}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 font-mono">{student.code}</p>
                   </li>
                 ))}
               </ul>
@@ -113,17 +113,17 @@ export const AdvisedGroupDetail: React.FC<AdvisedGroupDetailProps> = ({ data }) 
       </div>
 
       {/* 2. ส่วนตารางติดตามงาน (Card ล่าง) */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
-          <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-            <FiFileText className="text-blue-600" /> ประวัติการส่งงาน (Submission Progress)
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-colors">
+        <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-700/50">
+          <h3 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
+            <FiFileText className="text-blue-600 dark:text-blue-400" /> ประวัติการส่งงาน (Submission Progress)
           </h3>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-gray-50 text-gray-500 text-sm border-b border-gray-100">
+              <tr className="bg-gray-50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 text-sm border-b border-gray-100 dark:border-gray-700">
                 <th className="px-6 py-4 font-medium w-16 text-center">#</th>
                 <th className="px-6 py-4 font-medium">รอบการตรวจ</th>
                 <th className="px-6 py-4 font-medium">ช่วงเวลาที่กำหนด</th>
@@ -131,21 +131,21 @@ export const AdvisedGroupDetail: React.FC<AdvisedGroupDetailProps> = ({ data }) 
                 <th className="px-6 py-4 font-medium">ไฟล์แนบ</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody className="divide-y divide-gray-50 dark:divide-gray-700">
               {progress.map((item) => (
-                <tr key={item.roundId} className="hover:bg-blue-50/30 transition-colors">
-                  <td className="px-6 py-4 text-center font-medium text-gray-400">
+                <tr key={item.roundId} className="hover:bg-blue-50/30 dark:hover:bg-blue-900/10 transition-colors">
+                  <td className="px-6 py-4 text-center font-medium text-gray-400 dark:text-gray-500">
                     {item.roundNumber}
                   </td>
                   <td className="px-6 py-4">
-                    <p className="font-semibold text-gray-800">{item.roundTitle}</p>
+                    <p className="font-semibold text-gray-800 dark:text-white">{item.roundTitle}</p>
                     {item.submittedAt && (
-                      <p className="text-xs text-green-600 mt-1">
+                      <p className="text-xs text-green-600 dark:text-green-400 mt-1">
                         ส่งเมื่อ: {formatDate(item.submittedAt)}
                       </p>
                     )}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-500">
+                  <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
                     {formatDate(item.startDate)} - {formatDate(item.endDate)}
                   </td>
                   <td className="px-6 py-4">
@@ -158,9 +158,9 @@ export const AdvisedGroupDetail: React.FC<AdvisedGroupDetailProps> = ({ data }) 
                         href={item.fileUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="flex items-center gap-2 text-blue-600 hover:text-blue-800 hover:underline transition-colors group"
+                        className="flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline transition-colors group"
                       >
-                        <div className="p-1.5 bg-red-50 rounded text-red-500 group-hover:bg-red-100">
+                        <div className="p-1.5 bg-red-50 dark:bg-red-900/20 rounded text-red-500 dark:text-red-400 group-hover:bg-red-100 dark:group-hover:bg-red-900/40 transition-colors">
                           <FiFileText />
                         </div>
                         <span className="text-sm max-w-[150px] truncate" title={item.fileName || 'Download'}>
@@ -169,7 +169,7 @@ export const AdvisedGroupDetail: React.FC<AdvisedGroupDetailProps> = ({ data }) 
                         <FiDownload className="opacity-0 group-hover:opacity-100 transition-opacity" />
                       </a>
                     ) : (
-                      <span className="text-gray-300 text-sm">-</span>
+                      <span className="text-gray-300 dark:text-gray-600 text-sm">-</span>
                     )}
                   </td>
                 </tr>
@@ -178,7 +178,7 @@ export const AdvisedGroupDetail: React.FC<AdvisedGroupDetailProps> = ({ data }) 
           </table>
 
           {progress.length === 0 && (
-            <div className="p-8 text-center text-gray-400">
+            <div className="p-8 text-center text-gray-400 dark:text-gray-500">
               ไม่พบรอบการตรวจที่เกี่ยวข้อง
             </div>
           )}

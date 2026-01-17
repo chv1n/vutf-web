@@ -17,7 +17,7 @@ import { useUserManagement } from '../../hooks/admin/useUserManagement';
 import { useSectionManagement } from '../../hooks/admin/useSectionManagement';
 import { useDebounce } from '../../hooks/useDebounce';
 
-// Services (เรียกใช้เพื่อดึงข้อมูลลง Dropdown)
+// Services
 import { classSectionService } from '../../services/class-section.service';
 
 // Types
@@ -32,7 +32,7 @@ export const UserManagementPage = () => {
   const limit = 10;
   const debouncedSearch = useDebounce(searchTerm, 500);
 
-  // --- Filter State (เพิ่มใหม่) ---
+  // --- Filter State ---
   const [selectedYear, setSelectedYear] = useState('');
   const [selectedTerm, setSelectedTerm] = useState('');
   const [selectedSectionId, setSelectedSectionId] = useState('');
@@ -49,12 +49,22 @@ export const UserManagementPage = () => {
   const userMgr = useUserManagement();
   const sectionMgr = useSectionManagement();
 
+  const currentMeta = activeTab === 'section' ? sectionMgr.meta : userMgr.meta;
+
+  const paginationMeta = {
+    page: page,
+    limit: limit,
+    // แปลงจาก totalItems (API เก่า) -> total (Component ใหม่)
+    total: currentMeta?.totalItems || 0,
+    // แปลงจาก totalPages (API เก่า) -> lastPage (Component ใหม่)
+    lastPage: currentMeta?.totalPages || 1
+  };
+
   // --- Effects ---
   useEffect(() => {
-    setPage(1); // Reset page when tab or search changes
+    setPage(1);
   }, [activeTab, debouncedSearch, selectedYear, selectedTerm, selectedSectionId]);
 
-  // Effect: โหลดรายชื่อ Section มาใส่ Dropdown (ทำครั้งเดียวตอนโหลดหน้า)
   useEffect(() => {
     const loadSectionsForDropdown = async () => {
       try {
@@ -67,7 +77,6 @@ export const UserManagementPage = () => {
     loadSectionsForDropdown();
   }, []);
 
-  // Effect: Fetch Data หลัก
   useEffect(() => {
     if (activeTab === 'section') {
       sectionMgr.fetchSections(page, limit, debouncedSearch, {
@@ -108,41 +117,41 @@ export const UserManagementPage = () => {
       {/* 1. Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 pt-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">จัดการข้อมูลระบบ</h1>
-          <p className="text-gray-500 text-sm mt-1">จัดการข้อมูล นักศึกษา อาจารย์ และกลุ่มเรียน</p>
+          <h1 className="text-2xl font-bold text-gray-800 dark:text-white">จัดการข้อมูลระบบ</h1>
+          <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">จัดการข้อมูล นักศึกษา อาจารย์ และกลุ่มเรียน</p>
         </div>
         <button
           onClick={handleAddNew}
-          className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all shadow-lg font-medium cursor-pointer"
+          className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all shadow-lg font-medium cursor-pointer dark:bg-blue-600 dark:hover:bg-blue-500"
         >
           <FiPlus size={20} />
           {activeTab === 'section' ? 'เพิ่มกลุ่มเรียน' : 'เพิ่มผู้ใช้งาน'}
         </button>
       </div>
 
-      {/* 2. Controls Section (Search & Filters on Top, Tabs on Bottom) */}
+      {/* 2. Controls Section */}
       <div className="flex flex-col gap-6 mb-6">
 
         {/* --- ค้นหา และ ตัวกรอง --- */}
-        <div className="flex flex-col lg:flex-row justify-between items-center gap-4 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+        <div className="flex flex-col lg:flex-row justify-between items-center gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 transition-colors">
 
           {/* ค้นหา */}
           <div className="relative w-full lg:w-80">
-            <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
             <input
               type="text"
               placeholder={activeTab === 'section' ? "ค้นหารหัสกลุ่มเรียน..." : "ค้นหา ชื่อ, อีเมล, รหัส..."}
-              className="w-full pl-10 pr-4 py-2 text-gray-600 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+              className="w-full pl-10 pr-4 py-2 text-gray-600 dark:text-gray-200 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all bg-white dark:bg-gray-700 dark:placeholder-gray-400"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
 
-          {/* ตัวกรอง (แสดงเฉพาะ Student และ Section) */}
+          {/* ตัวกรอง */}
           <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto justify-end">
             {(activeTab === 'student' || activeTab === 'section') && (
               <>
-                <div className="flex items-center gap-2 px-3 py-2 text-gray-400 text-sm italic">
+                <div className="flex items-center gap-2 px-3 py-2 text-gray-400 dark:text-gray-500 text-sm italic">
                   <FiFilter /> กรองข้อมูล:
                 </div>
 
@@ -150,7 +159,7 @@ export const UserManagementPage = () => {
                 <select
                   value={selectedYear}
                   onChange={(e) => setSelectedYear(e.target.value)}
-                  className="px-3 py-2 text-gray-600 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white min-w-[100px]"
+                  className="px-3 py-2 text-gray-600 dark:text-gray-200 border border-gray-200 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white dark:bg-gray-700 min-w-[100px]"
                 >
                   <option value="">ทุกปีการศึกษา</option>
                   {[...new Set(dropdownSections.map(s => s.academic_year))]
@@ -165,7 +174,7 @@ export const UserManagementPage = () => {
                 <select
                   value={selectedTerm}
                   onChange={(e) => setSelectedTerm(e.target.value)}
-                  className="px-3 py-2 text-gray-600 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white min-w-[100px]"
+                  className="px-3 py-2 text-gray-600 dark:text-gray-200 border border-gray-200 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white dark:bg-gray-700 min-w-[100px]"
                 >
                   <option value="">ทุกเทอม</option>
                   <option value="1">เทอม 1</option>
@@ -173,12 +182,12 @@ export const UserManagementPage = () => {
                   <option value="3">เทอม 3 (Summer)</option>
                 </select>
 
-                {/* กลุ่มเรียน (แสดงเฉพาะแท็บนักศึกษา) */}
+                {/* กลุ่มเรียน */}
                 {activeTab === 'student' && (
                   <select
                     value={selectedSectionId}
                     onChange={(e) => setSelectedSectionId(e.target.value)}
-                    className="px-3 py-2 text-gray-600 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white min-w-[150px]"
+                    className="px-3 py-2 text-gray-600 dark:text-gray-200 border border-gray-200 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white dark:bg-gray-700 min-w-[150px]"
                   >
                     <option value="">ทุกกลุ่มเรียน</option>
                     {dropdownSections
@@ -195,11 +204,11 @@ export const UserManagementPage = () => {
                   </select>
                 )}
 
-                {/* ปุ่มรีเซ็ตค่า (แสดงเฉพาะเมื่อมีการเลือกค่าใดค่าหนึ่ง) */}
+                {/* ปุ่มรีเซ็ตค่า */}
                 {(searchTerm || selectedYear || selectedTerm || selectedSectionId) && (
                   <button
                     onClick={handleResetFilters}
-                    className="flex items-center gap-1.5 px-3 py-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors text-sm font-medium"
+                    className="flex items-center gap-1.5 px-3 py-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors text-sm font-medium"
                     title="ล้างตัวกรองทั้งหมด"
                   >
                     <FiRotateCcw size={14} /> รีเซ็ต
@@ -217,7 +226,7 @@ export const UserManagementPage = () => {
       </div>
 
       {/* 3. Content Table Section */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden transition-colors">
         {activeTab === 'section' ? (
           <SectionTable
             data={sectionMgr.data}
@@ -256,10 +265,8 @@ export const UserManagementPage = () => {
       {/* 4. Pagination */}
       <div className="mt-6">
         <Pagination
-          page={page}
-          setPage={setPage}
-          limit={limit}
-          meta={activeTab === 'section' ? sectionMgr.meta : userMgr.meta}
+          meta={paginationMeta}       // ส่ง object ที่แปลงแล้ว
+          onPageChange={setPage}      // เปลี่ยนจาก setPage เป็น onPageChange
         />
       </div>
 

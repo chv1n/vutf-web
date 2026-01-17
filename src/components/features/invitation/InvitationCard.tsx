@@ -24,11 +24,9 @@ interface InvitationCardProps {
 
 /**
  * InvitationCard - การ์ดแสดงคำเชิญ
- * 
- * Composition: ใช้ InvitationBadge และ InvitationActions
- * Single Responsibility: แสดงข้อมูลคำเชิญและจัด layout
- * 
- * Features:
+ * * Composition: ใช้ InvitationBadge และ InvitationActions
+ * * Single Responsibility: แสดงข้อมูลคำเชิญและจัด layout
+ * * Features:
  * - แสดงชื่อวิทยานิพนธ์
  * - แสดงผู้เชิญ (Owner)
  * - แสดงสมาชิกอื่นๆ
@@ -82,32 +80,32 @@ export const InvitationCard: React.FC<InvitationCardProps> = ({
     return (
         <CardWrapper
             {...animationProps}
-            className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden"
+            className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden"
         >
             {/* Header */}
-            <div className="p-4 sm:p-5 border-b border-gray-50">
+            <div className="p-4 sm:p-5 border-b border-gray-50 dark:border-gray-700">
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                     <div className="flex items-start gap-3 sm:gap-4 flex-1 min-w-0">
-                        {/* Icon - ปรับขนาดให้เล็กลงเล็กน้อยในมือถือ แต่ยังคงความเด่น */}
-                        <div className="w-8 h-8 sm:w-12 sm:h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg shadow-blue-200 flex-shrink-0">
+                        {/* Icon */}
+                        <div className="w-8 h-8 sm:w-12 sm:h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg shadow-blue-200 dark:shadow-none flex-shrink-0">
                             <FiFileText className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
                         </div>
 
                         {/* Thesis Info */}
                         <div className="flex-1 min-w-0">
-                            <h3 className="text-base sm:text-lg font-bold text-gray-900 truncate leading-tight">
+                            <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white truncate leading-tight">
                                 {thesis?.thesis_name_th || 'ไม่มีชื่อวิทยานิพนธ์'}
                             </h3>
-                            <p className="text-xs sm:text-sm text-gray-500 truncate mt-1">
+                            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate mt-1">
                                 {thesis?.thesis_name_en || '-'}
                             </p>
 
                             <div className="flex flex-wrap items-center gap-2 mt-2">
-                                <span className="px-2 py-0.5 bg-gray-100 text-gray-600 text-[10px] sm:text-xs font-medium rounded">
+                                <span className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-[10px] sm:text-xs font-medium rounded">
                                     {thesis?.thesis_code || '-'}
                                 </span>
                                 {thesis?.graduation_year && (
-                                    <span className="text-[10px] sm:text-xs text-gray-400">
+                                    <span className="text-[10px] sm:text-xs text-gray-400 dark:text-gray-500">
                                         ปี {thesis.graduation_year}
                                     </span>
                                 )}
@@ -115,7 +113,7 @@ export const InvitationCard: React.FC<InvitationCardProps> = ({
                         </div>
                     </div>
 
-                    {/* Invitation Badge - ในมือถือจะขยับมาอยู่บรรทัดใหม่ หรือมุมขวาบนตามความเหมาะสม */}
+                    {/* Invitation Badge */}
                     <div className="flex sm:block justify-end shrink-0">
                         <InvitationBadge status={invitation_status} size="md" />
                     </div>
@@ -127,12 +125,12 @@ export const InvitationCard: React.FC<InvitationCardProps> = ({
                 {/* Invited By (Owner) */}
                 {owner && (
                     <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
-                            <FiUser className="w-4 h-4 text-amber-600" />
+                        <div className="w-8 h-8 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center flex-shrink-0">
+                            <FiUser className="w-4 h-4 text-amber-600 dark:text-amber-400" />
                         </div>
                         <div className="flex-1 min-w-0">
-                            <p className="text-xs text-gray-400 uppercase tracking-wide">ผู้เชิญ</p>
-                            <p className="text-sm font-medium text-gray-900 truncate">
+                            <p className="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-wide">ผู้เชิญ</p>
+                            <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
                                 {owner.first_name} {owner.last_name}
                             </p>
                         </div>
@@ -142,22 +140,22 @@ export const InvitationCard: React.FC<InvitationCardProps> = ({
                 {/* Other Members */}
                 {otherMembers.length > 0 && (
                     <div className="flex items-start gap-3">
-                        <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <FiUsers className="w-4 h-4 text-emerald-600" />
+                        <div className="w-8 h-8 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <FiUsers className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                         </div>
                         <div className="flex-1 min-w-0">
-                            <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">สมาชิกอื่น</p>
+                            <p className="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-1">สมาชิกอื่น</p>
                             <div className="flex flex-wrap gap-1.5">
                                 {otherMembers.slice(0, 3).map((m) => (
                                     <span
                                         key={m.member_id}
-                                        className="px-2 py-0.5 bg-emerald-50 text-emerald-700 text-xs rounded-full"
+                                        className="px-2 py-0.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 text-xs rounded-full"
                                     >
                                         {m.student?.first_name} {m.student?.last_name}
                                     </span>
                                 ))}
                                 {otherMembers.length > 3 && (
-                                    <span className="px-2 py-0.5 bg-gray-100 text-gray-500 text-xs rounded-full">
+                                    <span className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 text-xs rounded-full">
                                         +{otherMembers.length - 3} คน
                                     </span>
                                 )}
@@ -166,36 +164,10 @@ export const InvitationCard: React.FC<InvitationCardProps> = ({
                     </div>
                 )}
 
-                {/* Advisors */}
-                {/* <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <FiAward className="w-4 h-4 text-purple-600" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                        <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">อาจารย์ที่ปรึกษา</p>
-                        <div className="space-y-1">
-                            {mainAdvisor && (
-                                <p className="text-sm text-gray-900">
-                                    <span className="font-medium">
-                                        {mainAdvisor.instructor?.first_name} {mainAdvisor.instructor?.last_name}
-                                    </span>
-                                    <span className="text-purple-600 text-xs ml-1">(หลัก)</span>
-                                </p>
-                            )}
-                            {coAdvisors.map((a) => (
-                                <p key={a.advisor_id} className="text-sm text-gray-600">
-                                    {a.instructor?.first_name} {a.instructor?.last_name}
-                                    <span className="text-gray-400 text-xs ml-1">(ร่วม)</span>
-                                </p>
-                            ))}
-                        </div>
-                    </div>
-                </div> */}
-
                 {/* Invited At */}
-                <div className="flex items-center gap-3 pt-2 border-t border-gray-50">
-                    <FiCalendar className="w-4 h-4 text-gray-400" />
-                    <span className="text-xs text-gray-500">
+                <div className="flex items-center gap-3 pt-2 border-t border-gray-50 dark:border-gray-700">
+                    <FiCalendar className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
                         ได้รับเชิญเมื่อ {formatDate(invited_at)}
                     </span>
                 </div>
@@ -203,7 +175,7 @@ export const InvitationCard: React.FC<InvitationCardProps> = ({
 
             {/* Actions (only for pending) */}
             {invitation_status === InvitationStatus.PENDING && (
-                <div className="px-5 py-4 bg-gray-50 border-t border-gray-100">
+                <div className="px-5 py-4 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-100 dark:border-gray-700">
                     <InvitationActions
                         memberId={member_id}
                         onSuccess={(action) => onActionSuccess?.(member_id, action)}

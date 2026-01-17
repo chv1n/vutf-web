@@ -24,8 +24,7 @@ interface GroupOption {
 
 /**
  * ThesisReportPage - หน้าแสดงประวัติการส่งไฟล์
- * 
- * Features:
+ * * Features:
  * - เลือกกลุ่ม (ถ้ามีหลายกลุ่ม)
  * - แสดง submissions grouped by inspection round
  * - Original/Report cards
@@ -131,9 +130,9 @@ const ThesisReportPage: React.FC = () => {
     // No groups
     if (groups.length === 0) {
         return (
-            <div className="min-h-[60vh] flex flex-col items-center justify-center text-gray-400">
+            <div className="min-h-[60vh] flex flex-col items-center justify-center text-gray-400 dark:text-gray-500">
                 <FiInbox className="w-16 h-16 mb-4" />
-                <p className="text-lg font-medium text-gray-600">คุณยังไม่มีกลุ่ม</p>
+                <p className="text-lg font-medium text-gray-600 dark:text-gray-300">คุณยังไม่มีกลุ่ม</p>
                 <p className="text-sm mt-1">กรุณาสร้างกลุ่มหรือรอรับคำเชิญจากหัวหน้ากลุ่ม</p>
             </div>
         );
@@ -147,12 +146,12 @@ const ThesisReportPage: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 className="flex items-center gap-3"
             >
-                <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-200">
+                <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-200 dark:shadow-none">
                     <FiFileText className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Thesis Report</h1>
-                    <p className="text-gray-500 text-sm">ประวัติการส่งไฟล์ตรวจความก้าวหน้า</p>
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Thesis Report</h1>
+                    <p className="text-gray-500 dark:text-gray-400 text-sm">ประวัติการส่งไฟล์ตรวจความก้าวหน้า</p>
                 </div>
             </motion.div>
 
@@ -162,7 +161,7 @@ const ThesisReportPage: React.FC = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
-                    className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100"
+                    className="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-gray-700 transition-colors"
                 >
                     <GroupSelector
                         groups={groups}
@@ -178,7 +177,7 @@ const ThesisReportPage: React.FC = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
-                    className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100"
+                    className="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-gray-700 transition-colors"
                 >
                     <GroupSelector
                         groups={groups}
@@ -193,32 +192,32 @@ const ThesisReportPage: React.FC = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100"
+                className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 transition-colors"
             >
-                <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2 mb-6">
-                    <FiFileText className="w-5 h-5 text-indigo-500" />
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2 mb-6">
+                    <FiFileText className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />
                     ประวัติการส่งไฟล์
                 </h2>
 
                 {/* Loading */}
                 {isLoadingSubmissions && (
-                    <div className="flex items-center justify-center py-12 text-gray-400">
+                    <div className="flex items-center justify-center py-12 text-gray-400 dark:text-gray-500">
                         <FiLoader className="w-8 h-8 animate-spin" />
                     </div>
                 )}
 
                 {/* Empty */}
                 {!isLoadingSubmissions && submissions.length === 0 && (
-                    <div className="flex flex-col items-center justify-center py-12 text-gray-400">
+                    <div className="flex flex-col items-center justify-center py-12 text-gray-400 dark:text-gray-500">
                         <FiInbox className="w-12 h-12 mb-3" />
-                        <p className="text-base font-medium text-gray-500">ยังไม่มีประวัติการส่งไฟล์</p>
+                        <p className="text-base font-medium text-gray-500 dark:text-gray-400">ยังไม่มีประวัติการส่งไฟล์</p>
                         <p className="text-sm mt-1">ไฟล์ที่ส่งจะแสดงที่นี่</p>
                     </div>
                 )}
 
                 {/* Submissions by round */}
                 {!isLoadingSubmissions && submissions.length > 0 && (
-                    <div>
+                    <div className="space-y-6">
                         {submissions.map((submission, index) => (
                             <ReviewRoundSection
                                 key={submission.submissionId}

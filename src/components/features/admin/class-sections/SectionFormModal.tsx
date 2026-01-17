@@ -43,13 +43,17 @@ export const SectionFormModal = ({ isOpen, onClose, onSubmit, initialData, isSub
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl transform transition-all">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md p-6 shadow-2xl transform transition-all">
         
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-bold text-gray-800">
+          <h2 className="text-xl font-bold text-gray-800 dark:text-white">
             {isEditMode ? 'แก้ไขกลุ่มเรียน' : 'เพิ่มกลุ่มเรียนใหม่'}
           </h2>
-          <button onClick={onClose} disabled={isSubmitting} className="text-gray-400 hover:text-gray-600 transition-colors">
+          <button 
+            onClick={onClose} 
+            disabled={isSubmitting} 
+            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+          >
             <FiX size={24} />
           </button>
         </div>
@@ -58,19 +62,19 @@ export const SectionFormModal = ({ isOpen, onClose, onSubmit, initialData, isSub
           
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">ปีการศึกษา</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">ปีการศึกษา</label>
               <input 
                 type="number" 
                 required 
-                className="w-full px-4 py-2 text-gray-600 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                className="w-full px-4 py-2 text-gray-600 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white dark:bg-gray-700"
                 value={formData.academic_year}
                 onChange={e => setFormData({...formData, academic_year: Number(e.target.value)})}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">ภาคเรียน</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">ภาคเรียน</label>
               <select 
-                className="w-full px-4 py-2 text-gray-600 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white"
+                className="w-full px-4 py-2 text-gray-600 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white dark:bg-gray-700"
                 value={formData.term}
                 onChange={e => setFormData({...formData, term: e.target.value})}
               >
@@ -82,12 +86,12 @@ export const SectionFormModal = ({ isOpen, onClose, onSubmit, initialData, isSub
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">ชื่อกลุ่มเรียน (Section)</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">ชื่อกลุ่มเรียน (Section)</label>
             <input 
               type="text" 
               required 
               placeholder="เช่น 66344 INE1"
-              className="w-full px-4 py-2 text-gray-600 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+              className="w-full px-4 py-2 text-gray-600 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white dark:bg-gray-700 placeholder-gray-400 dark:placeholder-gray-500"
               value={formData.section_name}
               onChange={e => setFormData({...formData, section_name: e.target.value})}
             />
@@ -98,14 +102,14 @@ export const SectionFormModal = ({ isOpen, onClose, onSubmit, initialData, isSub
                 type="button" 
                 onClick={onClose} 
                 disabled={isSubmitting} 
-                className="flex-1 px-4 py-2 text-gray-600 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium"
+                className="flex-1 px-4 py-2 text-gray-600 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 font-medium transition-colors"
              >
                 ยกเลิก
              </button>
              <button 
                 type="submit" 
                 disabled={isSubmitting}
-                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium flex justify-center items-center gap-2"
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 font-medium flex justify-center items-center gap-2 transition-colors"
              >
                 {isSubmitting ? <><FiLoader className="animate-spin" /> กำลังบันทึก...</> : 'บันทึก'}
              </button>

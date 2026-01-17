@@ -19,10 +19,8 @@ interface AdvisorSelectSectionProps {
 
 /**
  * AdvisorSelectSection - ส่วนเลือกอาจารย์ที่ปรึกษา
- * 
- * Single Responsibility: จัดการเฉพาะการเลือกอาจารย์ที่ปรึกษา
- * 
- * Features:
+ * * Single Responsibility: จัดการเฉพาะการเลือกอาจารย์ที่ปรึกษา
+ * * Features:
  * - Searchable autocomplete ค้นหาอาจารย์
  * - เลือก role (main/co)
  * - ต้องมี main advisor อย่างน้อย 1 คน
@@ -97,67 +95,41 @@ export const AdvisorSelectSection: React.FC<AdvisorSelectSectionProps> = ({
 
 
     return (
-        <section className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        <section className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 transition-colors">
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
                     {/* Icon */}
-                    <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-purple-200 shrink-0">
+                    <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-purple-200 dark:shadow-none shrink-0">
                         <FiAward className="w-5 h-5 text-white" />
                     </div>
 
                     {/* Text Group */}
                     <div>
-                        <h2 className="text-lg font-bold text-gray-900 leading-tight">อาจารย์ที่ปรึกษา</h2>
-                        <p className="text-sm text-gray-500 mt-1">เลือกอาจารย์ที่ปรึกษาวิทยานิพนธ์</p>
+                        <h2 className="text-lg font-bold text-gray-900 dark:text-white leading-tight">อาจารย์ที่ปรึกษา</h2>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">เลือกอาจารย์ที่ปรึกษาวิทยานิพนธ์</p>
                     </div>
                 </div>
 
                 {/* Status & Count Badges */}
                 <div className="flex flex-wrap items-center gap-2">
                     {!hasMainAdvisor && (
-                        <span className="px-3 py-1 bg-amber-100 text-amber-700 text-xs font-medium rounded-full border border-amber-200">
+                        <span className="px-3 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 text-xs font-medium rounded-full border border-amber-200 dark:border-amber-800">
                             ต้องมีที่ปรึกษาหลัก
                         </span>
                     )}
                     {selectedAdvisors.length > 0 && (
-                        <span className="px-3 py-1 bg-purple-100 text-purple-700 text-sm font-medium rounded-full">
+                        <span className="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-sm font-medium rounded-full">
                             {selectedAdvisors.length} คน
                         </span>
                     )}
                 </div>
             </div>
 
-            {/* Role Selection */}
-            {/* <div className="flex gap-2 mb-4">
-                <button
-                    type="button"
-                    onClick={() => setSelectedRole(AdvisorRole.MAIN)}
-                    className={`flex-1 py-2 px-4 rounded-xl text-sm font-medium transition-all duration-200 ${selectedRole === AdvisorRole.MAIN
-                        ? 'bg-purple-600 text-white shadow-lg shadow-purple-200'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                        }`}
-                >
-                    <FiAward className="inline-block w-4 h-4 mr-2" />
-                    ที่ปรึกษาหลัก
-                </button>
-                <button
-                    type="button"
-                    onClick={() => setSelectedRole(AdvisorRole.CO)}
-                    className={`flex-1 py-2 px-4 rounded-xl text-sm font-medium transition-all duration-200 ${selectedRole === AdvisorRole.CO
-                        ? 'bg-purple-600 text-white shadow-lg shadow-purple-200'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                        }`}
-                >
-                    <FiUsers className="inline-block w-4 h-4 mr-2" />
-                    ที่ปรึกษาร่วม
-                </button>
-            </div> */}
-
             {/* Search Input */}
             <div className="relative mb-4" ref={dropdownRef}>
                 <div className="relative">
-                    <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
                     <input
                         type="text"
                         placeholder="ค้นหาอาจารย์ด้วยชื่อ..."
@@ -167,7 +139,7 @@ export const AdvisorSelectSection: React.FC<AdvisorSelectSectionProps> = ({
                             setIsDropdownOpen(true);
                         }}
                         onFocus={() => setIsDropdownOpen(true)}
-                        className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 text-sm transition-all duration-200 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 focus:bg-white hover:border-gray-300"
+                        className="w-full pl-12 pr-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white text-sm transition-all duration-200 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 dark:focus:border-purple-500 focus:bg-white dark:focus:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-500"
                     />
                     {isLoading && (
                         <FiLoader className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 animate-spin" />
@@ -182,56 +154,55 @@ export const AdvisorSelectSection: React.FC<AdvisorSelectSectionProps> = ({
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -10 }}
                             transition={{ duration: 0.15 }}
-                            className="absolute z-20 w-full mt-2 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden"
+                            className="absolute z-20 w-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg overflow-hidden"
                         >
                             {isLoading ? (
-                                <div className="p-4 text-center text-gray-500">
+                                <div className="p-4 text-center text-gray-500 dark:text-gray-400">
                                     <FiLoader className="w-5 h-5 animate-spin mx-auto mb-2" />
                                     กำลังค้นหา...
                                 </div>
                             ) : filteredResults.length > 0 ? (
-                                <ul className="max-h-60 overflow-y-auto">
+                                <ul className="max-h-60 overflow-y-auto custom-scrollbar">
                                     {filteredResults.map((instructor) => (
                                         <li key={instructor.instructor_uuid}>
                                             <button
                                                 type="button"
                                                 onClick={() => addAdvisor(instructor)}
-                                                className="w-full px-4 py-3 flex items-center gap-3 hover:bg-gray-50 transition-colors text-left border-b border-gray-50 last:border-0"
+                                                className="w-full px-4 py-3 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors text-left border-b border-gray-50 dark:border-gray-700 last:border-0"
                                             >
                                                 {/* 1. ซ่อนรูปโปรไฟล์ในจอเล็ก */}
-                                                <div className="hidden sm:flex w-10 h-10 bg-gradient-to-br from-purple-100 to-purple-200 rounded-full items-center justify-center shrink-0">
-                                                    <FiUser className="w-5 h-5 text-purple-600" />
+                                                <div className="hidden sm:flex w-10 h-10 bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/40 dark:to-purple-800/40 rounded-full items-center justify-center shrink-0">
+                                                    <FiUser className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                                                 </div>
 
-                                                {/* 2. ส่วนข้อมูลชื่อ - จะแสดงผลได้เต็มที่มากขึ้นในมือถือ */}
+                                                {/* 2. ส่วนข้อมูลชื่อ */}
                                                 <div className="flex-1 min-w-0">
-                                                    <p className="text-sm font-semibold text-gray-900 truncate">
+                                                    <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
                                                         {instructor.first_name} {instructor.last_name}
                                                     </p>
-                                                    <p className="text-[11px] text-gray-500 truncate">
+                                                    <p className="text-[11px] text-gray-500 dark:text-gray-400 truncate">
                                                         {instructor.department || 'อาจารย์'}
                                                     </p>
                                                 </div>
 
-                                                {/* 3. ส่วน Role และ ปุ่มบวก - ซ่อนทั้งหมดในจอเล็ก */}
+                                                {/* 3. ส่วน Role และ ปุ่มบวก */}
                                                 <div className="hidden sm:flex items-center gap-2 shrink-0 ml-2">
                                                     <span className={`px-2 py-0.5 text-[10px] font-bold rounded-md ${selectedRole === AdvisorRole.MAIN
-                                                        ? 'bg-purple-100 text-purple-700'
-                                                        : 'bg-gray-100 text-gray-600'
+                                                        ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
+                                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
                                                         }`}>
                                                         {selectedRole === AdvisorRole.MAIN ? 'หลัก' : 'ร่วม'}
                                                     </span>
-                                                    <FiPlus className="w-5 h-5 text-purple-500" />
+                                                    <FiPlus className="w-5 h-5 text-purple-500 dark:text-purple-400" />
                                                 </div>
 
-                                                {/* เพิ่มเติม: ในมือถืออาจจะใส่ไอคอนบวกเล็กๆ ไว้ขวาสุดแทนเพื่อให้รู้ว่ากดเพิ่มได้ (ถ้าต้องการ) */}
                                                 <FiPlus className="sm:hidden w-4 h-4 text-purple-400 shrink-0" />
                                             </button>
                                         </li>
                                     ))}
                                 </ul>
                             ) : (
-                                <div className="p-4 text-center text-gray-500">
+                                <div className="p-4 text-center text-gray-500 dark:text-gray-400">
                                     ไม่พบอาจารย์ที่ค้นหา
                                 </div>
                             )}
@@ -242,8 +213,8 @@ export const AdvisorSelectSection: React.FC<AdvisorSelectSectionProps> = ({
 
             {/* Error Message */}
             {errors.advisors && (
-                <p className="mb-4 text-sm text-red-500 flex items-center gap-1">
-                    <span className="w-1 h-1 bg-red-500 rounded-full" />
+                <p className="mb-4 text-sm text-red-500 dark:text-red-400 flex items-center gap-1">
+                    <span className="w-1 h-1 bg-red-500 dark:bg-red-400 rounded-full" />
                     {errors.advisors.message}
                 </p>
             )}
@@ -259,52 +230,56 @@ export const AdvisorSelectSection: React.FC<AdvisorSelectSectionProps> = ({
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.95 }}
                             transition={{ duration: 0.2 }}
-                            className="flex flex-col sm:flex-row sm:items-center gap-3 px-4 py-3 bg-gradient-to-r from-gray-50 to-white border border-gray-100 rounded-xl group"
+                            className="flex flex-col sm:flex-row sm:items-center gap-3 px-4 py-3 bg-gradient-to-r from-gray-50 to-white dark:from-gray-800/50 dark:to-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl group"
                         >
                             {/* Icon + ชื่อ */}
                             <div className="flex items-center gap-3 flex-1 min-w-0">
                                 <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${advisor.role === AdvisorRole.MAIN
-                                        ? 'bg-gradient-to-br from-purple-100 to-purple-200'
-                                        : 'bg-gradient-to-br from-gray-100 to-gray-200'
+                                    ? 'bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/40 dark:to-purple-800/40'
+                                    : 'bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600'
                                     }`}>
                                     {advisor.role === AdvisorRole.MAIN ? (
-                                        <FiAward className="w-5 h-5 text-purple-600" />
+                                        <FiAward className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                                     ) : (
-                                        <FiUser className="w-5 h-5 text-gray-600" />
+                                        <FiUser className="w-5 h-5 text-gray-600 dark:text-gray-300" />
                                     )}
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-medium text-gray-900 truncate">
+                                    <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
                                         {advisor.instructorInfo
                                             ? `${advisor.instructorInfo.first_name} ${advisor.instructorInfo.last_name}`
                                             : advisor.instructor_uuid
                                         }
                                     </p>
-                                    <p className="text-xs text-gray-500 truncate">
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
                                         {advisor.instructorInfo?.department || 'อาจารย์'}
                                     </p>
                                 </div>
                             </div>
 
                             {/* Role Toggle + ปุ่มลบ */}
-                            <div className="flex items-center justify-between sm:justify-end gap-2 pt-2 sm:pt-0 border-t sm:border-0 border-gray-100">
+                            <div className="flex items-center justify-between sm:justify-end gap-2 pt-2 sm:pt-0 border-t sm:border-0 border-gray-100 dark:border-gray-700">
                                 <select
                                     value={advisor.role}
                                     onChange={(e) => changeAdvisorRole(advisor.instructor_uuid, e.target.value as AdvisorRole)}
-                                    className={`flex-1 sm:flex-initial px-3 py-1.5 text-xs font-medium rounded-lg border-0 cursor-pointer transition-colors ${advisor.role === AdvisorRole.MAIN
-                                            ? 'bg-purple-100 text-purple-700'
-                                            : 'bg-gray-100 text-gray-600'
+                                    className={`flex-1 sm:flex-initial px-3 py-1.5 text-xs font-medium rounded-lg border-0 cursor-pointer transition-colors outline-none
+                                        ${advisor.role === AdvisorRole.MAIN
+                                            ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
+                                            : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
                                         }`}
                                 >
-                                    <option value={AdvisorRole.MAIN}>ที่ปรึกษาหลัก</option>
-                                    <option value={AdvisorRole.CO}>ที่ปรึกษาร่วม</option>
+                                    <option value={AdvisorRole.MAIN} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
+                                        ที่ปรึกษาหลัก
+                                    </option>
+                                    <option value={AdvisorRole.CO} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
+                                        ที่ปรึกษาร่วม
+                                    </option>
                                 </select>
 
                                 <button
                                     type="button"
                                     onClick={() => removeAdvisor(advisor.instructor_uuid)}
-                                    // ปรับ opacity-100 ในมือถือเพื่อให้มองเห็นปุ่มลบได้ทันที
-                                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+                                    className="p-2 text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
                                 >
                                     <FiX className="w-4 h-4" />
                                 </button>
@@ -314,10 +289,10 @@ export const AdvisorSelectSection: React.FC<AdvisorSelectSectionProps> = ({
                 </AnimatePresence>
 
                 {selectedAdvisors.length === 0 && (
-                    <div className="py-8 text-center border-2 border-dashed border-gray-200 rounded-xl">
-                        <FiAward className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-                        <p className="text-sm text-gray-500">ยังไม่มีอาจารย์ที่ปรึกษา</p>
-                        <p className="text-xs text-gray-400 mt-1">ค้นหาและเพิ่มอาจารย์ด้านบน</p>
+                    <div className="py-8 text-center border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-800/30">
+                        <FiAward className="w-8 h-8 text-gray-300 dark:text-gray-600 mx-auto mb-2" />
+                        <p className="text-sm text-gray-500 dark:text-gray-400">ยังไม่มีอาจารย์ที่ปรึกษา</p>
+                        <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">ค้นหาและเพิ่มอาจารย์ด้านบน</p>
                     </div>
                 )}
             </div>

@@ -16,8 +16,7 @@ interface ActiveInspectionCardProps {
 
 /**
  * ActiveInspectionCard - แสดง Active Inspection Round
- * 
- * Features:
+ * * Features:
  * - แสดง title, term/year
  * - แสดง start/end date
  * - Countdown แสดงเวลาที่เหลือ
@@ -98,8 +97,9 @@ export const ActiveInspectionCard: React.FC<ActiveInspectionCardProps> = ({
             onClick={handleClick}
             className={`
         bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-700
-        rounded-2xl shadow-xl shadow-blue-200 cursor-pointer
-        hover:shadow-2xl hover:shadow-blue-300 hover:-translate-y-1
+        dark:from-blue-600 dark:via-blue-700 dark:to-indigo-800
+        rounded-2xl shadow-xl shadow-blue-200 dark:shadow-blue-900/30 cursor-pointer
+        hover:shadow-2xl hover:shadow-blue-300 dark:hover:shadow-blue-900/50 hover:-translate-y-1
         transition-all duration-300 overflow-hidden relative
         ${sizeClasses[size]}
       `}

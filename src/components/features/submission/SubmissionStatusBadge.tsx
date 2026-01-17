@@ -7,10 +7,8 @@ import { SubmissionStatus, type SubmissionStatusBadgeProps } from '@/types/submi
 
 /**
  * SubmissionStatusBadge - Badge แสดงสถานะ Submission
- * 
- * Single Responsibility: แสดงสถานะของ submission ด้วย badge
- * 
- * Props:
+ * * Single Responsibility: แสดงสถานะของ submission ด้วย badge
+ * * Props:
  * - status: สถานะ (PENDING, IN_PROGRESS, COMPLETED)
  * - size: ขนาด (sm, md, lg)
  * - className: custom className
@@ -25,23 +23,23 @@ export const SubmissionStatusBadge: React.FC<SubmissionStatusBadgeProps> = ({
         [SubmissionStatus.PENDING]: {
             label: 'รอดำเนินการ',
             icon: FiClock,
-            bgColor: 'bg-amber-100',
-            textColor: 'text-amber-700',
-            iconColor: 'text-amber-600',
+            bgColor: 'bg-amber-100 dark:bg-amber-900/30',
+            textColor: 'text-amber-700 dark:text-amber-300',
+            iconColor: 'text-amber-600 dark:text-amber-400',
         },
         [SubmissionStatus.IN_PROGRESS]: {
             label: 'กำลังตรวจ',
             icon: FiLoader,
-            bgColor: 'bg-blue-100',
-            textColor: 'text-blue-700',
-            iconColor: 'text-blue-600',
+            bgColor: 'bg-blue-100 dark:bg-blue-900/30',
+            textColor: 'text-blue-700 dark:text-blue-300',
+            iconColor: 'text-blue-600 dark:text-blue-400',
         },
         [SubmissionStatus.COMPLETED]: {
             label: 'ตรวจเสร็จแล้ว',
             icon: FiCheckCircle,
-            bgColor: 'bg-emerald-100',
-            textColor: 'text-emerald-700',
-            iconColor: 'text-emerald-600',
+            bgColor: 'bg-emerald-100 dark:bg-emerald-900/30',
+            textColor: 'text-emerald-700 dark:text-emerald-300',
+            iconColor: 'text-emerald-600 dark:text-emerald-400',
         },
     };
 

@@ -15,10 +15,8 @@ interface ThesisInfoSectionProps {
 
 /**
  * ThesisInfoSection - ส่วนกรอกข้อมูลวิทยานิพนธ์
- * 
- * Single Responsibility: จัดการเฉพาะ form fields ของข้อมูลวิทยานิพนธ์
- * 
- * Fields:
+ * * Single Responsibility: จัดการเฉพาะ form fields ของข้อมูลวิทยานิพนธ์
+ * * Fields:
  * - thesis_code: รหัสวิทยานิพนธ์ (required)
  * - thesis_name_th: ชื่อภาษาไทย (required)
  * - thesis_name_en: ชื่อภาษาอังกฤษ (required)
@@ -33,25 +31,27 @@ export const ThesisInfoSection: React.FC<ThesisInfoSectionProps> = ({
     const yearOptions = Array.from({ length: 11 }, (_, i) => currentYear - 5 + i);
 
     const inputClass = (hasError: boolean) => `
-        w-full px-4 py-3 bg-gray-50 border rounded-xl text-gray-900 text-sm
-        transition-all duration-200 placeholder:text-gray-400
-        focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white
-        ${hasError ? 'border-red-300 bg-red-50' : 'border-gray-200 hover:border-gray-300'}
+        w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border rounded-xl text-gray-900 dark:text-white text-sm
+        transition-all duration-200 placeholder:text-gray-400 dark:placeholder:text-gray-500
+        focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:focus:border-blue-500 focus:bg-white dark:focus:bg-gray-800
+        ${hasError 
+            ? 'border-red-300 dark:border-red-500 bg-red-50 dark:bg-red-900/10' 
+            : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'}
     `;
 
     return (
-        <section className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        <section className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 transition-colors">
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-start md:items-center gap-4 mb-8">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-200 shrink-0">
+                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-200 dark:shadow-none shrink-0">
                         <FiFileText className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                        <h2 className="text-lg font-bold text-gray-900 leading-tight">
+                        <h2 className="text-lg font-bold text-gray-900 dark:text-white leading-tight">
                             ข้อมูลวิทยานิพนธ์
                         </h2>
-                        <p className="text-sm text-gray-500 mt-1">
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                             กรอกรายละเอียดโครงการวิทยานิพนธ์
                         </p>
                     </div>
@@ -61,9 +61,9 @@ export const ThesisInfoSection: React.FC<ThesisInfoSectionProps> = ({
             <div className="space-y-5">
                 {/* Thesis Code */}
                 <div>
-                    <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-                        <FiHash className="w-4 h-4 text-gray-400" />
-                        รหัสวิทยานิพนธ์ <span className="text-red-500">*</span>
+                    <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <FiHash className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+                        รหัสวิทยานิพนธ์ <span className="text-red-500 dark:text-red-400">*</span>
                     </label>
                     <input
                         type="text"
@@ -71,15 +71,15 @@ export const ThesisInfoSection: React.FC<ThesisInfoSectionProps> = ({
                         className={inputClass(!!errors.thesis_code)}
                         {...register('thesis_code', { required: 'กรุณากรอกรหัสวิทยานิพนธ์' })}
                     />
-                    {errors.thesis_code && <p className="mt-1.5 text-xs text-red-500">{errors.thesis_code.message}</p>}
+                    {errors.thesis_code && <p className="mt-1.5 text-xs text-red-500 dark:text-red-400">{errors.thesis_code.message}</p>}
                 </div>
 
                 {/* Course Type, Start Year, Start Term ในแถวเดียวกัน */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-                            <FiBookOpen className="w-4 h-4 text-gray-400" />
-                            ประเภทวิชา <span className="text-red-500">*</span>
+                        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <FiBookOpen className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+                            ประเภทวิชา <span className="text-red-500 dark:text-red-400">*</span>
                         </label>
                         <select
                             className={inputClass(!!errors.course_type)}
@@ -92,9 +92,9 @@ export const ThesisInfoSection: React.FC<ThesisInfoSectionProps> = ({
                     </div>
 
                     <div>
-                        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-                            <FiCalendar className="w-4 h-4 text-gray-400" />
-                            ปีการศึกษาที่เริ่ม <span className="text-red-500">*</span>
+                        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <FiCalendar className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+                            ปีการศึกษาที่เริ่ม <span className="text-red-500 dark:text-red-400">*</span>
                         </label>
                         <select
                             className={inputClass(!!errors.start_academic_year)}
@@ -106,9 +106,9 @@ export const ThesisInfoSection: React.FC<ThesisInfoSectionProps> = ({
                     </div>
 
                     <div>
-                        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-                            <FiClock className="w-4 h-4 text-gray-400" />
-                            ภาคเรียนที่เริ่ม <span className="text-red-500">*</span>
+                        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <FiClock className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+                            ภาคเรียนที่เริ่ม <span className="text-red-500 dark:text-red-400">*</span>
                         </label>
                         <select
                             className={inputClass(!!errors.start_term)}
@@ -125,9 +125,9 @@ export const ThesisInfoSection: React.FC<ThesisInfoSectionProps> = ({
                 {/* Thesis Name TH & EN */}
                 <div className="grid grid-cols-1 gap-5">
                     <div>
-                        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-                            <FiFileText className="w-4 h-4 text-gray-400" />
-                            ชื่อวิทยานิพนธ์ (ภาษาไทย) <span className="text-red-500">*</span>
+                        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <FiFileText className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+                            ชื่อวิทยานิพนธ์ (ภาษาไทย) <span className="text-red-500 dark:text-red-400">*</span>
                         </label>
                         <input
                             type="text"
@@ -135,12 +135,13 @@ export const ThesisInfoSection: React.FC<ThesisInfoSectionProps> = ({
                             className={inputClass(!!errors.thesis_name_th)}
                             {...register('thesis_name_th', { required: 'กรุณากรอกชื่อภาษาไทย' })}
                         />
+                        {errors.thesis_name_th && <p className="mt-1.5 text-xs text-red-500 dark:text-red-400">{errors.thesis_name_th.message}</p>}
                     </div>
 
                     <div>
-                        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-                            <FiFileText className="w-4 h-4 text-gray-400" />
-                            ชื่อวิทยานิพนธ์ (ภาษาอังกฤษ) <span className="text-red-500">*</span>
+                        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <FiFileText className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+                            ชื่อวิทยานิพนธ์ (ภาษาอังกฤษ) <span className="text-red-500 dark:text-red-400">*</span>
                         </label>
                         <input
                             type="text"
@@ -148,14 +149,15 @@ export const ThesisInfoSection: React.FC<ThesisInfoSectionProps> = ({
                             className={inputClass(!!errors.thesis_name_en)}
                             {...register('thesis_name_en', { required: 'กรุณากรอกชื่อภาษาอังกฤษ' })}
                         />
+                        {errors.thesis_name_en && <p className="mt-1.5 text-xs text-red-500 dark:text-red-400">{errors.thesis_name_en.message}</p>}
                     </div>
                 </div>
 
                 {/* Graduation Year */}
                 <div>
-                    <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-                        <FiCalendar className="w-4 h-4 text-gray-400" />
-                        ปีการศึกษาที่คาดว่าจะจบ <span className="text-red-500">*</span>
+                    <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <FiCalendar className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+                        ปีการศึกษาที่คาดว่าจะจบ <span className="text-red-500 dark:text-red-400">*</span>
                     </label>
                     <select
                         className={inputClass(!!errors.graduation_year)}
@@ -165,12 +167,12 @@ export const ThesisInfoSection: React.FC<ThesisInfoSectionProps> = ({
                         })}
                     >
                         <option value="">-- เลือกปีการศึกษา --</option>
-                        {yearOptions.map((year) => (
+                        {yearOptions.map(year => (
                             <option key={year} value={year}>{year}</option>
                         ))}
                     </select>
                     {errors.graduation_year && (
-                        <p className="mt-1.5 text-xs text-red-500">{errors.graduation_year.message}</p>
+                        <p className="mt-1.5 text-xs text-red-500 dark:text-red-400">{errors.graduation_year.message}</p>
                     )}
                 </div>
             </div>

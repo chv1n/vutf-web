@@ -114,44 +114,41 @@ export const AnnouncementsPage = () => {
   return (
     <div className="max-w-7xl mx-auto pb-10">
       
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden transition-colors">
 
         {/* --- Banner Header --- */}
-        {/* Responsive: p-6 บนมือถือ, p-8 บนจอใหญ่ */}
-        <div className="bg-indigo-50 p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
-          <div className="absolute -top-10 -left-10 w-32 h-32 bg-indigo-100 rounded-full opacity-50 blur-2xl"></div>
+        <div className="bg-indigo-50 dark:bg-indigo-900/30 p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden transition-colors">
+          <div className="absolute -top-10 -left-10 w-32 h-32 bg-indigo-100 dark:bg-indigo-500/20 rounded-full opacity-50 blur-2xl"></div>
           
-          {/* Responsive: จัดกึ่งกลางบนมือถือ */}
           <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6 z-10 text-center md:text-left">
-            <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-sm text-blue-500 shrink-0">
+            <div className="w-16 h-16 bg-white dark:bg-gray-800 rounded-2xl flex items-center justify-center shadow-sm text-blue-500 dark:text-blue-400 shrink-0">
                <FiBell size={32} />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-800">Announcements</h1>
-              <p className="text-indigo-600 text-sm">Stay updated with the latest news</p>
+              <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Announcements</h1>
+              <p className="text-indigo-600 dark:text-indigo-300 text-sm">Stay updated with the latest news</p>
             </div>
           </div>
           
           <div className="relative w-full md:w-80 z-10">
-            <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-indigo-400" />
+            <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-indigo-400 dark:text-indigo-300" />
             <input 
               type="text" 
               placeholder="Search articles..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-white border-none rounded-xl text-gray-700 shadow-sm placeholder-indigo-300 focus:ring-2 focus:ring-indigo-200 outline-none transition-all"
+              className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-800 border-none rounded-xl text-gray-700 dark:text-gray-200 shadow-sm placeholder-indigo-300 dark:placeholder-gray-500 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-500 outline-none transition-all"
             />
           </div>
         </div>
 
         {/* --- Content --- */}
-        <div className="p-4 md:p-8">
+        <div className="p-4 md:p-8 bg-white dark:bg-gray-800 transition-colors">
           
           {/* Controls Section */}
-          {/* Responsive: flex-col บนมือถือ, flex-row บนจอใหญ่ */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6 border-b border-gray-100 pb-4">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6 border-b border-gray-100 dark:border-gray-700 pb-4">
             
-            {/* Tabs: Scroll แนวนอนได้ถ้ายาวเกิน */}
+            {/* Tabs */}
             <div className="flex gap-4 sm:gap-8 w-full sm:w-auto overflow-x-auto pb-2 sm:pb-0 no-scrollbar">
               {['All', 'News', 'Activities'].map((tab) => (
                 <button
@@ -159,8 +156,8 @@ export const AnnouncementsPage = () => {
                   onClick={() => setActiveTab(tab)}
                   className={`pb-2 text-sm font-semibold transition-colors whitespace-nowrap relative ${
                     activeTab === tab 
-                      ? 'text-blue-900 after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-blue-900' 
-                      : 'text-gray-400 hover:text-gray-600'
+                      ? 'text-blue-900 dark:text-blue-400 after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-blue-900 dark:after:bg-blue-400' 
+                      : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'
                   }`}
                 >
                   {tab}
@@ -171,8 +168,8 @@ export const AnnouncementsPage = () => {
             <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
               {isAdmin && (
                  <button 
-                    onClick={() => { setSelectedItem(null); setIsModalOpen(true); }}
-                    className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+                   onClick={() => { setSelectedItem(null); setIsModalOpen(true); }}
+                   className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors"
                  >
                    <FiPlus /> Create
                  </button>
@@ -182,11 +179,11 @@ export const AnnouncementsPage = () => {
 
           {/* List Content */}
           {isLoading ? (
-            <div className="flex justify-center py-20 text-indigo-300">
+            <div className="flex justify-center py-20 text-indigo-300 dark:text-indigo-500">
                <FiLoader className="animate-spin text-3xl" />
             </div>
           ) : announcements.length === 0 ? (
-            <div className="text-center py-20 text-gray-400">
+            <div className="text-center py-20 text-gray-400 dark:text-gray-500">
               <p>No announcements found.</p>
             </div>
           ) : (
@@ -198,42 +195,39 @@ export const AnnouncementsPage = () => {
                   <div key={item.announceId} className="flex flex-col sm:flex-row gap-2 sm:gap-6 group">
                     
                     {/* Date Column */}
-                    {/* Responsive: จัดซ้ายบนมือถือ, จัดขวาบนจอใหญ่ */}
                     <div className="w-full sm:w-24 flex-shrink-0 text-left sm:text-right pt-1 flex sm:block items-center gap-2 sm:gap-0">
-                      <div className="text-gray-500 font-medium text-sm">{dateDisplay.top}</div>
-                      {/* บนมือถือ ใส่เครื่องหมายขีดคั่นกลาง */}
-                      <span className="sm:hidden text-gray-300">•</span>
-                      <div className="text-gray-400 text-xs sm:mt-1">{dateDisplay.bottom}</div>
+                      <div className="text-gray-500 dark:text-gray-400 font-medium text-sm">{dateDisplay.top}</div>
+                      <span className="sm:hidden text-gray-300 dark:text-gray-600">•</span>
+                      <div className="text-gray-400 dark:text-gray-500 text-xs sm:mt-1">{dateDisplay.bottom}</div>
                     </div>
 
-                    {/* Divider Line: ซ่อนบนมือถือ, แสดงบนจอใหญ่ */}
-                    <div className="hidden sm:block w-px bg-gray-200 relative"></div>
+                    {/* Divider Line */}
+                    <div className="hidden sm:block w-px bg-gray-200 dark:bg-gray-700 relative"></div>
 
                     {/* Content Column */}
-                    <div className="flex-1 pb-6 sm:pb-8 border-b border-gray-50 last:border-0 relative">
+                    <div className="flex-1 pb-6 sm:pb-8 border-b border-gray-50 dark:border-gray-700 last:border-0 relative">
                       <h3 
-                        className="text-lg font-bold text-gray-800 mb-1 group-hover:text-blue-600 transition-colors cursor-pointer" 
+                        className="text-lg font-bold text-gray-800 dark:text-white mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors cursor-pointer" 
                         onClick={() => setViewingItem(item)}
                       >
                         {item.title}
                       </h3>
-                      <p className="text-gray-500 text-sm leading-relaxed line-clamp-2">
+                      <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed line-clamp-2">
                         {item.description}
                       </p>
                       
                       {/* Actions */}
                       {isAdmin && (
-                        // Responsive: แสดงตลอดบนมือถือ, แสดงเมื่อ Hover บนจอใหญ่
                         <div className="mt-3 sm:mt-0 sm:absolute sm:right-0 sm:top-0 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity flex gap-2">
                            <button 
                              onClick={(e) => { e.stopPropagation(); setSelectedItem(item); setIsModalOpen(true); }}
-                             className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md"
+                             className="p-1.5 text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-md"
                            >
                              <FiEdit2 size={16} />
                            </button>
                            <button 
                              onClick={(e) => { e.stopPropagation(); handleDelete(item.announceId); }}
-                             className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md"
+                             className="p-1.5 text-gray-400 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md"
                            >
                              <FiTrash2 size={16} />
                            </button>
@@ -248,30 +242,30 @@ export const AnnouncementsPage = () => {
 
           {/* Pagination */}
           {meta && meta.totalPages > 0 && (
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-8 pt-4 border-t border-gray-50">
-                <div className="text-sm text-gray-500 text-center sm:text-left">
-                   Showing <span className="font-medium">{(page - 1) * limit + 1}</span> to <span className="font-medium">{Math.min(page * limit, meta.totalItems)}</span> of <span className="font-medium">{meta.totalItems}</span> entries
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-8 pt-4 border-t border-gray-50 dark:border-gray-700 transition-colors">
+                <div className="text-sm text-gray-500 dark:text-gray-400 text-center sm:text-left">
+                   Showing <span className="font-medium text-gray-900 dark:text-white">{(page - 1) * limit + 1}</span> to <span className="font-medium text-gray-900 dark:text-white">{Math.min(page * limit, meta.totalItems)}</span> of <span className="font-medium text-gray-900 dark:text-white">{meta.totalItems}</span> entries
                 </div>
 
                 <div className="flex items-center gap-2">
                     <button
                         onClick={() => setPage(p => Math.max(1, p - 1))}
                         disabled={page === 1}
-                        className="p-2 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        className="p-2 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-gray-600 dark:text-gray-300"
                     >
-                        <FiChevronLeft size={20} className="text-gray-600" />
+                        <FiChevronLeft size={20} />
                     </button>
                     
-                    <div className="px-4 py-2 bg-blue-50 text-blue-600 font-medium rounded-lg text-sm">
+                    <div className="px-4 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 font-medium rounded-lg text-sm">
                         Page {page} of {meta.totalPages}
                     </div>
 
                     <button
                         onClick={() => setPage(p => Math.min(meta.totalPages, p + 1))}
                         disabled={page === meta.totalPages}
-                        className="p-2 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        className="p-2 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-gray-600 dark:text-gray-300"
                     >
-                        <FiChevronRight size={20} className="text-gray-600" />
+                        <FiChevronRight size={20} />
                     </button>
                 </div>
             </div>

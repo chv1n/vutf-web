@@ -21,11 +21,9 @@ import {
 
 /**
  * CreateThesisForm - ฟอร์มหลักสำหรับสร้างกลุ่มวิทยานิพนธ์
- * 
- * Composition Pattern: รวม sub-components (ThesisInfoSection, MemberSelectSection, AdvisorSelectSection)
- * Single Responsibility: จัดการ form submission และ error handling
- * 
- * Features:
+ * * Composition Pattern: รวม sub-components (ThesisInfoSection, MemberSelectSection, AdvisorSelectSection)
+ * * Single Responsibility: จัดการ form submission และ error handling
+ * * Features:
  * - Form validation ด้วย react-hook-form
  * - API integration สำหรับสร้าง thesis group
  * - Error handling และแสดง feedback ด้วย SweetAlert2
@@ -68,6 +66,11 @@ export const CreateThesisForm: React.FC = () => {
                 title: 'กรุณาเลือกอาจารย์ที่ปรึกษาหลัก',
                 text: 'ต้องมีอาจารย์ที่ปรึกษาหลักอย่างน้อย 1 คน',
                 confirmButtonColor: '#3b82f6',
+                customClass: {
+                    popup: 'dark:bg-gray-800 dark:text-white',
+                    title: 'dark:text-white',
+                    htmlContainer: 'dark:text-gray-300'
+                }
             });
             return;
         }
@@ -107,6 +110,11 @@ export const CreateThesisForm: React.FC = () => {
                 confirmButtonColor: '#10b981',
                 timer: 2000,
                 timerProgressBar: true,
+                customClass: {
+                    popup: 'dark:bg-gray-800 dark:text-white',
+                    title: 'dark:text-white',
+                    htmlContainer: 'dark:text-gray-300'
+                }
             });
 
             // Redirect ไปหน้า dashboard
@@ -122,6 +130,11 @@ export const CreateThesisForm: React.FC = () => {
                     title: 'รหัสวิทยานิพนธ์ซ้ำ',
                     text: 'กรุณาใช้รหัสวิทยานิพนธ์อื่น',
                     confirmButtonColor: '#ef4444',
+                    customClass: {
+                        popup: 'dark:bg-gray-800 dark:text-white',
+                        title: 'dark:text-white',
+                        htmlContainer: 'dark:text-gray-300'
+                    }
                 });
             } else if (errorMessage.includes('not found')) {
                 Swal.fire({
@@ -129,6 +142,11 @@ export const CreateThesisForm: React.FC = () => {
                     title: 'ข้อมูลไม่ถูกต้อง',
                     text: errorMessage,
                     confirmButtonColor: '#ef4444',
+                    customClass: {
+                        popup: 'dark:bg-gray-800 dark:text-white',
+                        title: 'dark:text-white',
+                        htmlContainer: 'dark:text-gray-300'
+                    }
                 });
             } else if (errorMessage.includes('Unauthorized')) {
                 Swal.fire({
@@ -136,6 +154,11 @@ export const CreateThesisForm: React.FC = () => {
                     title: 'ไม่ได้รับอนุญาต',
                     text: 'กรุณาเข้าสู่ระบบใหม่',
                     confirmButtonColor: '#ef4444',
+                    customClass: {
+                        popup: 'dark:bg-gray-800 dark:text-white',
+                        title: 'dark:text-white',
+                        htmlContainer: 'dark:text-gray-300'
+                    }
                 }).then(() => {
                     navigate('/login');
                 });
@@ -145,6 +168,11 @@ export const CreateThesisForm: React.FC = () => {
                     title: 'เกิดข้อผิดพลาด',
                     text: errorMessage,
                     confirmButtonColor: '#ef4444',
+                    customClass: {
+                        popup: 'dark:bg-gray-800 dark:text-white',
+                        title: 'dark:text-white',
+                        htmlContainer: 'dark:text-gray-300'
+                    }
                 });
             }
         } finally {
@@ -174,7 +202,7 @@ export const CreateThesisForm: React.FC = () => {
                     <button
                         type="button"
                         onClick={() => navigate(-1)}
-                        className="order-2 sm:order-1 flex items-center justify-center gap-2 w-full sm:w-auto px-5 py-2.5 sm:px-6 sm:py-3 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl font-medium text-sm sm:text-base transition-all duration-200"
+                        className="order-2 sm:order-1 flex items-center justify-center gap-2 w-full sm:w-auto px-5 py-2.5 sm:px-6 sm:py-3 text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-xl font-medium text-sm sm:text-base transition-all duration-200"
                     >
                         <FiArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
                         ย้อนกลับ
@@ -186,10 +214,10 @@ export const CreateThesisForm: React.FC = () => {
                         disabled={isSubmitting}
                         className={`
             order-1 sm:order-2 flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-2.5 sm:px-8 sm:py-3 rounded-xl font-semibold text-white text-sm sm:text-base
-            transition-all duration-200 shadow-lg
+            transition-all duration-200 shadow-lg dark:shadow-none
             ${isSubmitting
-                                ? 'bg-gray-400 cursor-not-allowed'
-                                : 'bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 shadow-blue-200 hover:shadow-xl hover:-translate-y-0.5'
+                                ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed'
+                                : 'bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-500 dark:hover:to-blue-600 shadow-blue-200 hover:shadow-xl hover:-translate-y-0.5'
                             }
         `}
                     >

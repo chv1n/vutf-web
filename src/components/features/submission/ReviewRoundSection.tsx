@@ -21,8 +21,7 @@ interface ReviewRoundSectionProps {
 
 /**
  * ReviewRoundSection - แสดง submission ของแต่ละ round
- * 
- * Features:
+ * * Features:
  * - Header: "รอบที่ X" + Status Badge
  * - 2 columns: Original | Report
  */
@@ -42,33 +41,33 @@ export const ReviewRoundSection: React.FC<ReviewRoundSectionProps> = ({
                 return {
                     label: 'รอดำเนินการ',
                     icon: FiClock,
-                    bgColor: 'bg-amber-100',
-                    textColor: 'text-amber-700',
-                    iconColor: 'text-amber-600',
+                    bgColor: 'bg-amber-100 dark:bg-amber-900/30',
+                    textColor: 'text-amber-700 dark:text-amber-300',
+                    iconColor: 'text-amber-600 dark:text-amber-400',
                 };
             case SubmissionStatus.IN_PROGRESS:
                 return {
                     label: 'กำลังตรวจ',
                     icon: FiLoader,
-                    bgColor: 'bg-blue-100',
-                    textColor: 'text-blue-700',
-                    iconColor: 'text-blue-600',
+                    bgColor: 'bg-blue-100 dark:bg-blue-900/30',
+                    textColor: 'text-blue-700 dark:text-blue-300',
+                    iconColor: 'text-blue-600 dark:text-blue-400',
                 };
             case SubmissionStatus.COMPLETED:
                 return {
                     label: 'ตรวจเสร็จ',
                     icon: FiCheckCircle,
-                    bgColor: 'bg-emerald-100',
-                    textColor: 'text-emerald-700',
-                    iconColor: 'text-emerald-600',
+                    bgColor: 'bg-emerald-100 dark:bg-emerald-900/30',
+                    textColor: 'text-emerald-700 dark:text-emerald-300',
+                    iconColor: 'text-emerald-600 dark:text-emerald-400',
                 };
             default:
                 return {
                     label: status,
                     icon: FiClock,
-                    bgColor: 'bg-gray-100',
-                    textColor: 'text-gray-700',
-                    iconColor: 'text-gray-600',
+                    bgColor: 'bg-gray-100 dark:bg-gray-700',
+                    textColor: 'text-gray-700 dark:text-gray-300',
+                    iconColor: 'text-gray-600 dark:text-gray-400',
                 };
         }
     };
@@ -83,7 +82,7 @@ export const ReviewRoundSection: React.FC<ReviewRoundSectionProps> = ({
         <div className="mb-8 last:mb-0">
             {/* Header */}
             <div className="flex items-center gap-3 mb-4">
-                <h3 className="text-lg font-bold text-gray-900">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white">
                     {roundTitle || `รอบที่ ${roundNumber}`}
                 </h3>
                 <span className={`

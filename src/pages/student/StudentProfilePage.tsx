@@ -74,25 +74,33 @@ export const StudentProfilePage = () => {
         timer: 1500,
         showConfirmButton: false,
         position: 'top-end',
-        toast: true
+        toast: true,
+        customClass: {
+            popup: 'dark:bg-gray-800 dark:text-white'
+        }
       });
     } catch (error) {
       Swal.fire({
         icon: 'error',
         title: 'เกิดข้อผิดพลาด',
-        text: 'ไม่สามารถบันทึกข้อมูลได้'
+        text: 'ไม่สามารถบันทึกข้อมูลได้',
+        customClass: {
+            popup: 'dark:bg-gray-800 dark:text-white',
+            title: 'dark:text-white',
+            htmlContainer: 'dark:text-gray-300'
+        }
       });
     } finally {
       setIsSaving(false);
     }
   };
 
-  const inputClass = "w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all text-gray-800 text-base sm:text-sm";
-  const rowClass = "flex flex-col sm:flex-row sm:items-center py-3 border-b border-gray-100 px-2 min-h-[50px] gap-1 sm:gap-0";
-  const labelClass = "w-full sm:w-1/3 text-gray-500 font-medium text-sm flex items-center gap-2";
+  const inputClass = "w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 focus:border-blue-500 dark:focus:border-blue-500 outline-none transition-all text-base sm:text-sm";
+  const rowClass = "flex flex-col sm:flex-row sm:items-center py-3 border-b border-gray-100 dark:border-gray-700 px-2 min-h-[50px] gap-1 sm:gap-0";
+  const labelClass = "w-full sm:w-1/3 text-gray-500 dark:text-gray-400 font-medium text-sm flex items-center gap-2";
   const valueClass = "w-full sm:w-2/3";
 
-  if (loading) return <div className="p-8 text-center text-gray-500 animate-pulse">Loading profile...</div>;
+  if (loading) return <div className="p-8 text-center text-gray-500 dark:text-gray-400 animate-pulse">Loading profile...</div>;
   if (!profile) return null;
 
   return (
@@ -107,12 +115,12 @@ export const StudentProfilePage = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-enter-up">
         
         {/* ================= Card 1: ข้อมูลส่วนตัว (Inline Edit) ================= */}
-        <div className={`bg-white rounded-2xl shadow-sm border p-4 sm:p-6 relative transition-all duration-300 ${isEditing ? 'border-blue-200 shadow-md ring-4 ring-blue-50/50' : 'border-gray-100'}`}>
+        <div className={`bg-white dark:bg-gray-800 rounded-2xl shadow-sm border p-4 sm:p-6 relative transition-all duration-300 ${isEditing ? 'border-blue-200 dark:border-blue-800 shadow-md ring-4 ring-blue-50/50 dark:ring-blue-900/30' : 'border-gray-100 dark:border-gray-700'}`}>
           
           {/* Header Card */}
           <div className="flex items-center justify-between mb-6 h-8">
-            <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-              <FiUser className="text-blue-500" />
+            <h2 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
+              <FiUser className="text-blue-500 dark:text-blue-400" />
               ข้อมูลส่วนตัว
             </h2>
 
@@ -121,14 +129,14 @@ export const StudentProfilePage = () => {
                 <button 
                   onClick={handleCancelEdit}
                   disabled={isSaving}
-                  className="px-3 py-1 text-sm text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors flex items-center gap-1"
+                  className="px-3 py-1 text-sm text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors flex items-center gap-1"
                 >
                   <FiX /> <span className="hidden sm:inline">ยกเลิก</span>
                 </button>
                 <button 
                   onClick={handleSave}
                   disabled={isSaving}
-                  className="px-3 py-1 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition-colors flex items-center gap-1"
+                  className="px-3 py-1 text-sm text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 rounded-lg shadow-sm transition-colors flex items-center gap-1"
                 >
                   {isSaving ? '...' : <><FiCheck /> <span>บันทึก</span></>}
                 </button>
@@ -136,7 +144,7 @@ export const StudentProfilePage = () => {
             ) : (
               <button 
                 onClick={handleStartEdit}
-                className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-all"
+                className="p-2 text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-full transition-all"
                 title="แก้ไขข้อมูล"
               >
                 <FiEdit2 size={18} />
@@ -160,7 +168,7 @@ export const StudentProfilePage = () => {
                     <option value="นาง">นาง</option>
                   </select>
                 ) : (
-                  <span className="text-gray-800 font-medium text-base sm:text-sm">{profile.prefix_name}</span>
+                  <span className="text-gray-800 dark:text-gray-200 font-medium text-base sm:text-sm">{profile.prefix_name}</span>
                 )}
               </div>
             </div>
@@ -177,7 +185,7 @@ export const StudentProfilePage = () => {
                     onChange={e => setFormData({...formData, firstName: e.target.value})}
                   />
                 ) : (
-                  <span className="text-gray-800 font-medium text-base sm:text-sm">{profile.first_name}</span>
+                  <span className="text-gray-800 dark:text-gray-200 font-medium text-base sm:text-sm">{profile.first_name}</span>
                 )}
               </div>
             </div>
@@ -194,7 +202,7 @@ export const StudentProfilePage = () => {
                     onChange={e => setFormData({...formData, lastName: e.target.value})}
                   />
                 ) : (
-                  <span className="text-gray-800 font-medium text-base sm:text-sm">{profile.last_name}</span>
+                  <span className="text-gray-800 dark:text-gray-200 font-medium text-base sm:text-sm">{profile.last_name}</span>
                 )}
               </div>
             </div>
@@ -202,7 +210,7 @@ export const StudentProfilePage = () => {
             {/* 4. เบอร์โทรศัพท์ */}
             <div className={rowClass}>
               <div className={labelClass}>
-                <FiPhone className="text-blue-500 sm:hidden md:inline" /> เบอร์โทรศัพท์
+                <FiPhone className="text-blue-500 dark:text-blue-400 sm:hidden md:inline" /> เบอร์โทรศัพท์
               </div>
               <div className={valueClass}>
                 {isEditing ? (
@@ -213,7 +221,7 @@ export const StudentProfilePage = () => {
                     onChange={e => setFormData({...formData, phone: e.target.value})}
                   />
                 ) : (
-                  <span className="text-gray-800 font-medium text-base sm:text-sm">{profile.phone}</span>
+                  <span className="text-gray-800 dark:text-gray-200 font-medium text-base sm:text-sm">{profile.phone}</span>
                 )}
               </div>
             </div>
@@ -221,10 +229,10 @@ export const StudentProfilePage = () => {
             {/* 5. อีเมล */}
             <div className={rowClass}>
               <div className={labelClass}>
-                <FiMail className="text-blue-500 sm:hidden md:inline" /> อีเมล
+                <FiMail className="text-blue-500 dark:text-blue-400 sm:hidden md:inline" /> อีเมล
               </div>
               <div className={valueClass}>
-                <span className="text-gray-500 font-medium text-base sm:text-sm break-all">
+                <span className="text-gray-500 dark:text-gray-400 font-medium text-base sm:text-sm break-all">
                   {profile.email}
                 </span>
               </div>
@@ -233,10 +241,10 @@ export const StudentProfilePage = () => {
         </div>
 
         {/* ================= Card 2: ข้อมูลการศึกษา (Read Only) ================= */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 h-fit">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 sm:p-6 h-fit transition-colors">
           <div className="flex items-center justify-between mb-6 h-8">
-            <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-              <FiBook className="text-blue-500" />
+            <h2 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
+              <FiBook className="text-blue-500 dark:text-blue-400" />
               ข้อมูลการศึกษา
             </h2>
           </div>
@@ -245,10 +253,10 @@ export const StudentProfilePage = () => {
             {/* 1. รหัสนักศึกษา */}
             <div className={rowClass}>
               <div className={labelClass}>
-                 <FiHash className="text-blue-500 sm:hidden md:inline" /> รหัสนักศึกษา
+                 <FiHash className="text-blue-500 dark:text-blue-400 sm:hidden md:inline" /> รหัสนักศึกษา
               </div>
               <div className={valueClass}>
-                <span className="text-gray-800 font-medium text-base sm:text-sm">
+                <span className="text-gray-800 dark:text-gray-200 font-medium text-base sm:text-sm">
                   {profile.student_code}
                 </span>
               </div>
@@ -258,7 +266,7 @@ export const StudentProfilePage = () => {
             <div className={rowClass}>
               <div className={labelClass}>กลุ่มเรียน (Section)</div>
               <div className={valueClass}>
-                <span className="text-gray-800 font-medium text-base sm:text-sm">
+                <span className="text-gray-800 dark:text-gray-200 font-medium text-base sm:text-sm">
                   {profile.sectionName}
                 </span>
               </div>
@@ -268,7 +276,7 @@ export const StudentProfilePage = () => {
             <div className={rowClass}>
               <div className={labelClass}>สถานะ</div>
               <div className={valueClass}>
-                <span className={`px-2 py-0.5 rounded text-sm font-medium ${profile.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                <span className={`px-2 py-0.5 rounded text-sm font-medium ${profile.is_active ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'}`}>
                   {profile.is_active ? 'Active' : 'Inactive'}
                 </span>
               </div>
@@ -278,7 +286,7 @@ export const StudentProfilePage = () => {
             <div className={rowClass}>
               <div className={labelClass}>วันที่สมัคร</div>
               <div className={valueClass}>
-                <span className="text-gray-800 font-medium text-base sm:text-sm">
+                <span className="text-gray-800 dark:text-gray-200 font-medium text-base sm:text-sm">
                   {new Date(profile.create_at).toLocaleDateString('th-TH')}
                 </span>
               </div>
