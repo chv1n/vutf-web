@@ -3,13 +3,14 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { FiFileText, FiLoader, FiInbox } from 'react-icons/fi';
+import { FiFileText, FiLoader, FiInbox, FiDownload, FiX, FiFile } from 'react-icons/fi';
+import { FaFilePdf } from 'react-icons/fa6';
 import { useTitle } from '@/hooks/useTitle';
 import { useAuth } from '@/contexts/AuthContext';
 import { groupMemberService } from '@/services/group-member.service';
 import { submissionService } from '@/services/submission.service';
 import { ThesisGroup } from '@/types/thesis';
-import { Submission } from '@/types/submission';
+import { Submission, formatFileSize } from '@/types/submission';
 
 // Components
 import { GroupSelector } from '@/components/features/submission/GroupSelector';
@@ -40,6 +41,9 @@ const ThesisReportPage: React.FC = () => {
     const [submissions, setSubmissions] = useState<Submission[]>([]);
     const [isLoadingGroups, setIsLoadingGroups] = useState(true);
     const [isLoadingSubmissions, setIsLoadingSubmissions] = useState(false);
+
+    // State สำหรับ Preview Modal
+    const [previewFile, setPreviewFile] = useState<{ url: string; downloadUrl: string; name: string; type: string; size: number;} | null>(null);
 
     /**
      * Fetch user's groups
@@ -111,10 +115,39 @@ const ThesisReportPage: React.FC = () => {
      */
     const handleDownload = async (submissionId: number) => {
         try {
-            const { url } = await submissionService.getFileUrl(submissionId);
-            window.open(url, '_blank');
+            // เรียกใช้ API เพื่อขอ URL ใหม่ (downloadUrl)
+            const res = await submissionService.getFileUrl(submissionId);
+            const targetUrl = res.downloadUrl || res.url;
+
+            // สร้าง Link ชั่วคราวเพื่อ Force Download
+            const link = document.createElement('a');
+            link.href = targetUrl;
+            link.setAttribute('download', '');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         } catch (error) {
             console.error('Error getting download URL:', error);
+            alert('ไม่สามารถดาวน์โหลดไฟล์ได้');
+        }
+    };
+
+    /**
+     * Handle Preview
+     */
+    const handlePreview = async (submissionId: number, fileName: string, fileSize: number, mimeType?: string) => {
+        try {
+            const res = await submissionService.getFileUrl(submissionId);
+            setPreviewFile({
+                url: res.url,
+                downloadUrl: res.downloadUrl,
+                name: fileName,
+                type: mimeType || 'application/pdf',
+                size: fileSize,
+            });
+        } catch (error) {
+            console.error('Error opening preview:', error);
+            alert('ไม่สามารถเปิดไฟล์ได้');
         }
     };
 
@@ -221,16 +254,88 @@ const ThesisReportPage: React.FC = () => {
                         {submissions.map((submission, index) => (
                             <ReviewRoundSection
                                 key={submission.submissionId}
-                                roundNumber={submissions.length - index}
-                                roundTitle={`รอบที่ ${submissions.length - index}`}
+                                roundNumber={submission.inspectionRoundNumber || (submissions.length - index)}
+                                // roundTitle={submission.inspectionTitle || `รอบที่ ${submissions.length - index}`}
                                 submission={submission}
+                                // ส่ง Actions: Original File
                                 onDownloadOriginal={() => handleDownload(submission.submissionId)}
+                                onPreviewOriginal={() => handlePreview(submission.submissionId, submission.fileName, submission.fileSize, submission.mimeType)}
+                                // ส่ง Actions: Report File (ถ้า Logic เปลี่ยนให้แก้ตรงนี้)
                                 onDownloadReport={() => handleDownload(submission.submissionId)}
+                                onPreviewReport={() => handlePreview(submission.submissionId, submission.fileName, submission.fileSize, submission.mimeType)}
                             />
                         ))}
                     </div>
                 )}
             </motion.div>
+
+            {/* Preview Modal */}
+            {previewFile && (
+                <div className="fixed inset-0 z-[9999] flex flex-col bg-gray-900/95 backdrop-blur-sm p-0 sm:p-4 animate-in fade-in duration-200">
+                    {/* Header */}
+                    <div className="flex items-center justify-between bg-white dark:bg-gray-800 p-3 sm:p-4 rounded-none sm:rounded-t-xl border-b dark:border-gray-700 shrink-0 shadow-sm">
+                        <div className="flex items-center gap-3 overflow-hidden">
+                            <div className="p-2 bg-red-50 dark:bg-white rounded-lg text-red-500 shrink-0">
+                                <FaFilePdf size={24} />
+                            </div>
+                            <div className="min-w-0">
+                                <p className="font-semibold text-gray-900 dark:text-white truncate text-base sm:text-lg max-w-[200px] sm:max-w-md">
+                                    {previewFile.name}
+                                </p>
+                                <p className="text-xs text-gray-500 uppercase tracking-wider">
+                                    {previewFile.type.split('/')[1] || 'FILE'} • {formatFileSize(previewFile.size)}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                            {/* Download Button (Desktop) */}
+                            <a
+                                href={previewFile.downloadUrl}
+                                download={previewFile.name}
+                                className="hidden sm:flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-medium shadow-sm"
+                            >
+                                <FiDownload size={18} />
+                                <span>Download</span>
+                            </a>
+                            {/* Download Button (Mobile) */}
+                            <a
+                                href={previewFile.downloadUrl}
+                                download={previewFile.name}
+                                className="sm:hidden p-2 text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
+                            >
+                                <FiDownload size={24} />
+                            </a>
+
+                            <button
+                                onClick={() => setPreviewFile(null)}
+                                className="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-200 rounded-lg transition-colors"
+                            >
+                                <FiX size={24} />
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Body */}
+                    <div className="flex-1 bg-white dark:bg-gray-900 rounded-none sm:rounded-b-xl overflow-hidden shadow-2xl relative">
+                        {previewFile.type.includes('pdf') ? (
+                            <iframe
+                                src={`${previewFile.url}#toolbar=0`}
+                                className="w-full h-full border-none"
+                                title="File Preview"
+                            />
+                        ) : (
+                            <div className="w-full h-full flex flex-col items-center justify-center p-4 text-gray-400">
+                                <FiFile size={48} className="mb-4 opacity-30" />
+                                <p>ไม่สามารถแสดงตัวอย่างไฟล์ประเภทนี้ได้</p>
+                                <a href={previewFile.downloadUrl} download={previewFile.name} className="mt-4 text-blue-600 hover:underline">
+                                    ดาวน์โหลดไฟล์
+                                </a>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

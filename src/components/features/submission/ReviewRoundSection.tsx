@@ -15,8 +15,12 @@ interface ReviewRoundSectionProps {
     submission: Submission;
     /** Callback download original */
     onDownloadOriginal?: () => void;
+    /** Callback preview original */
+    onPreviewOriginal?: () => void;
     /** Callback download report */
     onDownloadReport?: () => void;
+    /** Callback preview report */
+    onPreviewReport?: () => void;
 }
 
 /**
@@ -30,7 +34,9 @@ export const ReviewRoundSection: React.FC<ReviewRoundSectionProps> = ({
     roundTitle,
     submission,
     onDownloadOriginal,
+    onPreviewOriginal,
     onDownloadReport,
+    onPreviewReport,
 }) => {
     /**
      * Get status config
@@ -83,7 +89,10 @@ export const ReviewRoundSection: React.FC<ReviewRoundSectionProps> = ({
             {/* Header */}
             <div className="flex items-center gap-3 mb-4">
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                    {roundTitle || `รอบที่ ${roundNumber}`}
+                    {roundTitle
+                        ? `รอบที่ ${roundNumber}: ${roundTitle}`
+                        : `รอบที่ ${roundNumber}`
+                    }
                 </h3>
                 <span className={`
                     inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium
@@ -105,6 +114,7 @@ export const ReviewRoundSection: React.FC<ReviewRoundSectionProps> = ({
                         submittedAt: submission.submittedAt,
                     }}
                     onDownload={onDownloadOriginal}
+                    onPreview={onPreviewOriginal}
                 />
 
                 {/* Report (mocked) */}
@@ -119,6 +129,7 @@ export const ReviewRoundSection: React.FC<ReviewRoundSectionProps> = ({
                     } : undefined}
                     reviewerName={hasReport ? 'อ.ผู้ตรวจ' : undefined}
                     onDownload={onDownloadReport}
+                    onPreview={onPreviewReport}
                 />
             </div>
         </div>

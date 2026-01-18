@@ -100,12 +100,24 @@ export function useSubmissions(groupId: string | null) {
 
     /**
      * Download file
+     * แก้ไข: รองรับ downloadUrl และบังคับโหลดไฟล์
      */
     const downloadFile = useCallback(async (submissionId: number) => {
         try {
-            const { url } = await submissionService.getFileUrl(submissionId);
-            // Open in new tab
-            window.open(url, '_blank');
+            // 1. เรียก Service เพื่อขอ URL ล่าสุด (สดใหม่เสมอ)
+            const res = await submissionService.getFileUrl(submissionId);
+            
+            // 2. เลือกใช้ downloadUrl ก่อน ถ้าไม่มีค่อยใช้ url ธรรมดา
+            const targetUrl = res.downloadUrl || res.url;
+
+            // 3. สร้าง Link ชั่วคราวเพื่อสั่งดาวน์โหลด
+            const link = document.createElement('a');
+            link.href = targetUrl;
+            link.setAttribute('download', ''); // ใส่ attribute download
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
         } catch (err: unknown) {
             const errorMessage = err instanceof Error
                 ? err.message

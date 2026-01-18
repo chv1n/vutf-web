@@ -11,6 +11,7 @@ export interface GroupProgress {
   submittedAt: string | null;
   submissionId: number | null;
   fileUrl: string | null;
+  downloadUrl?: string | null;
   fileName: string | null;
 }
 
