@@ -28,17 +28,10 @@ interface TabConfig {
 
 /**
  * GroupManagementPage - หน้าจัดการกลุ่มวิทยานิพนธ์
- * 
- * Route: /student/group-management
- * 
- * Features:
+ * * Features:
  * - Tab: My Groups - แสดงกลุ่มเป็นตาราง
  * - Tab: Create Group - สร้างกลุ่มใหม่
  * - Tab: Invitations - ดูคำเชิญ
- * 
- * SOLID:
- * - Single Responsibility: แต่ละ tab จัดการหน้าที่ของตัวเอง
- * - Open/Closed: Tab system ขยายได้ง่าย
  */
 const GroupManagementPage: React.FC = () => {
     useTitle('จัดการกลุ่มวิทยานิพนธ์');
@@ -68,7 +61,7 @@ const GroupManagementPage: React.FC = () => {
     ];
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900/30 transition-colors">
             <div className="max-w-6xl mx-auto px-4 py-8">
                 {/* Page Header */}
                 <motion.div
@@ -78,22 +71,22 @@ const GroupManagementPage: React.FC = () => {
                     className="mb-8"
                 >
                     {/* Breadcrumb */}
-                    <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
+                    <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-4">
                         <span>หน้าหลัก</span>
                         <span>/</span>
-                        <span className="text-blue-600 font-medium">จัดการกลุ่ม</span>
+                        <span className="text-blue-600 dark:text-blue-400 font-medium">จัดการกลุ่ม</span>
                     </div>
 
                     {/* Title */}
                     <div className="flex items-center gap-4">
-                        <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-xl shadow-blue-200">
+                        <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-xl shadow-blue-200 dark:shadow-none">
                             <FiUsers className="w-7 h-7 text-white" />
                         </div>
                         <div>
-                            <h1 className="text-2xl font-bold text-gray-900">
+                            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                                 จัดการกลุ่มวิทยานิพนธ์
                             </h1>
-                            <p className="text-gray-500 mt-1">
+                            <p className="text-gray-500 dark:text-gray-400 mt-1">
                                 ดูกลุ่ม สร้างกลุ่ม และจัดการคำเชิญ
                             </p>
                         </div>
@@ -107,7 +100,7 @@ const GroupManagementPage: React.FC = () => {
                     transition={{ duration: 0.4, delay: 0.1 }}
                     className="mb-6"
                 >
-                    <div className="flex items-center gap-1 p-1.5 bg-gray-100 rounded-xl overflow-x-auto no-scrollbar">
+                    <div className="flex items-center gap-1 p-1.5 bg-gray-100 dark:bg-gray-700 rounded-xl overflow-x-auto no-scrollbar transition-colors">
                         {tabs.map((tab) => {
                             const Icon = tab.icon;
                             const isActive = activeTab === tab.key;
@@ -119,8 +112,8 @@ const GroupManagementPage: React.FC = () => {
                         flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 rounded-lg text-sm font-medium whitespace-nowrap
                         transition-all duration-200 shrink-0 relative
                         ${isActive
-                                            ? 'bg-white text-blue-600 shadow-sm'
-                                            : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
+                                            ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm'
+                                            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-600'
                                         }
                     `}
                                     title={tab.label}
@@ -228,21 +221,21 @@ const MyGroupsTab: React.FC = () => {
 
     return (
         <>
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden transition-colors">
                 {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b border-gray-100">
+                <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-gray-700">
                     <div>
-                        <h2 className="text-lg font-bold text-gray-900">กลุ่มของฉัน</h2>
-                        <p className="text-sm text-gray-500 mt-0.5">
+                        <h2 className="text-lg font-bold text-gray-900 dark:text-white">กลุ่มของฉัน</h2>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
                             รายการกลุ่มวิทยานิพนธ์ที่คุณเป็นสมาชิก ({groups.length} กลุ่ม)
                         </p>
                     </div>
                     <button
                         onClick={fetchGroups}
                         disabled={isLoading}
-                        className="p-2.5 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors disabled:opacity-50"
+                        className="p-2.5 bg-gray-100 dark:bg-gray-700 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors disabled:opacity-50"
                     >
-                        <FiRefreshCw className={`w-5 h-5 text-gray-600 ${isLoading ? 'animate-spin' : ''}`} />
+                        <FiRefreshCw className={`w-5 h-5 text-gray-600 dark:text-gray-300 ${isLoading ? 'animate-spin' : ''}`} />
                     </button>
                 </div>
 
@@ -265,11 +258,11 @@ const MyGroupsTab: React.FC = () => {
  */
 const CreateGroupTab: React.FC = () => {
     return (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden transition-colors">
             {/* Header */}
-            <div className="p-6 border-b border-gray-100">
-                <h2 className="text-lg font-bold text-gray-900">สร้างกลุ่มวิทยานิพนธ์</h2>
-                <p className="text-sm text-gray-500 mt-0.5">
+            <div className="p-6 border-b border-gray-100 dark:border-gray-700">
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white">สร้างกลุ่มวิทยานิพนธ์</h2>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
                     กรอกข้อมูลเพื่อสร้างกลุ่มวิทยานิพนธ์ใหม่
                 </p>
             </div>
@@ -336,14 +329,14 @@ const InvitationsTab: React.FC<InvitationsTabProps> = ({ onUpdate }) => {
     );
 
     return (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden transition-colors">
             {/* Header - ปรับ Padding ให้เล็กลงในมือถือ (p-4 sm:p-6) */}
-            <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-100">
+            <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-100 dark:border-gray-700">
                 <div className="min-w-0"> {/* เพิ่ม min-w-0 เพื่อป้องกันข้อความดันปุ่มรีเฟรช */}
-                    <h2 className="text-base sm:text-lg font-bold text-gray-900 truncate">
+                    <h2 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white truncate">
                         คำเชิญเข้าร่วมกลุ่ม
                     </h2>
-                    <p className="text-xs sm:text-sm text-gray-500 mt-0.5 truncate">
+                    <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5 truncate">
                         คำเชิญที่รอการตอบรับ ({pendingInvitations.length})
                     </p>
                 </div>
@@ -352,9 +345,9 @@ const InvitationsTab: React.FC<InvitationsTabProps> = ({ onUpdate }) => {
                 <button
                     onClick={fetchInvitations}
                     disabled={isLoading}
-                    className="p-2 sm:p-2.5 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors disabled:opacity-50 shrink-0 ml-4"
+                    className="p-2 sm:p-2.5 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-xl transition-colors disabled:opacity-50 shrink-0 ml-4"
                 >
-                    <FiRefreshCw className={`w-4 h-4 sm:w-5 h-5 text-gray-600 ${isLoading ? 'animate-spin' : ''}`} />
+                    <FiRefreshCw className={`w-4 h-4 sm:w-5 h-5 text-gray-600 dark:text-gray-300 ${isLoading ? 'animate-spin' : ''}`} />
                 </button>
             </div>
 
@@ -362,19 +355,19 @@ const InvitationsTab: React.FC<InvitationsTabProps> = ({ onUpdate }) => {
             <div className="p-4 sm:p-6">
                 {isLoading ? (
                     <div className="flex flex-col items-center justify-center py-10 sm:py-12">
-                        <FiLoader className="w-8 h-8 sm:w-10 sm:h-10 text-blue-500 animate-spin mb-4" />
-                        <p className="text-sm sm:text-base text-gray-500 font-medium">กำลังโหลดคำเชิญ...</p>
+                        <FiLoader className="w-8 h-8 sm:w-10 sm:h-10 text-blue-500 dark:text-blue-400 animate-spin mb-4" />
+                        <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400 font-medium">กำลังโหลดคำเชิญ...</p>
                     </div>
                 ) : error ? (
                     <div className="flex flex-col items-center justify-center py-10 sm:py-12 text-center">
-                        <div className="w-14 h-14 sm:w-16 sm:h-16 bg-red-50 rounded-full flex items-center justify-center mb-4">
-                            <FiMail className="w-7 h-7 sm:w-8 sm:h-8 text-red-500" />
+                        <div className="w-14 h-14 sm:w-16 sm:h-16 bg-red-50 dark:bg-red-900/20 rounded-full flex items-center justify-center mb-4">
+                            <FiMail className="w-7 h-7 sm:w-8 sm:h-8 text-red-500 dark:text-red-400" />
                         </div>
-                        <p className="text-gray-900 font-bold mb-1">เกิดข้อผิดพลาด</p>
-                        <p className="text-gray-500 text-xs sm:text-sm mb-4 px-4">{error}</p>
+                        <p className="text-gray-900 dark:text-white font-bold mb-1">เกิดข้อผิดพลาด</p>
+                        <p className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm mb-4 px-4">{error}</p>
                         <button
                             onClick={fetchInvitations}
-                            className="px-5 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+                            className="px-5 py-2 bg-blue-600 dark:bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 dark:hover:bg-blue-500 transition-colors shadow-sm"
                         >
                             ลองใหม่อีกครั้ง
                         </button>
@@ -385,11 +378,11 @@ const InvitationsTab: React.FC<InvitationsTabProps> = ({ onUpdate }) => {
                         animate={{ opacity: 1, scale: 1 }}
                         className="flex flex-col items-center justify-center py-10 sm:py-12 text-center"
                     >
-                        <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-50 rounded-full flex items-center justify-center mb-4">
-                            <FiInbox className="w-8 h-8 sm:w-10 sm:h-10 text-gray-300" />
+                        <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-50 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4 transition-colors">
+                            <FiInbox className="w-8 h-8 sm:w-10 sm:h-10 text-gray-300 dark:text-gray-500" />
                         </div>
-                        <p className="text-gray-900 font-bold mb-1 text-sm sm:text-base">ไม่มีคำเชิญ</p>
-                        <p className="text-gray-400 text-xs sm:text-sm">
+                        <p className="text-gray-900 dark:text-white font-bold mb-1 text-sm sm:text-base">ไม่มีคำเชิญ</p>
+                        <p className="text-gray-400 dark:text-gray-500 text-xs sm:text-sm">
                             คุณไม่มีคำเชิญที่รอการตอบรับในขณะนี้
                         </p>
                     </motion.div>

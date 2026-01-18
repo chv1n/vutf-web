@@ -26,8 +26,7 @@ import { SubmissionUploadForm, SubmissionList } from '@/components/features/subm
 
 /**
  * InspectionRoundPage - หน้า Inspection Round
- * 
- * Features:
+ * * Features:
  * - แสดง Active Inspection Round
  * - เลือกกลุ่มสำหรับ Owner หลายกลุ่ม
  * - ส่งไฟล์ (Owner only)
@@ -143,30 +142,30 @@ const InspectionRoundPage: React.FC = () => {
     // Loading
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <FiLoader className="w-10 h-10 text-blue-500 animate-spin" />
+            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center transition-colors">
+                <FiLoader className="w-10 h-10 text-blue-500 dark:text-blue-400 animate-spin" />
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900/30 transition-colors">
             <div className="max-w-4xl mx-auto px-4 py-8">
                 {/* Back Button */}
                 <button
                     onClick={() => navigate(-1)}
-                    className="flex items-center gap-2 text-gray-500 hover:text-gray-900 mb-6 transition-colors"
+                    className="flex items-center gap-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white mb-6 transition-colors"
                 >
                     <FiArrowLeft /> ย้อนกลับ
                 </button>
 
                 {/* Header */}
                 <div className="mb-8">
-                    <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
-                        <FiClipboard className="w-8 h-8 text-blue-500" />
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+                        <FiClipboard className="w-8 h-8 text-blue-500 dark:text-blue-400" />
                         รอบตรวจความก้าวหน้า
                     </h1>
-                    <p className="text-gray-500 mt-2">ส่งไฟล์รายงานความก้าวหน้าตามรอบที่กำหนด</p>
+                    <p className="text-gray-500 dark:text-gray-400 mt-2">ส่งไฟล์รายงานความก้าวหน้าตามรอบที่กำหนด</p>
                 </div>
 
                 {/* No Active Round */}
@@ -174,11 +173,11 @@ const InspectionRoundPage: React.FC = () => {
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="bg-amber-50 border border-amber-200 rounded-2xl p-8 text-center"
+                        className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-2xl p-8 text-center transition-colors"
                     >
-                        <FiAlertCircle className="w-12 h-12 text-amber-400 mx-auto mb-4" />
-                        <h2 className="text-lg font-semibold text-gray-900 mb-2">ไม่มีรอบตรวจที่เปิดรับไฟล์</h2>
-                        <p className="text-gray-600">กรุณารอประกาศเปิดรับไฟล์ใหม่จากทางคณะ</p>
+                        <FiAlertCircle className="w-12 h-12 text-amber-400 dark:text-amber-500 mx-auto mb-4" />
+                        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">ไม่มีรอบตรวจที่เปิดรับไฟล์</h2>
+                        <p className="text-gray-600 dark:text-gray-300">กรุณารอประกาศเปิดรับไฟล์ใหม่จากทางคณะ</p>
                     </motion.div>
                 )}
 
@@ -188,22 +187,22 @@ const InspectionRoundPage: React.FC = () => {
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-6"
+                            className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 mb-6 transition-colors"
                         >
                             {/* Round Header */}
                             <div className="flex items-start gap-4 mb-6">
-                                <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-200 flex-shrink-0">
+                                <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-200 dark:shadow-none flex-shrink-0">
                                     <FiClipboard className="w-7 h-7 text-white" />
                                 </div>
                                 <div className="flex-1">
-                                    <h2 className="text-xl font-bold text-gray-900">{activeRound.title}</h2>
-                                    <p className="text-gray-500 mt-1">{activeRound.description || `รอบที่ ${activeRound.roundNumber}`}</p>
+                                    <h2 className="text-xl font-bold text-gray-900 dark:text-white">{activeRound.title}</h2>
+                                    <p className="text-gray-500 dark:text-gray-400 mt-1">{activeRound.description || `รอบที่ ${activeRound.roundNumber}`}</p>
 
                                     <div className="flex flex-wrap gap-2 mt-3">
-                                        <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
+                                        <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-sm font-medium">
                                             ภาคเรียน {activeRound.term}/{activeRound.academicYear}
                                         </span>
-                                        <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm font-medium">
+                                        <span className="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-full text-sm font-medium">
                                             รอบที่ {activeRound.roundNumber}
                                         </span>
                                     </div>
@@ -212,18 +211,18 @@ const InspectionRoundPage: React.FC = () => {
 
                             {/* Date Info */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                                <div className="flex items-center gap-3 bg-gray-50 rounded-xl px-4 py-3">
-                                    <FiCalendar className="w-5 h-5 text-gray-400" />
+                                <div className="flex items-center gap-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl px-4 py-3 transition-colors">
+                                    <FiCalendar className="w-5 h-5 text-gray-400 dark:text-gray-500" />
                                     <div>
-                                        <p className="text-xs text-gray-500">เริ่มต้น</p>
-                                        <p className="text-sm font-medium text-gray-900">{formatDate(activeRound.startDate)}</p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">เริ่มต้น</p>
+                                        <p className="text-sm font-medium text-gray-900 dark:text-white">{formatDate(activeRound.startDate)}</p>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-3 bg-gray-50 rounded-xl px-4 py-3">
-                                    <FiCalendar className="w-5 h-5 text-gray-400" />
+                                <div className="flex items-center gap-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl px-4 py-3 transition-colors">
+                                    <FiCalendar className="w-5 h-5 text-gray-400 dark:text-gray-500" />
                                     <div>
-                                        <p className="text-xs text-gray-500">สิ้นสุด</p>
-                                        <p className="text-sm font-medium text-gray-900">{formatDate(activeRound.endDate)}</p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">สิ้นสุด</p>
+                                        <p className="text-sm font-medium text-gray-900 dark:text-white">{formatDate(activeRound.endDate)}</p>
                                     </div>
                                 </div>
                             </div>
@@ -231,20 +230,20 @@ const InspectionRoundPage: React.FC = () => {
                             {/* Countdown */}
                             {countdown && (
                                 <div className={`
-                  flex items-center gap-3 px-4 py-3 rounded-xl
-                  ${countdown.type === 'active' ? 'bg-emerald-50 border border-emerald-100' : ''}
-                  ${countdown.type === 'waiting' ? 'bg-amber-50 border border-amber-100' : ''}
-                  ${countdown.type === 'ended' ? 'bg-red-50 border border-red-100' : ''}
+                  flex items-center gap-3 px-4 py-3 rounded-xl transition-colors
+                  ${countdown.type === 'active' ? 'bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800' : ''}
+                  ${countdown.type === 'waiting' ? 'bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800' : ''}
+                  ${countdown.type === 'ended' ? 'bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800' : ''}
                 `}>
                                     <FiClock className={`w-5 h-5
-                    ${countdown.type === 'active' ? 'text-emerald-500' : ''}
-                    ${countdown.type === 'waiting' ? 'text-amber-500' : ''}
-                    ${countdown.type === 'ended' ? 'text-red-500' : ''}
+                    ${countdown.type === 'active' ? 'text-emerald-500 dark:text-emerald-400' : ''}
+                    ${countdown.type === 'waiting' ? 'text-amber-500 dark:text-amber-400' : ''}
+                    ${countdown.type === 'ended' ? 'text-red-500 dark:text-red-400' : ''}
                   `} />
                                     <span className={`font-medium
-                    ${countdown.type === 'active' ? 'text-emerald-700' : ''}
-                    ${countdown.type === 'waiting' ? 'text-amber-700' : ''}
-                    ${countdown.type === 'ended' ? 'text-red-700' : ''}
+                    ${countdown.type === 'active' ? 'text-emerald-700 dark:text-emerald-300' : ''}
+                    ${countdown.type === 'waiting' ? 'text-amber-700 dark:text-amber-300' : ''}
+                    ${countdown.type === 'ended' ? 'text-red-700 dark:text-red-300' : ''}
                   `}>
                                         {countdown.text}
                                     </span>
@@ -258,10 +257,10 @@ const InspectionRoundPage: React.FC = () => {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.1 }}
-                                className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-6"
+                                className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 mb-6 transition-colors"
                             >
-                                <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2 mb-4">
-                                    <FiUploadCloud className="w-5 h-5 text-blue-500" />
+                                <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2 mb-4">
+                                    <FiUploadCloud className="w-5 h-5 text-blue-500 dark:text-blue-400" />
                                     ส่งไฟล์
                                 </h3>
 
@@ -298,7 +297,7 @@ const InspectionRoundPage: React.FC = () => {
 
                                 {/* No group selected message */}
                                 {!selectedGroupId && hasMultipleGroups && (
-                                    <div className="flex items-center gap-2 text-gray-500 text-sm">
+                                    <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm">
                                         <FiInfo className="w-4 h-4" />
                                         <span>กรุณาเลือกกลุ่มเพื่อส่งไฟล์</span>
                                     </div>
@@ -312,13 +311,13 @@ const InspectionRoundPage: React.FC = () => {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.1 }}
-                                className="bg-blue-50 border border-blue-100 rounded-2xl p-6 mb-6"
+                                className="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-900/50 rounded-2xl p-6 mb-6 transition-colors"
                             >
                                 <div className="flex items-start gap-3">
-                                    <FiInfo className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
+                                    <FiInfo className="w-5 h-5 text-blue-500 dark:text-blue-400 flex-shrink-0 mt-0.5" />
                                     <div>
-                                        <h3 className="font-medium text-blue-900">คุณไม่ได้เป็นหัวหน้ากลุ่ม</h3>
-                                        <p className="text-blue-700 mt-1 text-sm">
+                                        <h3 className="font-medium text-blue-900 dark:text-blue-200">คุณไม่ได้เป็นหัวหน้ากลุ่ม</h3>
+                                        <p className="text-blue-700 dark:text-blue-300 mt-1 text-sm">
                                             เฉพาะหัวหน้ากลุ่ม (Owner) เท่านั้นที่สามารถส่งไฟล์ได้
                                             กรุณาติดต่อหัวหน้ากลุ่มของคุณ หรือหากคุณยังไม่มีกลุ่ม กรุณาสร้างกลุ่มใหม่
                                         </p>
@@ -333,10 +332,10 @@ const InspectionRoundPage: React.FC = () => {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.2 }}
-                                className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100"
+                                className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 transition-colors"
                             >
-                                <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2 mb-4">
-                                    <FiFileText className="w-5 h-5 text-emerald-500" />
+                                <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2 mb-4">
+                                    <FiFileText className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
                                     ประวัติการส่งไฟล์
                                 </h3>
                                 <SubmissionList

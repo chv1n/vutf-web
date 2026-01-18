@@ -84,8 +84,8 @@ export const ThesisTopicPage = () => {
                 keyword,
                 start_academic_year: academicYear !== '' ? academicYear : undefined,
                 start_term: term !== '' ? term : undefined,
-                group_status: groupStatusParam,  
-                thesis_status: thesisStatusParam 
+                group_status: groupStatusParam,
+                thesis_status: thesisStatusParam
             });
 
             if (res && res.data) {
@@ -103,7 +103,7 @@ export const ThesisTopicPage = () => {
     // Fetch เมื่อมีการเปลี่ยน Filter ใดๆ
     useEffect(() => {
         fetchGroups();
-    }, [activeTab, page, keyword, academicYear, term, statusFilter]); 
+    }, [activeTab, page, keyword, academicYear, term, statusFilter]);
 
     // Reset ค่าเมื่อเปลี่ยน Tab
     useEffect(() => {
@@ -188,9 +188,9 @@ export const ThesisTopicPage = () => {
             {/* --- Header --- */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-800">จัดการหัวข้อวิทยานิพนธ์</h1>
+                    <h1 className="text-2xl font-bold text-gray-800 dark:text-white">จัดการหัวข้อวิทยานิพนธ์</h1>
                     {viewMode === 'list' && (
-                        <p className="text-gray-500 text-sm mt-1">ทั้งหมด {totalItems} รายการ</p>
+                        <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">ทั้งหมด {totalItems} รายการ</p>
                     )}
                 </div>
             </div>
@@ -213,18 +213,20 @@ export const ThesisTopicPage = () => {
                         setAcademicYear={setAcademicYear}
                         term={term}
                         setTerm={setTerm}
-                        activeTab={activeTab}        
-                        statusFilter={statusFilter}  
-                        setStatusFilter={setStatusFilter} 
+                        activeTab={activeTab}
+                        statusFilter={statusFilter}
+                        setStatusFilter={setStatusFilter}
                         defaultYear={defaultYear}
                         defaultTerm={defaultTerm}
                     />
 
-                    <div className="border-b border-gray-200">
+                    <div className="border-b border-gray-200 dark:border-gray-700">
                         <nav className="flex space-x-8">
                             <button
                                 onClick={() => setActiveTab('requests')}
-                                className={`py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2 transition-colors cursor-pointer ${activeTab === 'requests' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'
+                                className={`py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2 transition-colors cursor-pointer ${activeTab === 'requests' 
+                                    ? 'border-blue-600 text-blue-600 dark:text-blue-400 dark:border-blue-400' 
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
                                     }`}
                             >
                                 <FiInbox size={18} />
@@ -232,7 +234,9 @@ export const ThesisTopicPage = () => {
                             </button>
                             <button
                                 onClick={() => setActiveTab('active')}
-                                className={`py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2 transition-colors cursor-pointer ${activeTab === 'active' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'
+                                className={`py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2 transition-colors cursor-pointer ${activeTab === 'active' 
+                                    ? 'border-blue-600 text-blue-600 dark:text-blue-400 dark:border-blue-400' 
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
                                     }`}
                             >
                                 <FiLayers size={18} />
@@ -241,7 +245,7 @@ export const ThesisTopicPage = () => {
                         </nav>
                     </div>
 
-                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm min-h-[400px] flex flex-col">
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm min-h-[400px] flex flex-col transition-colors">
                         <div className="flex-1">
                             {activeTab === 'requests' ? (
                                 <ThesisRequestTable
@@ -264,22 +268,22 @@ export const ThesisTopicPage = () => {
                         </div>
 
                         {!loading && groups.length > 0 && (
-                            <div className="p-4 border-t border-gray-100 flex items-center justify-between">
-                                <span className="text-sm text-gray-500">
+                            <div className="p-4 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between">
+                                <span className="text-sm text-gray-500 dark:text-gray-400">
                                     หน้า {page} จาก {totalPages}
                                 </span>
                                 <div className="flex gap-2">
                                     <button
                                         onClick={() => setPage(p => Math.max(1, p - 1))}
                                         disabled={page === 1}
-                                        className="p-2 border rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors"
+                                        className="p-2 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors text-gray-600 dark:text-gray-300"
                                     >
                                         <FiChevronLeft />
                                     </button>
                                     <button
                                         onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                                         disabled={page === totalPages}
-                                        className="p-2 border rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors"
+                                        className="p-2 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors text-gray-600 dark:text-gray-300"
                                     >
                                         <FiChevronRight />
                                     </button>

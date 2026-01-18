@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { FiX, FiAlertCircle, FiLoader, FiLayers, FiSearch, FiCheck } from 'react-icons/fi';
 import { User } from '../../../../types/user';
-import { classSectionService } from '../../../../services/class-section.service'; // ✅ Import Service
-import { ClassSection } from '../../../../types/class-section'; // ✅ Import Type
+import { classSectionService } from '../../../../services/class-section.service';
+import { ClassSection } from '../../../../types/class-section';
 
 interface Props {
     isOpen: boolean;
@@ -40,7 +40,7 @@ export const UserFormModal = ({ isOpen, onClose, onSubmit, initialData, role, is
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    // ✅ เพิ่ม sectionId ใน State
+    // State
     const [formData, setFormData] = useState({
         email: '',
         password: '',
@@ -53,10 +53,10 @@ export const UserFormModal = ({ isOpen, onClose, onSubmit, initialData, role, is
         sectionId: '' as string | number
     });
 
-    // ✅ State สำหรับเก็บรายการกลุ่มเรียน
+    // State สำหรับเก็บรายการกลุ่มเรียน
     const [sections, setSections] = useState<ClassSection[]>([]);
 
-    // ✅ Load Sections (เฉพาะตอนเป็น Student)
+    // Load Sections (เฉพาะตอนเป็น Student)
     useEffect(() => {
         if (role === 'student' && isOpen) {
             const loadSections = async () => {
@@ -85,7 +85,7 @@ export const UserFormModal = ({ isOpen, onClose, onSubmit, initialData, role, is
                     code: initialData.student.student_code || '',
                     phone: initialData.student.phone || '',
                     isActive: initialData.isActive ?? true,
-                    sectionId: initialData.student.section?.section_id || '' // ✅ Load Section ID
+                    sectionId: initialData.student.section?.section_id || ''
                 });
             } else if (role === 'instructor' && initialData.instructor) {
                 setFormData({
@@ -105,7 +105,7 @@ export const UserFormModal = ({ isOpen, onClose, onSubmit, initialData, role, is
         }
     }, [initialData, role, isOpen]);
 
-    // ✅ Logic กรองข้อมูลตามคำค้นหา
+    // Logic กรองข้อมูลตามคำค้นหา
     const filteredSections = sections.filter(s => {
         const term = searchTerm.toLowerCase();
         return s.section_name.toLowerCase().includes(term) ||
@@ -113,14 +113,14 @@ export const UserFormModal = ({ isOpen, onClose, onSubmit, initialData, role, is
             s.term.includes(term);
     });
 
-    // ✅ ฟังก์ชันเมื่อเลือกรายการ
+    // ฟังก์ชันเมื่อเลือกรายการ
     const handleSelectSection = (sec: ClassSection) => {
         setFormData({ ...formData, sectionId: sec.section_id });
         setSearchTerm(`${sec.section_name} (${sec.term}/${sec.academic_year})`);
         setIsDropdownOpen(false);
     };
 
-    // ✅ ฟังก์ชันล้างค่า
+    // ฟังก์ชันล้างค่า
     const handleClearSection = () => {
         setFormData({ ...formData, sectionId: '' });
         setSearchTerm('');
@@ -182,7 +182,7 @@ export const UserFormModal = ({ isOpen, onClose, onSubmit, initialData, role, is
             payload.studentCode = formData.code;
             payload.phone = formData.phone;
             payload.prefixName = formData.prefixName;
-            // ✅ ส่ง sectionId ไปด้วย (ถ้ามีการเลือก)
+
             if (formData.sectionId) payload.sectionId = Number(formData.sectionId);
 
             if (isEditMode) payload.isActive = formData.isActive;
@@ -214,16 +214,16 @@ export const UserFormModal = ({ isOpen, onClose, onSubmit, initialData, role, is
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-            <div className="bg-white rounded-2xl w-full max-w-lg p-6 shadow-2xl transform transition-all max-h-[90vh] overflow-y-auto">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-lg p-6 shadow-2xl transform transition-all max-h-[90vh] overflow-y-auto">
 
                 <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-xl font-bold text-gray-800">
+                    <h2 className="text-xl font-bold text-gray-800 dark:text-white">
                         {isEditMode ? 'Edit' : (isAddStudent ? 'Invite New' : 'Add New')} {role === 'student' ? 'Student' : 'Instructor'}
                     </h2>
                     <button
                         onClick={onClose}
                         disabled={isSubmitting}
-                        className="text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50 cursor-pointer"
+                        className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors disabled:opacity-50 cursor-pointer"
                     >
                         <FiX size={24} />
                     </button>
@@ -239,9 +239,9 @@ export const UserFormModal = ({ isOpen, onClose, onSubmit, initialData, role, is
 
                                     {/* 1. Prefix Name (กินพื้นที่ 1 ส่วน) */}
                                     <div className="col-span-1">
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Prefix Name</label>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Prefix Name</label>
                                         <select
-                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-900 bg-white h-[42px]"
+                                            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-900 dark:text-white bg-white dark:bg-gray-700 h-[42px]"
                                             value={formData.prefixName}
                                             onChange={e => setFormData({ ...formData, prefixName: e.target.value })}
                                         >
@@ -253,7 +253,7 @@ export const UserFormModal = ({ isOpen, onClose, onSubmit, initialData, role, is
 
                                     {/* 2. Class Section Autocomplete (กินพื้นที่ 2 ส่วน - ขยายเต็มขวา) */}
                                     <div className="col-span-2">
-                                        <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center gap-1">
                                             Class Section
                                         </label>
 
@@ -261,8 +261,10 @@ export const UserFormModal = ({ isOpen, onClose, onSubmit, initialData, role, is
                                             <div className="relative">
                                                 <input
                                                     type="text"
-                                                    className={`w-full pl-10 pr-10 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-900 bg-white shadow-sm transition-all h-[42px] ${formData.sectionId ? 'border-blue-500 bg-blue-50/10' : 'border-gray-300'
-                                                        }`}
+                                                    className={`w-full pl-10 pr-10 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-900 dark:text-white bg-white dark:bg-gray-700 shadow-sm transition-all h-[42px] ${formData.sectionId 
+                                                        ? 'border-blue-500 bg-blue-50/10 dark:bg-blue-900/20 dark:border-blue-500' 
+                                                        : 'border-gray-300 dark:border-gray-600'
+                                                    }`}
                                                     placeholder="Search section..."
                                                     value={searchTerm}
                                                     onChange={(e) => {
@@ -272,14 +274,14 @@ export const UserFormModal = ({ isOpen, onClose, onSubmit, initialData, role, is
                                                     }}
                                                     onFocus={() => setIsDropdownOpen(true)}
                                                 />
-                                                <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                                                <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
 
                                                 {/* ปุ่ม Clear */}
                                                 {searchTerm && (
                                                     <button
                                                         type="button"
                                                         onClick={handleClearSection}
-                                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer p-1 rounded-full hover:bg-gray-100"
+                                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 cursor-pointer p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-600"
                                                     >
                                                         <FiX size={14} />
                                                     </button>
@@ -288,25 +290,27 @@ export const UserFormModal = ({ isOpen, onClose, onSubmit, initialData, role, is
 
                                             {/* Dropdown List */}
                                             {isDropdownOpen && (
-                                                <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-xl max-h-48 overflow-y-auto animate-in fade-in zoom-in-95 duration-100">
+                                                <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-xl max-h-48 overflow-y-auto animate-in fade-in zoom-in-95 duration-100">
                                                     {filteredSections.length > 0 ? (
                                                         <ul className="py-1">
                                                             {filteredSections.map((sec) => (
                                                                 <li
                                                                     key={sec.section_id}
                                                                     onClick={() => handleSelectSection(sec)}
-                                                                    className={`px-4 py-2.5 text-sm cursor-pointer flex justify-between items-center hover:bg-blue-50 transition-colors ${formData.sectionId === sec.section_id ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-700'
-                                                                        }`}
+                                                                    className={`px-4 py-2.5 text-sm cursor-pointer flex justify-between items-center hover:bg-blue-50 dark:hover:bg-gray-600 transition-colors ${formData.sectionId === sec.section_id 
+                                                                        ? 'bg-blue-50 text-blue-700 font-medium dark:bg-blue-900/30 dark:text-blue-300' 
+                                                                        : 'text-gray-700 dark:text-gray-200'
+                                                                    }`}
                                                                 >
                                                                     <span className="truncate mr-2">{sec.section_name}</span>
-                                                                    <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full whitespace-nowrap">
+                                                                    <span className="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-full whitespace-nowrap">
                                                                         {sec.term}/{sec.academic_year}
                                                                     </span>
                                                                 </li>
                                                             ))}
                                                         </ul>
                                                     ) : (
-                                                        <div className="px-4 py-3 text-sm text-gray-500 text-center">
+                                                        <div className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 text-center">
                                                             No sections found
                                                         </div>
                                                     )}
@@ -319,21 +323,21 @@ export const UserFormModal = ({ isOpen, onClose, onSubmit, initialData, role, is
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">First Name</label>
                                     <input
                                         required
                                         type="text"
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-900 bg-white"
+                                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-900 dark:text-white bg-white dark:bg-gray-700"
                                         value={formData.firstName}
                                         onChange={e => setFormData({ ...formData, firstName: e.target.value })}
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Last Name</label>
                                     <input
                                         required
                                         type="text"
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-900 bg-white"
+                                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-900 dark:text-white bg-white dark:bg-gray-700"
                                         value={formData.lastName}
                                         onChange={e => setFormData({ ...formData, lastName: e.target.value })}
                                     />
@@ -341,15 +345,15 @@ export const UserFormModal = ({ isOpen, onClose, onSubmit, initialData, role, is
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                     {role === 'student' ? 'Student ID' : 'Instructor ID'}
-                                    {isCodeDisabled && <span className="text-xs text-gray-400 font-normal ml-2">(Cannot be changed)</span>}
+                                    {isCodeDisabled && <span className="text-xs text-gray-400 dark:text-gray-500 font-normal ml-2">(Cannot be changed)</span>}
                                 </label>
                                 <input
                                     required
                                     type="text"
                                     disabled={isCodeDisabled}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-900 bg-white disabled:bg-gray-100 disabled:text-gray-500"
+                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-900 dark:text-white bg-white dark:bg-gray-700 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500 dark:disabled:text-gray-500"
                                     value={formData.code}
                                     onChange={e => setFormData({ ...formData, code: e.target.value })}
                                 />
@@ -357,39 +361,41 @@ export const UserFormModal = ({ isOpen, onClose, onSubmit, initialData, role, is
 
                             {role === 'student' && (
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Phone</label>
                                     <input
                                         type="tel"
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-900 bg-white"
+                                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-900 dark:text-white bg-white dark:bg-gray-700"
                                         value={formData.phone}
                                         onChange={e => setFormData({ ...formData, phone: e.target.value })}
                                     />
                                 </div>
                             )}
 
-                            <hr className="my-4 border-gray-100" />
+                            <hr className="my-4 border-gray-100 dark:border-gray-700" />
                         </>
                     )}
 
                     {/* Email Field */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Email {role === 'student' ? '(RMUTT Only)' : ''}
-                            {!isEditMode && role === 'instructor' && <span className="text-xs text-gray-400 font-normal ml-2">(Optional - Auto Generated if empty)</span>}
-                            {isEmailDisabled && <span className="text-xs text-gray-400 font-normal ml-2">(Cannot be changed)</span>}
+                            {!isEditMode && role === 'instructor' && <span className="text-xs text-gray-400 dark:text-gray-500 font-normal ml-2">(Optional - Auto Generated if empty)</span>}
+                            {isEmailDisabled && <span className="text-xs text-gray-400 dark:text-gray-500 font-normal ml-2">(Cannot be changed)</span>}
                         </label>
 
                         {isAddStudent ? (
                             <>
                                 <textarea
                                     required
-                                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 outline-none text-gray-900 bg-white min-h-[150px] ${emailError ? 'border-red-500 focus:ring-red-200' : 'border-gray-300 focus:ring-blue-500'
-                                        }`}
+                                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 outline-none text-gray-900 dark:text-white bg-white dark:bg-gray-700 min-h-[150px] ${emailError 
+                                        ? 'border-red-500 focus:ring-red-200 dark:border-red-500 dark:focus:ring-red-900' 
+                                        : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500'
+                                    }`}
                                     placeholder={`student1@mail.rmutt.ac.th\nstudent2@mail.rmutt.ac.th`}
                                     value={formData.email}
                                     onChange={e => setFormData({ ...formData, email: e.target.value })}
                                 />
-                                <p className="text-xs text-gray-500 mt-1">
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                                     * สามารถกรอกหลายอีเมลได้โดยการคั่นด้วยเครื่องหมายจุลภาค (,) หรือขึ้นบรรทัดใหม่
                                 </p>
                             </>
@@ -398,8 +404,10 @@ export const UserFormModal = ({ isOpen, onClose, onSubmit, initialData, role, is
                                 type="email"
                                 required={role === 'student'}
                                 disabled={isEmailDisabled}
-                                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 outline-none text-gray-900 bg-white disabled:bg-gray-100 disabled:text-gray-500 ${emailError ? 'border-red-500 focus:ring-red-200' : 'border-gray-300 focus:ring-blue-500'
-                                    }`}
+                                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 outline-none text-gray-900 dark:text-white bg-white dark:bg-gray-700 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500 dark:disabled:text-gray-500 ${emailError 
+                                    ? 'border-red-500 focus:ring-red-200 dark:border-red-500 dark:focus:ring-red-900' 
+                                    : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500'
+                                }`}
                                 placeholder="example@mail.rmutt.ac.th"
                                 value={formData.email}
                                 onChange={e => setFormData({ ...formData, email: e.target.value })}
@@ -407,7 +415,7 @@ export const UserFormModal = ({ isOpen, onClose, onSubmit, initialData, role, is
                         )}
 
                         {emailError && (
-                            <div className="flex items-center gap-1 mt-1.5 text-red-500 animate-fadeIn">
+                            <div className="flex items-center gap-1 mt-1.5 text-red-500 dark:text-red-400 animate-fadeIn">
                                 <FiAlertCircle size={14} />
                                 <span className="text-xs">
                                     {role === 'instructor' && isEditMode
@@ -422,21 +430,23 @@ export const UserFormModal = ({ isOpen, onClose, onSubmit, initialData, role, is
                     {/* ... (Password Fields เหมือนเดิม) ... */}
                     {(!isAddStudent) && (
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                 Password
-                                {!isEditMode && role === 'instructor' && <span className="text-xs text-gray-400 font-normal ml-2">(Optional)</span>}
-                                {isEditMode && <span className="text-xs text-gray-400 font-normal ml-2">(Leave blank to keep current)</span>}
+                                {!isEditMode && role === 'instructor' && <span className="text-xs text-gray-400 dark:text-gray-500 font-normal ml-2">(Optional)</span>}
+                                {isEditMode && <span className="text-xs text-gray-400 dark:text-gray-500 font-normal ml-2">(Leave blank to keep current)</span>}
                             </label>
                             <input
                                 type="password"
-                                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 outline-none text-gray-900 bg-white ${passwordError ? 'border-red-500 focus:ring-red-200' : 'border-gray-300 focus:ring-blue-500'
-                                    }`}
+                                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 outline-none text-gray-900 dark:text-white bg-white dark:bg-gray-700 ${passwordError 
+                                    ? 'border-red-500 focus:ring-red-200 dark:border-red-500 dark:focus:ring-red-900' 
+                                    : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500'
+                                }`}
                                 value={formData.password}
                                 onChange={e => setFormData({ ...formData, password: e.target.value })}
                                 placeholder={isEditMode ? "••••••••" : "อย่างน้อย 6 ตัวอักษร"}
                             />
                             {passwordError && (
-                                <div className="flex items-center gap-1 mt-1.5 text-red-500 animate-fadeIn">
+                                <div className="flex items-center gap-1 mt-1.5 text-red-500 dark:text-red-400 animate-fadeIn">
                                     <FiAlertCircle size={14} />
                                     <span className="text-xs">รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร</span>
                                 </div>
@@ -451,9 +461,9 @@ export const UserFormModal = ({ isOpen, onClose, onSubmit, initialData, role, is
                                 id="isActive"
                                 checked={formData.isActive}
                                 onChange={e => setFormData({ ...formData, isActive: e.target.checked })}
-                                className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500 border-gray-300"
+                                className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500 border-gray-300 dark:border-gray-600 dark:bg-gray-700"
                             />
-                            <label htmlFor="isActive" className="text-sm text-gray-700">Active Status</label>
+                            <label htmlFor="isActive" className="text-sm text-gray-700 dark:text-gray-300">Active Status</label>
                         </div>
                     )}
 
@@ -463,7 +473,7 @@ export const UserFormModal = ({ isOpen, onClose, onSubmit, initialData, role, is
                             type="button"
                             onClick={onClose}
                             disabled={isSubmitting}
-                            className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors disabled:opacity-50 cursor-pointer"
+                            className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 font-medium transition-colors disabled:opacity-50 cursor-pointer"
                         >
                             Cancel
                         </button>
@@ -471,7 +481,7 @@ export const UserFormModal = ({ isOpen, onClose, onSubmit, initialData, role, is
                         <button
                             type="submit"
                             disabled={isSubmitDisabled}
-                            className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow-md font-medium transition-colors disabled:opacity-70 disabled:cursor-not-allowed disabled:bg-blue-400 disabled:shadow-none flex justify-center items-center gap-2 cursor-pointer"
+                            className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow-md font-medium transition-colors disabled:opacity-70 disabled:cursor-not-allowed disabled:bg-blue-400 disabled:shadow-none flex justify-center items-center gap-2 cursor-pointer dark:bg-blue-600 dark:hover:bg-blue-500"
                         >
                             {isSubmitting ? (
                                 <>

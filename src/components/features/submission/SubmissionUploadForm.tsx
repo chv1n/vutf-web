@@ -24,10 +24,8 @@ interface SubmissionUploadFormProps {
 
 /**
  * SubmissionUploadForm - Form สำหรับอัพโหลดไฟล์
- * 
- * Single Responsibility: จัดการ UI และ logic สำหรับ file upload
- * 
- * Features:
+ * * Single Responsibility: จัดการ UI และ logic สำหรับ file upload
+ * * Features:
  * - Drag & Drop support
  * - PDF only validation
  * - 50MB max size validation
@@ -166,10 +164,10 @@ export const SubmissionUploadForm: React.FC<SubmissionUploadFormProps> = ({
           transition-all duration-200
           ${compact ? 'p-4' : 'p-6'}
           ${isDragOver
-                        ? 'border-blue-500 bg-blue-50'
+                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30'
                         : selectedFile
-                            ? 'border-emerald-300 bg-emerald-50/50'
-                            : 'border-gray-200 bg-gray-50 hover:border-blue-300 hover:bg-blue-50/50'
+                            ? 'border-emerald-300 dark:border-emerald-700 bg-emerald-50/50 dark:bg-emerald-900/20'
+                            : 'border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50 hover:border-blue-300 dark:hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-900/20'
                     }
         `}
             >
@@ -191,14 +189,14 @@ export const SubmissionUploadForm: React.FC<SubmissionUploadFormProps> = ({
                             exit={{ opacity: 0, scale: 0.95 }}
                             className="flex items-center gap-3"
                         >
-                            <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                                <FiFile className="w-6 h-6 text-red-500" />
+                            <div className="w-12 h-12 bg-red-100 dark:bg-red-900/20 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors">
+                                <FiFile className="w-6 h-6 text-red-500 dark:text-red-400" />
                             </div>
                             <div className="flex-1 min-w-0">
-                                <p className="font-medium text-gray-900 truncate">
+                                <p className="font-medium text-gray-900 dark:text-white truncate">
                                     {selectedFile.name}
                                 </p>
-                                <p className="text-sm text-gray-500">
+                                <p className="text-sm text-gray-500 dark:text-gray-400">
                                     {formatFileSize(selectedFile.size)}
                                 </p>
                             </div>
@@ -208,7 +206,7 @@ export const SubmissionUploadForm: React.FC<SubmissionUploadFormProps> = ({
                                     e.stopPropagation();
                                     handleClear();
                                 }}
-                                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
+                                className="p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-full transition-colors"
                             >
                                 <FiX className="w-5 h-5" />
                             </button>
@@ -222,11 +220,11 @@ export const SubmissionUploadForm: React.FC<SubmissionUploadFormProps> = ({
                             exit={{ opacity: 0, scale: 0.95 }}
                             className="text-center"
                         >
-                            <FiUploadCloud className={`mx-auto ${compact ? 'w-8 h-8' : 'w-12 h-12'} text-gray-400`} />
-                            <p className={`${compact ? 'mt-2 text-sm' : 'mt-4 text-base'} font-medium text-gray-700`}>
+                            <FiUploadCloud className={`mx-auto ${compact ? 'w-8 h-8' : 'w-12 h-12'} text-gray-400 dark:text-gray-500`} />
+                            <p className={`${compact ? 'mt-2 text-sm' : 'mt-4 text-base'} font-medium text-gray-700 dark:text-gray-300`}>
                                 ลากไฟล์มาวางที่นี่ หรือคลิกเพื่อเลือก
                             </p>
-                            <p className={`${compact ? 'mt-1 text-xs' : 'mt-2 text-sm'} text-gray-500`}>
+                            <p className={`${compact ? 'mt-1 text-xs' : 'mt-2 text-sm'} text-gray-500 dark:text-gray-400`}>
                                 PDF เท่านั้น (สูงสุด {SUBMISSION_FILE_CONSTRAINTS.MAX_SIZE_MB}MB)
                             </p>
                         </motion.div>
@@ -241,10 +239,10 @@ export const SubmissionUploadForm: React.FC<SubmissionUploadFormProps> = ({
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
-                        className="flex items-center gap-2 px-4 py-3 bg-red-50 border border-red-100 rounded-xl"
+                        className="flex items-center gap-2 px-4 py-3 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded-xl transition-colors"
                     >
-                        <FiAlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
-                        <p className="text-sm text-red-600">{displayError}</p>
+                        <FiAlertCircle className="w-5 h-5 text-red-500 dark:text-red-400 flex-shrink-0" />
+                        <p className="text-sm text-red-600 dark:text-red-400">{displayError}</p>
                     </motion.div>
                 )}
             </AnimatePresence>
@@ -256,10 +254,10 @@ export const SubmissionUploadForm: React.FC<SubmissionUploadFormProps> = ({
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
-                        className="flex items-center gap-2 px-4 py-3 bg-emerald-50 border border-emerald-100 rounded-xl"
+                        className="flex items-center gap-2 px-4 py-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800 rounded-xl transition-colors"
                     >
-                        <FiCheckCircle className="w-5 h-5 text-emerald-500 flex-shrink-0" />
-                        <p className="text-sm text-emerald-600">อัพโหลดไฟล์สำเร็จ</p>
+                        <FiCheckCircle className="w-5 h-5 text-emerald-500 dark:text-emerald-400 flex-shrink-0" />
+                        <p className="text-sm text-emerald-600 dark:text-emerald-400">อัพโหลดไฟล์สำเร็จ</p>
                     </motion.div>
                 )}
             </AnimatePresence>
@@ -277,8 +275,9 @@ export const SubmissionUploadForm: React.FC<SubmissionUploadFormProps> = ({
             ${compact ? 'py-2.5' : 'py-3'} px-4
             bg-gradient-to-r from-blue-600 to-blue-700
             hover:from-blue-700 hover:to-blue-800
+            dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-500 dark:hover:to-blue-600
             text-white font-medium rounded-xl
-            shadow-lg shadow-blue-200
+            shadow-lg shadow-blue-200 dark:shadow-none
             transition-all duration-200
             disabled:opacity-60 disabled:cursor-not-allowed
           `}

@@ -59,17 +59,17 @@ export const ThesisFilter = ({
     };
 
     return (
-        <div className="flex flex-col xl:flex-row gap-4 items-start xl:items-center justify-between bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
+        <div className="flex flex-col xl:flex-row gap-4 items-start xl:items-center justify-between bg-white dark:bg-gray-800 p-4 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm transition-colors">
 
             {/* 1. Search Bar */}
             <div className="relative w-full xl:w-80">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <FiSearch className="text-gray-400" />
+                    <FiSearch className="text-gray-400 dark:text-gray-500" />
                 </div>
                 <input
                     type="text"
                     placeholder="ค้นหาชื่อหรือรหัสวิทยานิพนธ์"
-                    className="block w-full pl-10 pr-3 py-2.5 text-gray-600 border border-gray-200 rounded-xl leading-5 bg-gray-50 placeholder-gray-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all sm:text-sm"
+                    className="block w-full pl-10 pr-3 py-2.5 text-gray-600 dark:text-gray-200 border border-gray-200 dark:border-gray-600 rounded-xl leading-5 bg-gray-50 dark:bg-gray-700 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-500/40 focus:border-blue-500 dark:focus:border-blue-500 transition-all sm:text-sm"
                     value={keyword}
                     onChange={(e) => setKeyword(e.target.value)}
                 />
@@ -80,13 +80,13 @@ export const ThesisFilter = ({
 
                 {/* Dropdown: สถานะ */}
                 <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500 dark:text-gray-400">
                         <FiCheckCircle size={16} />
                     </div>
                     <select
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
-                        className="pl-9 pr-8 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 appearance-none cursor-pointer min-w-[140px]"
+                        className="pl-9 pr-8 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 appearance-none cursor-pointer min-w-[140px]"
                     >
                         <option value="">ทุกสถานะ</option>
                         {activeTab === 'requests' ? (
@@ -104,27 +104,27 @@ export const ThesisFilter = ({
                             </>
                         )}
                     </select>
-                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-gray-400">
+                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-gray-400 dark:text-gray-500">
                         <FiFilter size={12} />
                     </div>
                 </div>
 
                 {/* Dropdown: ปีการศึกษา */}
                 <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500 dark:text-gray-400">
                         <FiCalendar size={16} />
                     </div>
                     <select
                         value={academicYear}
                         onChange={(e) => setAcademicYear(e.target.value ? Number(e.target.value) : '')}
-                        className="pl-9 pr-8 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 appearance-none cursor-pointer min-w-[130px]"
+                        className="pl-9 pr-8 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 appearance-none cursor-pointer min-w-[130px]"
                     >
                         <option value="">ทุกปี</option>
                         {years.map((y) => (
                             <option key={y} value={y}>ปี {y}</option>
                         ))}
                     </select>
-                    <div className="absolute inset-y-0 right-0 pr-2 flex items-center pointer-events-none text-gray-400">
+                    <div className="absolute inset-y-0 right-0 pr-2 flex items-center pointer-events-none text-gray-400 dark:text-gray-500">
                         <FiChevronDown size={12} />
                     </div>
                 </div>
@@ -134,14 +134,14 @@ export const ThesisFilter = ({
                     <select
                         value={term}
                         onChange={(e) => setTerm(e.target.value ? Number(e.target.value) : '')}
-                        className="pl-4 pr-8 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 appearance-none cursor-pointer"
+                        className="pl-4 pr-8 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 appearance-none cursor-pointer"
                     >
                         <option value="">ทุกเทอม</option>
                         <option value="1">เทอม 1</option>
                         <option value="2">เทอม 2</option>
                         <option value="3">ฤดูร้อน</option>
                     </select>
-                    <div className="absolute inset-y-0 right-0 pr-2 flex items-center pointer-events-none text-gray-400">
+                    <div className="absolute inset-y-0 right-0 pr-2 flex items-center pointer-events-none text-gray-400 dark:text-gray-500">
                         <FiChevronDown size={12} />
                     </div>
                 </div>
@@ -150,7 +150,7 @@ export const ThesisFilter = ({
                 {!isShowingAllYears && (
                     <button
                         onClick={handleShowLatestAll}
-                        className="flex items-center gap-1 px-3 py-2.5 text-sm font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 border border-indigo-100 rounded-xl transition-colors cursor-pointer"
+                        className="flex items-center gap-1 px-3 py-2.5 text-sm font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 border border-indigo-100 dark:border-indigo-900/30 rounded-xl transition-colors cursor-pointer"
                         title="แสดงรายการล่าสุดทั้งหมด โดยไม่กรองปีและเทอม (เผื่อนักศึกษากรอกปีผิด)"
                     >
                         <FiClock size={16} />
@@ -162,7 +162,7 @@ export const ThesisFilter = ({
                 {isFilterActive && (
                     <button
                         onClick={handleClearFilter}
-                        className="flex items-center gap-1 px-3 py-2.5 text-sm text-red-600 bg-red-50 hover:bg-red-100 border border-red-100 rounded-xl transition-colors ml-auto xl:ml-0 cursor-pointer"
+                        className="flex items-center gap-1 px-3 py-2.5 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 border border-red-100 dark:border-red-900/30 rounded-xl transition-colors ml-auto xl:ml-0 cursor-pointer"
                         title="รีเซ็ตตัวกรองเป็นค่าเริ่มต้น"
                     >
                         <FiX size={16} />

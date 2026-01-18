@@ -14,11 +14,9 @@ interface InvitationBadgeProps {
 
 /**
  * InvitationBadge - Badge แสดงสถานะคำเชิญ
- * 
- * Single Responsibility: แสดงสถานะคำเชิญด้วย style ที่เหมาะสม
- * Open/Closed: extend ได้ผ่าน props (size, status)
- * 
- * Status colors:
+ * * Single Responsibility: แสดงสถานะคำเชิญด้วย style ที่เหมาะสม
+ * * Open/Closed: extend ได้ผ่าน props (size, status)
+ * * Status colors:
  * - pending: yellow/orange
  * - approved: green
  * - rejected: red
@@ -30,23 +28,23 @@ export const InvitationBadge: React.FC<InvitationBadgeProps> = ({
     // Configuration ตาม status
     const statusConfig = {
         [InvitationStatus.PENDING]: {
-            bgColor: 'bg-amber-100',
-            textColor: 'text-amber-700',
-            borderColor: 'border-amber-200',
+            bgColor: 'bg-amber-100 dark:bg-amber-900/30',
+            textColor: 'text-amber-700 dark:text-amber-300',
+            borderColor: 'border-amber-200 dark:border-amber-800',
             icon: FiClock,
             label: 'รอตอบรับ',
         },
         [InvitationStatus.APPROVED]: {
-            bgColor: 'bg-emerald-100',
-            textColor: 'text-emerald-700',
-            borderColor: 'border-emerald-200',
+            bgColor: 'bg-emerald-100 dark:bg-emerald-900/30',
+            textColor: 'text-emerald-700 dark:text-emerald-300',
+            borderColor: 'border-emerald-200 dark:border-emerald-800',
             icon: FiCheck,
             label: 'ตอบรับแล้ว',
         },
         [InvitationStatus.REJECTED]: {
-            bgColor: 'bg-red-100',
-            textColor: 'text-red-700',
-            borderColor: 'border-red-200',
+            bgColor: 'bg-red-100 dark:bg-red-900/30',
+            textColor: 'text-red-700 dark:text-red-300',
+            borderColor: 'border-red-200 dark:border-red-800',
             icon: FiX,
             label: 'ปฏิเสธแล้ว',
         },

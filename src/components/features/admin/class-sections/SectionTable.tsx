@@ -35,9 +35,9 @@ export const SectionTable = ({ data, isLoading, onEdit, onDelete, onRefresh }: P
   // --- Loading State ---
   if (isLoading) {
     return (
-      <div className="w-full bg-white rounded-xl shadow-sm border border-gray-100 p-12 flex flex-col items-center justify-center gap-3 animate-pulse">
-        <div className="w-10 h-10 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin"></div>
-        <p className="text-gray-400 text-sm font-medium">กำลังโหลดข้อมูล...</p>
+      <div className="w-full bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-12 flex flex-col items-center justify-center gap-3 animate-pulse transition-colors">
+        <div className="w-10 h-10 border-4 border-indigo-100 dark:border-indigo-900 border-t-indigo-600 dark:border-t-indigo-500 rounded-full animate-spin"></div>
+        <p className="text-gray-400 dark:text-gray-500 text-sm font-medium">กำลังโหลดข้อมูล...</p>
       </div>
     );
   }
@@ -45,35 +45,35 @@ export const SectionTable = ({ data, isLoading, onEdit, onDelete, onRefresh }: P
   // --- Empty State ---
   if (!data || data.length === 0) {
     return (
-      <div className="w-full bg-white rounded-xl shadow-sm border border-gray-100 p-12 flex flex-col items-center justify-center gap-4 text-center">
-        <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center text-gray-300">
+      <div className="w-full bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-12 flex flex-col items-center justify-center gap-4 text-center transition-colors">
+        <div className="w-16 h-16 bg-gray-50 dark:bg-gray-700 rounded-full flex items-center justify-center text-gray-300 dark:text-gray-500">
           <FiInbox size={32} />
         </div>
         <div>
-          <h3 className="text-gray-800 font-semibold">ไม่พบข้อมูลกลุ่มเรียน</h3>
-          <p className="text-gray-500 text-sm mt-1">ลองเพิ่มกลุ่มเรียนใหม่ หรือเปลี่ยนเงื่อนไขการค้นหา</p>
+          <h3 className="text-gray-800 dark:text-white font-semibold">ไม่พบข้อมูลกลุ่มเรียน</h3>
+          <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">ลองเพิ่มกลุ่มเรียนใหม่ หรือเปลี่ยนเงื่อนไขการค้นหา</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="w-full bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
+    <div className="w-full bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden flex flex-col transition-colors">
 
       {/* ส่วนหัวตาราง */}
-      <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-white">
+      <div className="px-6 py-5 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between bg-white dark:bg-gray-800 transition-colors">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-indigo-50 text-indigo-600">
+          <div className="p-2.5 rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400">
             <FiLayers size={20} />
           </div>
           <div>
-            <h3 className="font-bold text-gray-800 text-base flex items-center gap-2">
+            <h3 className="font-bold text-gray-800 dark:text-white text-base flex items-center gap-2">
               ข้อมูลกลุ่มเรียน
-              <span className="px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 text-xs font-medium">
+              <span className="px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-300 text-xs font-medium">
                 {data.length}
               </span>
             </h3>
-            <p className="text-xs text-gray-400 mt-0.5">
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
               จัดการรายชื่อกลุ่มเรียน ปีการศึกษา และเทอม
             </p>
           </div>
@@ -81,7 +81,7 @@ export const SectionTable = ({ data, isLoading, onEdit, onDelete, onRefresh }: P
         {onRefresh && (
           <button
             onClick={onRefresh}
-            className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all duration-200"
+            className="p-2 text-gray-400 dark:text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-all duration-200"
             title="รีเฟรชข้อมูล"
           >
             <FiRefreshCw size={20} />
@@ -93,7 +93,7 @@ export const SectionTable = ({ data, isLoading, onEdit, onDelete, onRefresh }: P
       <div className="overflow-x-auto overflow-y-visible pb-24 sm:pb-0 min-h-[300px]">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="bg-gray-50/80 border-b border-gray-100 text-gray-500 text-xs uppercase font-bold tracking-wider">
+            <tr className="bg-gray-50/80 dark:bg-gray-700/50 border-b border-gray-100 dark:border-gray-700 text-gray-500 dark:text-gray-400 text-xs uppercase font-bold tracking-wider transition-colors">
               <th className="px-6 py-4">
                 <div className="flex items-center gap-1">
                   <FiCalendar size={14} /> ปีการศึกษา / เทอม
@@ -113,23 +113,23 @@ export const SectionTable = ({ data, isLoading, onEdit, onDelete, onRefresh }: P
             </tr>
           </thead>
 
-          <tbody className="divide-y divide-gray-50">
+          <tbody className="divide-y divide-gray-50 dark:divide-gray-700">
             {data.map((item) => {
               const id = item.section_id;
               const isOpen = openActionId === id;
 
               return (
-                <tr key={id} className="hover:bg-indigo-50/30 transition-colors duration-150 group">
+                <tr key={id} className="hover:bg-indigo-50/30 dark:hover:bg-gray-700/30 transition-colors duration-150 group">
 
                   {/* Column 1: Year/Term */}
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center gap-3">
-                      <span className="inline-flex items-center px-3 py-1 rounded-lg text-xs font-semibold bg-white border border-gray-200 text-gray-600 shadow-sm">
+                      <span className="inline-flex items-center px-3 py-1 rounded-lg text-xs font-semibold bg-white border border-gray-200 text-gray-600 shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
                         {item.academic_year}
                       </span>
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${item.term === '1' ? 'bg-green-50 text-green-700 border-green-100' :
-                        item.term === '2' ? 'bg-blue-50 text-blue-700 border-blue-100' :
-                          'bg-orange-50 text-orange-700 border-orange-100'
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${item.term === '1' ? 'bg-green-50 text-green-700 border-green-100 dark:bg-green-900/20 dark:text-green-400 dark:border-green-900/50' :
+                        item.term === '2' ? 'bg-blue-50 text-blue-700 border-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-900/50' :
+                          'bg-orange-50 text-orange-700 border-orange-100 dark:bg-orange-900/20 dark:text-orange-400 dark:border-orange-900/50'
                         }`}>
                         เทอม {item.term} {item.term === '3' && '(Summer)'}
                       </span>
@@ -138,7 +138,7 @@ export const SectionTable = ({ data, isLoading, onEdit, onDelete, onRefresh }: P
 
                   {/* Column 2: Section Name */}
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="font-medium text-gray-700 text-sm">
+                    <span className="font-medium text-gray-700 dark:text-gray-200 text-sm">
                       {item.section_name}
                     </span>
                   </td>
@@ -148,7 +148,9 @@ export const SectionTable = ({ data, isLoading, onEdit, onDelete, onRefresh }: P
                     <button
                       onClick={(e) => handleToggleMenu(id, e)}
                       className={`p-2 rounded-lg transition-all duration-200 outline-none
-                        ${isOpen ? 'bg-indigo-50 text-indigo-600' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'}
+                        ${isOpen 
+                          ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400' 
+                          : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:text-gray-500 dark:hover:text-gray-300 dark:hover:bg-gray-700'}
                       `}
                     >
                       <FiMoreHorizontal size={20} />
@@ -158,23 +160,23 @@ export const SectionTable = ({ data, isLoading, onEdit, onDelete, onRefresh }: P
                     {isOpen && (
                       <div
                         ref={menuRef}
-                        className="absolute right-8 top-8 w-40 bg-white rounded-xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1)] border border-gray-100 z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200 origin-top-right"
+                        className="absolute right-8 top-8 w-40 bg-white dark:bg-gray-800 rounded-xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1)] dark:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.5)] border border-gray-100 dark:border-gray-700 z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200 origin-top-right"
                       >
                         <div className="p-1">
                           <button
                             onClick={() => { onEdit(item); setOpenActionId(null); }}
-                            className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-indigo-600 rounded-lg flex items-center gap-2.5 transition-colors"
+                            className="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-lg flex items-center gap-2.5 transition-colors"
                           >
-                            <FiEdit2 size={16} className="text-gray-400" /> แก้ไข
+                            <FiEdit2 size={16} className="text-gray-400 dark:text-gray-500" /> แก้ไข
                           </button>
 
-                          <div className="h-px bg-gray-100 my-1 mx-2"></div>
+                          <div className="h-px bg-gray-100 dark:bg-gray-700 my-1 mx-2"></div>
 
                           <button
                             onClick={() => { onDelete(id); setOpenActionId(null); }}
-                            className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg flex items-center gap-2.5 transition-colors group/del"
+                            className="w-full text-left px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg flex items-center gap-2.5 transition-colors group/del"
                           >
-                            <FiTrash2 size={16} className="text-red-400 group-hover/del:text-red-600" />
+                            <FiTrash2 size={16} className="text-red-400 dark:text-red-500 group-hover/del:text-red-600 dark:group-hover/del:text-red-400" />
                             ลบข้อมูล
                           </button>
                         </div>

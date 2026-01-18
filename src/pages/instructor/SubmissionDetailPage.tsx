@@ -49,16 +49,16 @@ export const SubmissionDetailPage = () => {
         }
     };
 
-    if (loading) return <div className="p-10 text-center text-gray-500">กำลังโหลดข้อมูล...</div>;
+    if (loading) return <div className="p-10 text-center text-gray-500 dark:text-gray-400">กำลังโหลดข้อมูล...</div>;
     if (!data) return null;
 
     return (
-        <div className="p-6 bg-gray-50 min-h-screen">
+        <div className="p-6 bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors">
 
             {/* Back Button */}
             <button
                 onClick={() => navigate(-1)}
-                className="flex items-center gap-2 text-gray-500 hover:text-blue-600 mb-6 transition-colors font-medium"
+                className="flex items-center gap-2 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 mb-6 transition-colors font-medium"
             >
                 <FiArrowLeft /> ย้อนกลับ
             </button>
