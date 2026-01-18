@@ -40,12 +40,10 @@ export const SubmissionDetailPage = () => {
         if (!data) return;
         try {
             await submissionService.updateComment(data.submissionId, newComment);
-            // อัปเดต State หน้าจอทันทีโดยไม่ต้องโหลดใหม่
             setData(prev => prev ? { ...prev, comment: newComment } : null);
-            // หรือถ้าอยากชัวร์ก็ fetchDetail(data.submissionId);
         } catch (error) {
             alert('บันทึกคอมเมนต์ไม่สำเร็จ');
-            throw error; // ส่ง error กลับไปให้ Card รู้ว่า save ไม่ผ่าน
+            throw error;
         }
     };
 
@@ -72,7 +70,9 @@ export const SubmissionDetailPage = () => {
                     <SubmissionFileCard
                         fileName={data.fileName}
                         fileSize={data.fileSize}
-                        fileUrl={data.fileUrl}
+                        fileUrl={data.fileUrl} // สำหรับ Preview (Inline)
+                        downloadUrl={data.downloadUrl || data.fileUrl} // สำหรับ Download (Attachment)
+                        mimeType={data.mimeType}
                     />
 
                     <SubmissionCommentCard
@@ -84,9 +84,7 @@ export const SubmissionDetailPage = () => {
                 {/* === Right Column: Sidebar === */}
                 <div className="w-full lg:w-[360px] space-y-6">
                     <GroupMembersCard members={data.groupMembers} />
-                    
                     <AdvisorCard advisors={data.advisors} />
-
                     <ActionCard status={data.status} />
                 </div>
 

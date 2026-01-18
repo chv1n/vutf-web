@@ -65,7 +65,8 @@ export const submissionService = {
      * @returns Promise<SubmissionFileUrl>
      */
     async getFileUrl(id: number): Promise<SubmissionFileUrl> {
-        return api.get<SubmissionFileUrl>(`/submissions/${id}/file`);
+        const response = await api.post<SubmissionFileUrl>(`/submissions/${id}/file`, {});
+        return response.data;
     },
 
     /**

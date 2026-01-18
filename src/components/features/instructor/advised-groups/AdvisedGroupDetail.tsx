@@ -1,17 +1,41 @@
 // src/components/features/instructor/advised-groups/AdvisedGroupDetail.tsx
-import React from 'react';
-import { FiBook, FiUsers, FiHash, FiClock, FiFileText, FiDownload, FiAlertCircle, FiCheckCircle, FiActivity, FiTag } from 'react-icons/fi';
+import React, { useState } from 'react';
+import {
+  FiBook,
+  FiUsers,
+  FiHash,
+  FiClock,
+  FiFileText,
+  FiDownload,
+  FiAlertCircle,
+  FiCheckCircle,
+  FiActivity,
+  FiTag,
+  FiEye,
+  FiX
+} from 'react-icons/fi';
+import { FaFilePdf } from 'react-icons/fa6';
 import { AdvisedGroupResponse } from '../../../../types/group.types';
 
 interface AdvisedGroupDetailProps {
   data: AdvisedGroupResponse;
 }
 
-export const AdvisedGroupDetail: React.FC<AdvisedGroupDetailProps> = ({ data }) => {
+// Helper สำหรับตรวจสอบประเภทไฟล์
+const getFileType = (fileName: string): string => {
+  const extension = fileName?.split('.').pop()?.toLowerCase();
+  if (extension === 'pdf') return 'application/pdf';
+  if (['jpg', 'jpeg', 'png', 'gif'].includes(extension || '')) return 'image/' + extension;
+  return 'application/octet-stream';
+};
 
+export const AdvisedGroupDetail: React.FC<AdvisedGroupDetailProps> = ({ data }) => {
   const { thesisName, thesisCode, thesisStatus, academicYear, term, students, progress, courseType } = data;
 
-  // Helper สำหรับ "สถานะโครงงาน" (แสดงด้านบน)
+  // State สำหรับ Modal Preview
+  const [selectedFile, setSelectedFile] = useState<{ url: string; downloadUrl: string; name: string; type: string } | null>(null);
+
+  // Helper สำหรับ "สถานะโครงงาน"
   const getThesisStatusBadge = (status: string) => {
     switch (status) {
       case 'PASSED':
@@ -25,7 +49,7 @@ export const AdvisedGroupDetail: React.FC<AdvisedGroupDetailProps> = ({ data }) 
     }
   };
 
-  // Helper สำหรับ "สถานะการส่งงาน" (แสดงในตาราง)
+  // Helper สำหรับ "สถานะการส่งงาน"
   const getSubmissionStatusBadge = (status: string) => {
     switch (status) {
       case 'WAITING_FOR_SUBMISSION':
@@ -52,13 +76,12 @@ export const AdvisedGroupDetail: React.FC<AdvisedGroupDetailProps> = ({ data }) 
   return (
     <div className="space-y-6 animate-fade-in-up">
 
-      {/* 1. ส่วนข้อมูลทั่วไป (Card บน) */}
+      {/* ส่วนข้อมูลทั่วไป (Card บน) */}
       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-colors">
         <div className="bg-gradient-to-r from-gray-50 to-white dark:from-gray-700/50 dark:to-gray-800 px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
           <h2 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
             <FiBook className="text-blue-600 dark:text-blue-400" /> ข้อมูลกลุ่มปริญญานิพนธ์
           </h2>
-          {/* แสดงสถานะโครงงานตรงนี้ (Thesis Status) */}
           <div>
             {getThesisStatusBadge(thesisStatus)}
           </div>
@@ -86,8 +109,7 @@ export const AdvisedGroupDetail: React.FC<AdvisedGroupDetailProps> = ({ data }) 
                 <label className="flex items-center gap-1 text-sm text-blue-600 dark:text-blue-400 mb-1">
                   <FiTag /> ประเภทโครงงาน
                 </label>
-                <p className={`font-semibold ${courseType === 'PROJECT' ? 'text-gray-700 dark:text-gray-300' : 'text-gray-700 dark:text-gray-300'
-                  }`}>
+                <p className={`font-semibold ${courseType === 'PROJECT' ? 'text-gray-700 dark:text-gray-300' : 'text-gray-700 dark:text-gray-300'}`}>
                   {courseType}
                 </p>
               </div>
@@ -112,7 +134,7 @@ export const AdvisedGroupDetail: React.FC<AdvisedGroupDetailProps> = ({ data }) 
         </div>
       </div>
 
-      {/* 2. ส่วนตารางติดตามงาน (Card ล่าง) */}
+      {/* ส่วนตารางติดตามงาน (Card ล่าง) */}
       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-colors">
         <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-700/50">
           <h3 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
@@ -128,7 +150,7 @@ export const AdvisedGroupDetail: React.FC<AdvisedGroupDetailProps> = ({ data }) 
                 <th className="px-6 py-4 font-medium">รอบการตรวจ</th>
                 <th className="px-6 py-4 font-medium">ช่วงเวลาที่กำหนด</th>
                 <th className="px-6 py-4 font-medium">สถานะ</th>
-                <th className="px-6 py-4 font-medium">ไฟล์แนบ</th>
+                <th className="px-6 py-4 font-medium text-center">ไฟล์แนบ</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50 dark:divide-gray-700">
@@ -149,25 +171,35 @@ export const AdvisedGroupDetail: React.FC<AdvisedGroupDetailProps> = ({ data }) 
                     {formatDate(item.startDate)} - {formatDate(item.endDate)}
                   </td>
                   <td className="px-6 py-4">
-                    {/* ใช้ Helper สำหรับสถานะการส่งงาน */}
                     {getSubmissionStatusBadge(item.status)}
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-6 py-4 text-center">
                     {item.fileUrl ? (
-                      <a
-                        href={item.fileUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline transition-colors group"
-                      >
-                        <div className="p-1.5 bg-red-50 dark:bg-red-900/20 rounded text-red-500 dark:text-red-400 group-hover:bg-red-100 dark:group-hover:bg-red-900/40 transition-colors">
-                          <FiFileText />
-                        </div>
-                        <span className="text-sm max-w-[150px] truncate" title={item.fileName || 'Download'}>
-                          {item.fileName || 'ดาวน์โหลดไฟล์'}
-                        </span>
-                        <FiDownload className="opacity-0 group-hover:opacity-100 transition-opacity" />
-                      </a>
+                      <div className="flex items-center justify-center gap-2">
+                        {/* ปุ่ม Preview */}
+                        <button
+                          onClick={() => setSelectedFile({
+                            url: item.fileUrl!,
+                            downloadUrl: item.downloadUrl || item.fileUrl!,
+                            name: item.fileName || 'document.pdf',
+                            type: getFileType(item.fileName || 'document.pdf')
+                          })}
+                          className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
+                          title="ดูตัวอย่าง"
+                        >
+                          <FiEye size={18} />
+                        </button>
+
+                        {/* ปุ่ม Download */}
+                        <a
+                          href={item.downloadUrl || item.fileUrl}
+                          download={item.fileName}
+                          className="p-2 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                          title="ดาวน์โหลด"
+                        >
+                          <FiDownload size={18} />
+                        </a>
+                      </div>
                     ) : (
                       <span className="text-gray-300 dark:text-gray-600 text-sm">-</span>
                     )}
@@ -184,6 +216,62 @@ export const AdvisedGroupDetail: React.FC<AdvisedGroupDetailProps> = ({ data }) 
           )}
         </div>
       </div>
+
+      {/* In-App Preview Modal */}
+      {selectedFile && (
+        <div className="fixed inset-0 z-[100] flex flex-col bg-gray-900/90 backdrop-blur-sm p-2 sm:p-4 animate-in fade-in duration-200">
+          {/* Header */}
+          <div className="flex items-center justify-between bg-gray-300 dark:bg-gray-800 p-4 rounded-t-2xl border-b dark:border-gray-700">
+            <div className="flex items-center gap-3">
+              <FaFilePdf className="text-red-500" size={24} />
+              <div className="min-w-0">
+                <p className="font-semibold text-gray-900 dark:text-white truncate max-w-[200px] sm:max-w-md">
+                  {selectedFile.name}
+                </p>
+                <p className="text-xs text-gray-500 uppercase">{selectedFile.type.split('/')[1] || 'FILE'}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <a
+                href={selectedFile.downloadUrl}
+                download={selectedFile.name}
+                className="p-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors flex items-center gap-2 px-4 text-sm font-medium"
+              >
+                <FiDownload size={18} /> <span className="hidden sm:inline">Download</span>
+              </a>
+              <button
+                onClick={() => setSelectedFile(null)}
+                className="p-2.5 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors"
+              >
+                <FiX size={24} />
+              </button>
+            </div>
+          </div>
+
+          {/* Modal Body */}
+          <div className="flex-1 bg-white dark:bg-gray-900 rounded-b-2xl overflow-hidden shadow-2xl relative">
+            {selectedFile.type.includes('pdf') ? (
+              <iframe
+                src={`${selectedFile.url}#toolbar=0`}
+                className="w-full h-full border-none"
+                title="File Preview"
+              />
+            ) : selectedFile.type.startsWith('image/') ? (
+              <div className="w-full h-full flex items-center justify-center p-4">
+                <img src={selectedFile.url} alt="Preview" className="max-w-full max-h-full object-contain" />
+              </div>
+            ) : (
+              <div className="h-full flex flex-col items-center justify-center text-gray-500">
+                <FiFileText size={48} className="mb-4 opacity-20" />
+                <p>ไฟล์นี้ไม่รองรับการแสดงตัวอย่างในเบราว์เซอร์</p>
+                <a href={selectedFile.downloadUrl} download={selectedFile.name} className="mt-4 text-blue-600 font-medium hover:underline">
+                  คลิกที่นี่เพื่อดาวน์โหลดไฟล์
+                </a>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
     </div>
   );

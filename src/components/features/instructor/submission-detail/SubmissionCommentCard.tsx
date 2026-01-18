@@ -81,7 +81,7 @@ export const SubmissionCommentCard: React.FC<Props> = ({ comment, onSave }) => {
       ) : (
         <div className={`p-4 rounded-xl text-sm leading-relaxed border transition-colors ${
           text 
-            ? 'bg-orange-50 dark:bg-orange-900/20 text-orange-800 dark:text-orange-200 border-orange-100 dark:border-orange-900/30' 
+            ? 'bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-white border-green-100 dark:border-green-900/30' 
             : 'bg-gray-50 dark:bg-gray-700/50 text-gray-400 dark:text-gray-500 border-gray-100 dark:border-gray-600 italic'
         }`}>
           {text || 'ยังไม่มีความคิดเห็น... กด "แก้ไข" เพื่อเพิ่มคอมเมนต์'}

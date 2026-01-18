@@ -33,6 +33,8 @@ export interface Submission {
   comment: string | null;
   groupId: string;
   inspectionId: number;
+  inspectionRoundNumber?: number;
+  inspectionTitle?: string;
 }
 
 /**
@@ -40,6 +42,7 @@ export interface Submission {
  */
 export interface SubmissionFileUrl {
   url: string;
+  downloadUrl: string;
 }
 
 // ============================================
@@ -131,6 +134,7 @@ export interface SubmissionData {
   file: {
     name: string;
     url: string;
+    downloadUrl: string;
     type: string;
     size: string;
   };
@@ -188,6 +192,7 @@ export interface SubmissionDetail {
   submissionId: number;
   fileName: string;
   fileUrl: string;
+  downloadUrl?: string;
   fileSize: number;
   mimeType: string;
   status: SubmissionStatus;
