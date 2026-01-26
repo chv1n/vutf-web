@@ -6,7 +6,8 @@ import {
     FiChevronRight,
     FiEye,
     FiX,
-    FiDownload
+    FiDownload,
+    FiCheck
 } from 'react-icons/fi';
 import { FaFilePdf } from 'react-icons/fa6';
 import { SubmissionData } from '@/types/submission';
@@ -24,10 +25,49 @@ interface Props {
         limit: number;
     };
     onPageChange: (newPage: number) => void;
+    // New props for batch selection
+    selectedIds: number[];
+    onSelectionChange: (ids: number[]) => void;
+    onBatchVerify: () => void;
 }
 
-export const SubmissionTable: React.FC<Props> = ({ data, isLoading, onVerify, onViewDetails, meta, onPageChange }) => {
+export const SubmissionTable: React.FC<Props> = ({
+    data,
+    isLoading,
+    onVerify,
+    onViewDetails,
+    meta,
+    onPageChange,
+    selectedIds,
+    onSelectionChange,
+    onBatchVerify
+}) => {
     const [selectedFile, setSelectedFile] = useState<{ url: string; downloadUrl: string; name: string; type: string } | null>(null);
+
+    // Get verifiable items
+    const verifiableItems = data.filter(item => item.canVerify);
+    const allVerifiableSelected = verifiableItems.length > 0 && verifiableItems.every(item => selectedIds.includes(item.id));
+    const someSelected = selectedIds.length > 0;
+
+    // Handle select all
+    const handleSelectAll = () => {
+        if (allVerifiableSelected) {
+            // Deselect all
+            onSelectionChange([]);
+        } else {
+            // Select all verifiable
+            onSelectionChange(verifiableItems.map(item => item.id));
+        }
+    };
+
+    // Handle single item toggle
+    const handleToggle = (id: number) => {
+        if (selectedIds.includes(id)) {
+            onSelectionChange(selectedIds.filter(i => i !== id));
+        } else {
+            onSelectionChange([...selectedIds, id]);
+        }
+    };
 
     if (isLoading) return <div className="p-8 text-center text-gray-500 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700">กำลังโหลดข้อมูล...</div>;
     if (data.length === 0) return <div className="p-8 text-center text-gray-500 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700">ไม่พบข้อมูลการส่งงาน</div>;
@@ -39,6 +79,16 @@ export const SubmissionTable: React.FC<Props> = ({ data, isLoading, onVerify, on
                     <table className="w-full text-left border-collapse">
                         <thead className="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-100 dark:border-gray-700">
                             <tr>
+                                {/* Checkbox Header */}
+                                <th className="px-4 py-4 w-12">
+                                    <input
+                                        type="checkbox"
+                                        checked={allVerifiableSelected}
+                                        onChange={handleSelectAll}
+                                        disabled={verifiableItems.length === 0}
+                                        className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 disabled:opacity-50 cursor-pointer"
+                                    />
+                                </th>
                                 <th className="px-6 py-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">File Name</th>
                                 <th className="px-6 py-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Uploaded By</th>
                                 <th className="px-6 py-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Project Name</th>
@@ -50,19 +100,32 @@ export const SubmissionTable: React.FC<Props> = ({ data, isLoading, onVerify, on
                         </thead>
                         <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
                             {data.map((item) => (
-                                <tr key={item.id} className="hover:bg-blue-50/30 dark:hover:bg-blue-900/10 transition-colors">
+                                <tr
+                                    key={item.id}
+                                    className={`hover:bg-blue-50/30 dark:hover:bg-blue-900/10 transition-colors ${selectedIds.includes(item.id) ? 'bg-blue-50 dark:bg-blue-900/20' : ''}`}
+                                >
+                                    {/* Checkbox Cell */}
+                                    <td className="px-4 py-4">
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedIds.includes(item.id)}
+                                            onChange={() => handleToggle(item.id)}
+                                            disabled={!item.canVerify}
+                                            className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 disabled:opacity-30 cursor-pointer disabled:cursor-not-allowed"
+                                        />
+                                    </td>
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-3">
                                             <div className="p-2 bg-red-50 dark:bg-red-900/30 rounded-lg text-red-600 dark:text-red-400">
                                                 <FaFilePdf size={20} />
                                             </div>
                                             <div>
-                                                <button 
-                                                    onClick={() => setSelectedFile({ 
-                                                        url: item.file.url, 
-                                                        downloadUrl: item.file.downloadUrl || item.file.url, 
+                                                <button
+                                                    onClick={() => setSelectedFile({
+                                                        url: item.file.url,
+                                                        downloadUrl: item.file.downloadUrl || item.file.url,
                                                         name: item.file.name,
-                                                        type: item.file.type 
+                                                        type: item.file.type
                                                     })}
                                                     className="font-medium text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 hover:underline text-left line-clamp-1 max-w-[150px] transition-colors cursor-pointer"
                                                     title={item.file.name}
@@ -130,15 +193,41 @@ export const SubmissionTable: React.FC<Props> = ({ data, isLoading, onVerify, on
                 {/* Pagination Footer */}
                 <div className="px-6 py-4 border-t border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row items-center justify-between gap-4">
                     <span className="text-sm text-gray-500 dark:text-gray-400">
-                         แสดง {((meta.page - 1) * meta.limit) + 1} ถึง {Math.min(meta.page * meta.limit, meta.total)} จาก {meta.total} รายการ
+                        แสดง {((meta.page - 1) * meta.limit) + 1} ถึง {Math.min(meta.page * meta.limit, meta.total)} จาก {meta.total} รายการ
                     </span>
                     <div className="flex items-center gap-2">
-                         <button disabled={meta.page === 1} onClick={() => onPageChange(meta.page - 1)} className="p-2 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50"><FiChevronLeft /></button>
-                         <span className="px-4 text-sm font-medium dark:text-gray-300">หน้า {meta.page} / {meta.lastPage}</span>
-                         <button disabled={meta.page === meta.lastPage} onClick={() => onPageChange(meta.page + 1)} className="p-2 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50"><FiChevronRight /></button>
+                        <button disabled={meta.page === 1} onClick={() => onPageChange(meta.page - 1)} className="p-2 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50"><FiChevronLeft /></button>
+                        <span className="px-4 text-sm font-medium dark:text-gray-300">หน้า {meta.page} / {meta.lastPage}</span>
+                        <button disabled={meta.page === meta.lastPage} onClick={() => onPageChange(meta.page + 1)} className="p-2 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50"><FiChevronRight /></button>
                     </div>
                 </div>
             </div>
+
+            {/* Floating Action Bar */}
+            {someSelected && (
+                <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-bottom-4 duration-300">
+                    <div className="flex items-center gap-4 px-6 py-3 bg-gray-900 dark:bg-gray-700 text-white rounded-xl shadow-2xl">
+                        <div className="flex items-center gap-2">
+                            <FiCheck className="text-green-400" />
+                            <span className="font-medium">เลือก {selectedIds.length} รายการ</span>
+                        </div>
+                        <div className="w-px h-6 bg-gray-600"></div>
+                        <button
+                            onClick={() => onSelectionChange([])}
+                            className="px-3 py-1.5 text-sm text-gray-300 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
+                        >
+                            ยกเลิก
+                        </button>
+                        <button
+                            onClick={onBatchVerify}
+                            className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
+                        >
+                            <FiCheckCircle size={16} />
+                            ส่งตรวจทั้งหมด
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* In-App Preview Modal */}
             {selectedFile && (
@@ -153,14 +242,14 @@ export const SubmissionTable: React.FC<Props> = ({ data, isLoading, onVerify, on
                         </div>
                         <div className="flex items-center gap-2">
                             {/* ปุ่ม Download */}
-                            <a 
-                                href={selectedFile.downloadUrl} 
+                            <a
+                                href={selectedFile.downloadUrl}
                                 className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
                             >
                                 <FiDownload /> <span className="hidden sm:inline">Download</span>
                             </a>
                             {/* ปุ่ม ปิด */}
-                            <button 
+                            <button
                                 onClick={() => setSelectedFile(null)}
                                 className="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                             >
@@ -172,8 +261,8 @@ export const SubmissionTable: React.FC<Props> = ({ data, isLoading, onVerify, on
                     {/* Modal Body (Preview Content) */}
                     <div className="flex-1 bg-white dark:bg-gray-900 rounded-b-2xl overflow-hidden shadow-2xl relative">
                         {selectedFile.type?.includes('pdf') ? (
-                            <iframe 
-                                src={`${selectedFile.url}#toolbar=0`} 
+                            <iframe
+                                src={`${selectedFile.url}#toolbar=0`}
                                 className="w-full h-full border-none"
                                 title="File Preview"
                             />
