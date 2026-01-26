@@ -1,6 +1,7 @@
 // src/pages/instructor/DashboardPage.tsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from '@/utils/swal';
 import { SubmissionFilters } from '../../components/features/instructor/SubmissionFilters';
 import { SubmissionTable } from '../../components/features/instructor/SubmissionTable';
 import { submissionService } from '../../services/submission.service';
@@ -25,6 +26,13 @@ export const DashboardPage = () => {
   }>({ isOpen: false, type: 'single' });
   const [isVerifying, setIsVerifying] = useState(false);
 
+  // Polling State
+  const [isPolling, setIsPolling] = useState(false);
+  const pollingRef = useRef<NodeJS.Timeout | null>(null);
+  const hasSeenInProgressRef = useRef(false);
+  const pollingAttemptsRef = useRef(0);
+  const MAX_POLLING_ATTEMPTS = 60;
+
   // Filter State
   const [filters, setFilters] = useState<SubmissionFilterParams>({
     page: 1,
@@ -37,8 +45,19 @@ export const DashboardPage = () => {
     status: undefined
   });
 
-  // Fetch Data
-  const fetchSubmissions = async () => {
+  // Stop polling
+  const stopPolling = useCallback(() => {
+    if (pollingRef.current) {
+      clearInterval(pollingRef.current);
+      pollingRef.current = null;
+    }
+    setIsPolling(false);
+    hasSeenInProgressRef.current = false;
+    pollingAttemptsRef.current = 0;
+  }, []);
+
+  // Fetch Data  
+  const fetchSubmissions = useCallback(async () => {
     setLoading(true);
     try {
       const response = await submissionService.getAll(filters);
@@ -50,14 +69,68 @@ export const DashboardPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters]);
 
+  // Poll once
+  const pollOnce = useCallback(async () => {
+    try {
+      const { inProgressCount } = await submissionService.getStatusSummary();
+
+      // Track if we've seen IN_PROGRESS > 0
+      if (inProgressCount > 0) {
+        hasSeenInProgressRef.current = true;
+      }
+
+      // Only complete if we saw IN_PROGRESS before and now it's 0
+      if (hasSeenInProgressRef.current && inProgressCount === 0) {
+        stopPolling();
+        toast.fire({ icon: 'success', title: 'ตรวจสอบเสร็จสิ้นทั้งหมดแล้ว!' });
+        fetchSubmissions();
+        return;
+      }
+
+      // Check max attempts
+      pollingAttemptsRef.current += 1;
+      if (pollingAttemptsRef.current >= MAX_POLLING_ATTEMPTS) {
+        stopPolling();
+        toast.fire({ icon: 'warning', title: 'หมดเวลาตรวจสอบ กรุณา refresh หน้า' });
+        fetchSubmissions();
+      }
+    } catch (err) {
+      console.error('Polling error:', err);
+    }
+  }, [stopPolling, fetchSubmissions]);
+
+  // Start polling
+  const startPolling = useCallback(() => {
+    stopPolling();
+    setIsPolling(true);
+    hasSeenInProgressRef.current = false;
+    pollingAttemptsRef.current = 0;
+
+    // Start interval
+    pollingRef.current = setInterval(pollOnce, 3000);
+
+    // First poll after short delay (let backend update status)
+    setTimeout(pollOnce, 1000);
+  }, [stopPolling, pollOnce]);
+
+  // Cleanup polling on unmount
+  useEffect(() => {
+    return () => {
+      if (pollingRef.current) {
+        clearInterval(pollingRef.current);
+      }
+    };
+  }, []);
+
+  // Fetch on filter change
   useEffect(() => {
     const timer = setTimeout(() => {
       fetchSubmissions();
     }, 300);
     return () => clearTimeout(timer);
-  }, [filters]);
+  }, [fetchSubmissions]);
 
   // Handlers
   const handleFilterChange = (newFilters: Partial<SubmissionFilterParams>) => {
@@ -89,11 +162,15 @@ export const DashboardPage = () => {
 
       await submissionService.verifyBatch(ids);
 
-      // Close modal and refresh
+      // Close modal and refresh to show IN_PROGRESS status
       setConfirmModal({ isOpen: false, type: 'single' });
-      fetchSubmissions();
+      await fetchSubmissions();
+
+      // Start polling after fetch completes
+      startPolling();
     } catch (error) {
       console.error('Verification failed:', error);
+      toast.fire({ icon: 'error', title: 'ส่งตรวจสอบไม่สำเร็จ' });
     } finally {
       setIsVerifying(false);
     }
@@ -153,7 +230,10 @@ export const DashboardPage = () => {
     <div className="p-6 bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors">
       <div className="mb-8 animate-enter-down">
         <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Submission Dashboard</h1>
-        <p className="text-gray-500 dark:text-gray-400">จัดการและตรวจสอบไฟล์งานของนักศึกษา</p>
+        <p className="text-gray-500 dark:text-gray-400">
+          จัดการและตรวจสอบไฟล์งานของนักศึกษา
+          {isPolling && <span className="ml-2 text-amber-600 animate-pulse">• กำลังติดตามสถานะ...</span>}
+        </p>
       </div>
 
       {/* 1. Filters Section */}

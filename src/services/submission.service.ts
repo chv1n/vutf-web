@@ -95,5 +95,14 @@ export const submissionService = {
      */
     verifyBatch: async (submissionIds: number[]) => {
         return api.post('/report-file/verify-batch', { submissionIds });
+    },
+
+    /**
+     * Get status summary for polling (lightweight)
+     * Returns only inProgressCount
+     */
+    getStatusSummary: async (): Promise<{ inProgressCount: number }> => {
+        const response = await api.get<{ data: { inProgressCount: number } }>('/submissions/status-summary');
+        return response.data;
     }
 };

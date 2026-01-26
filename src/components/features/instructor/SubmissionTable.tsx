@@ -168,14 +168,30 @@ export const SubmissionTable: React.FC<Props> = ({
                                         <StatusBadge status={item.status as any} />
                                     </td>
                                     <td className="px-6 py-4 text-center">
-                                        {item.canVerify ? (
+                                        {item.status === 'IN_PROGRESS' ? (
+                                            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-100 text-amber-700 text-xs font-medium rounded-lg">
+                                                <span className="animate-spin">⏳</span> กำลังตรวจ...
+                                            </span>
+                                        ) : item.verificationCount > 0 ? (
+                                            <div className="flex flex-col items-center gap-1">
+                                                <span className="text-xs text-gray-500 dark:text-gray-400">
+                                                    ตรวจแล้ว {item.verificationCount} ครั้ง
+                                                </span>
+                                                <button
+                                                    onClick={() => onVerify(item.id)}
+                                                    className="inline-flex items-center gap-1 px-2.5 py-1 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 text-xs font-medium rounded-lg transition-colors"
+                                                >
+                                                    <FiCheckCircle size={12} /> ตรวจอีกครั้ง
+                                                </button>
+                                            </div>
+                                        ) : (
                                             <button
                                                 onClick={() => onVerify(item.id)}
                                                 className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition-colors"
                                             >
                                                 <FiCheckCircle size={14} /> Verify
                                             </button>
-                                        ) : <span className="text-xs text-gray-300">-</span>}
+                                        )}
                                     </td>
                                     <td className="px-6 py-4 text-center">
                                         <button
