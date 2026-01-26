@@ -158,6 +158,7 @@ export interface SubmissionData {
   };
   submittedAt: string;
   status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
+  verificationCount: number;
   canVerify: boolean;
 }
 

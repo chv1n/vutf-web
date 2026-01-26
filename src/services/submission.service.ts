@@ -88,5 +88,21 @@ export const submissionService = {
      */
     verify: async (id: number) => {
         return api.post(`/submissions/${id}/verify`, {});
+    },
+
+    /**
+     * ส่งคำร้องขอตรวจสอบหลายรายการ (Batch Verification)
+     */
+    verifyBatch: async (submissionIds: number[]) => {
+        return api.post('/report-file/verify-batch', { submissionIds });
+    },
+
+    /**
+     * Get status summary for polling (lightweight)
+     * Returns only inProgressCount
+     */
+    getStatusSummary: async (): Promise<{ inProgressCount: number }> => {
+        const response = await api.get<{ data: { inProgressCount: number } }>('/submissions/status-summary');
+        return response.data;
     }
 };
