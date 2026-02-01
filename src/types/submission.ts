@@ -200,6 +200,7 @@ export interface SubmissionDetail {
   submittedAt: string;
   verifiedAt: string | null;
   comment: string | null;
+  verificationCount?: number;
 
   thesisTitleTh: string;
   thesisTitleEn: string;

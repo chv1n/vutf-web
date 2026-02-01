@@ -12,6 +12,7 @@ import {
 import { FaFilePdf } from 'react-icons/fa6';
 import { SubmissionData } from '@/types/submission';
 import { StatusBadge } from './StatusBadge';
+import { Pagination } from '@/components/common/Pagination';
 
 interface Props {
     data: SubmissionData[];
@@ -206,17 +207,8 @@ export const SubmissionTable: React.FC<Props> = ({
                         </tbody>
                     </table>
                 </div>
-                {/* Pagination Footer */}
-                <div className="px-6 py-4 border-t border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <span className="text-sm text-gray-500 dark:text-gray-400">
-                        แสดง {((meta.page - 1) * meta.limit) + 1} ถึง {Math.min(meta.page * meta.limit, meta.total)} จาก {meta.total} รายการ
-                    </span>
-                    <div className="flex items-center gap-2">
-                        <button disabled={meta.page === 1} onClick={() => onPageChange(meta.page - 1)} className="p-2 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50"><FiChevronLeft /></button>
-                        <span className="px-4 text-sm font-medium dark:text-gray-300">หน้า {meta.page} / {meta.lastPage}</span>
-                        <button disabled={meta.page === meta.lastPage} onClick={() => onPageChange(meta.page + 1)} className="p-2 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50"><FiChevronRight /></button>
-                    </div>
-                </div>
+                {/* Pagination */}
+                <Pagination meta={meta} onPageChange={onPageChange} />
             </div>
 
             {/* Floating Action Bar */}

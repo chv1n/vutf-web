@@ -29,6 +29,8 @@ import { SubmissionDetailPage } from './pages/instructor/SubmissionDetailPage';
 import { StudentProfilePage } from './pages/student/StudentProfilePage';
 import { InstructorProfilePage } from './pages/instructor/InstructorProfilePage';
 import { MyAdvisedGroupsPage } from './pages/instructor/MyAdvisedGroupsPage';
+import { ReportPage } from './pages/instructor/ReportPage';
+import { ReportDetailPage } from './pages/instructor/ReportDetailPage';
 
 function App() {
   return (
@@ -81,6 +83,8 @@ function App() {
               <Route path="profile" element={<InstructorProfilePage />} />
               <Route path="groups" element={<MyAdvisedGroupsPage />} />
               <Route path="submission/:id" element={<SubmissionDetailPage />} />
+              <Route path="report" element={<ReportPage />} />
+              <Route path="report/:id" element={<ReportDetailPage />} />
               <Route path="announcements" element={<AnnouncementsPage />} />
             </Route>
           </Route>
