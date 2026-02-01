@@ -87,7 +87,7 @@ export const submissionService = {
      * ส่งคำร้องขอตรวจสอบ (Verification)
      */
     verify: async (id: number) => {
-        return api.post(`/submissions/${id}/verify`, {});
+        return api.post('/report-file/verify-batch', { submissionIds: [id] });
     },
 
     /**

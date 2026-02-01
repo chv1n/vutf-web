@@ -14,6 +14,7 @@
     "@hookform/resolvers": "^5.2.2",
     "framer-motion": "^10.16.4",
     "lucide-react": "^0.292.0",
+    "papaparse": "^5.5.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.67.0",
@@ -26,6 +27,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.17",
     "@types/node": "^25.0.10",
+    "@types/papaparse": "^5.5.2",
     "@types/react": "^18.3.27",
     "@types/react-dom": "^18.3.7",
     "@typescript-eslint/eslint-plugin": "^6.10.0",

@@ -1,3 +1,4 @@
+// src/components/layout/Sidebar.tsx
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import {
     FiHome, FiUser, FiFileText, FiBell, FiUsers,
