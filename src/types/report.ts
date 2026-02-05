@@ -80,3 +80,26 @@ export interface ReportFilterParams {
   verificationStatus?: VerificationStatus;
   reviewStatus?: ReviewStatus;
 }
+
+export interface StudentReportData {
+  id: number;
+  file_name: string;
+  file_type: string;
+  file_size: number;
+  verification_status: VerificationStatus;
+  review_status: ReviewStatus;
+  reported_at: string;
+  comment: string | null;
+  comment_by_id: string | null;
+  comment_by_name: string; // ชื่ออาจารย์ที่ได้มาจากการ Join
+  urls: {
+    pdf: {
+      url: string;
+      downloadUrl: string;
+    };
+    csv?: {
+      url: string;
+      downloadUrl: string;
+    } | null;
+  };
+}

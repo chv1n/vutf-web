@@ -2,7 +2,18 @@
 // Card แสดง submission file (Original หรือ Report)
 
 import React from 'react';
-import { FiFile, FiDownload, FiCalendar, FiUser, FiMessageSquare, FiEye } from 'react-icons/fi';
+import { 
+    FiFile, 
+    FiDownload, 
+    FiCalendar, 
+    FiUser, 
+    FiMessageSquare, 
+    FiEye,
+    FiCheckCircle,
+    FiXCircle,
+    FiAlertCircle,
+    FiClock
+} from 'react-icons/fi';
 import { formatFileSize } from '@/types/submission';
 
 interface SubmissionReviewCardProps {
@@ -18,6 +29,8 @@ interface SubmissionReviewCardProps {
     };
     /** ชื่อผู้ตรวจ (สำหรับ Report) */
     reviewerName?: string;
+    /** สถานะการตรวจ */
+    status?: string; 
     /** Callback เมื่อกด download */
     onDownload?: () => void;
     /** Callback เมื่อกด preview */
@@ -31,12 +44,13 @@ interface SubmissionReviewCardProps {
  * * Features:
  * - แสดง file info (name, size, date)
  * - Download button
- * - สำหรับ Report: reviewer name, comment
+ * - สำหรับ Report: reviewer name, comment, status badge
  */
 export const SubmissionReviewCard: React.FC<SubmissionReviewCardProps> = ({
     type,
     file,
     reviewerName,
+    status,
     onDownload,
     onPreview,
     loading = false,
@@ -48,6 +62,7 @@ export const SubmissionReviewCard: React.FC<SubmissionReviewCardProps> = ({
      * Format date to Thai
      */
     const formatDate = (dateString: string) => {
+        if (!dateString) return '-';
         const date = new Date(dateString);
         return date.toLocaleDateString('th-TH', {
             day: 'numeric',
@@ -56,6 +71,40 @@ export const SubmissionReviewCard: React.FC<SubmissionReviewCardProps> = ({
             hour: '2-digit',
             minute: '2-digit',
         });
+    };
+
+    /**
+     * Helper: เลือกสีและไอคอนตามสถานะ (ใช้ String Check)
+     */
+    const getStatusBadge = (currentStatus: string) => {
+        switch (currentStatus) {
+            case 'PASSED':
+                return (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+                        <FiCheckCircle className="w-3 h-3" /> ผ่าน
+                    </span>
+                );
+            case 'NOT_PASSED':
+                return (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border border-red-200 dark:border-red-800">
+                        <FiXCircle className="w-3 h-3" /> ไม่ผ่าน
+                    </span>
+                );
+            case 'NEEDS_REVISION':
+                return (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
+                        <FiAlertCircle className="w-3 h-3" /> ต้องแก้ไข
+                    </span>
+                );
+            case 'PENDING':
+                return (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400 border border-gray-200 dark:border-gray-700">
+                        <FiClock className="w-3 h-3" /> รอตรวจ
+                    </span>
+                );
+            default:
+                return null;
+        }
     };
 
     // No file state
@@ -74,16 +123,20 @@ export const SubmissionReviewCard: React.FC<SubmissionReviewCardProps> = ({
 
     return (
         <div className={`
-            bg-white dark:bg-gray-800 rounded-2xl p-5 border-2 h-full flex flex-col transition-colors
+            bg-white dark:bg-gray-800 rounded-2xl p-5 border-2 h-full flex flex-col transition-colors relative
             ${isOriginal ? 'border-blue-100 dark:border-blue-900/30' : 'border-emerald-100 dark:border-emerald-900/30'}
         `}>
-            {/* Header */}
-            <h4 className={`
-                text-sm font-bold uppercase tracking-wider mb-4
-                ${isOriginal ? 'text-blue-600 dark:text-blue-400' : 'text-emerald-600 dark:text-emerald-400'}
-            `}>
-                {title}
-            </h4>
+            {/* Header & Status Badge */}
+            <div className="flex items-center justify-between mb-4">
+                <h4 className={`
+                    text-sm font-bold uppercase tracking-wider
+                    ${isOriginal ? 'text-blue-600 dark:text-blue-400' : 'text-emerald-600 dark:text-emerald-400'}
+                `}>
+                    {title}
+                </h4>
+                {/* แสดง Status Badge ถ้าไม่ใช่ Original และมี status ส่งมา */}
+                {!isOriginal && status && getStatusBadge(status)}
+            </div>
 
             {/* Responsive Layout: Mobile=Column, Desktop=Row */}
             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">

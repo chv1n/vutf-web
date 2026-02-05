@@ -1,10 +1,9 @@
 // src/components/features/submission/ReviewRoundSection.tsx
-// Section แสดง submission ของแต่ละ Inspection Round
-
 import React from 'react';
 import { FiClock, FiLoader, FiCheckCircle } from 'react-icons/fi';
 import { SubmissionReviewCard } from './SubmissionReviewCard';
 import { SubmissionStatus, type Submission } from '@/types/submission';
+import { StudentReportData } from '@/types/report';
 
 interface ReviewRoundSectionProps {
     /** ลำดับรอบ */
@@ -13,6 +12,9 @@ interface ReviewRoundSectionProps {
     roundTitle?: string;
     /** Submission ของรอบนี้ */
     submission: Submission;
+    /** Report */
+    reportFile?: StudentReportData | null;
+
     /** Callback download original */
     onDownloadOriginal?: () => void;
     /** Callback preview original */
@@ -23,21 +25,16 @@ interface ReviewRoundSectionProps {
     onPreviewReport?: () => void;
 }
 
-/**
- * ReviewRoundSection - แสดง submission ของแต่ละ round
- * * Features:
- * - Header: "รอบที่ X" + Status Badge
- * - 2 columns: Original | Report
- */
 export const ReviewRoundSection: React.FC<ReviewRoundSectionProps> = ({
     roundNumber,
     roundTitle,
     submission,
+    reportFile,
     onDownloadOriginal,
     onPreviewOriginal,
     onDownloadReport,
     onPreviewReport,
-}) => {
+}) => {  
     /**
      * Get status config
      */
@@ -81,9 +78,6 @@ export const ReviewRoundSection: React.FC<ReviewRoundSectionProps> = ({
     const statusConfig = getStatusConfig(submission.status);
     const StatusIcon = statusConfig.icon;
 
-    // Check if report exists (mocked: completed = has report)
-    const hasReport = submission.status === SubmissionStatus.COMPLETED;
-
     return (
         <div className="mb-8 last:mb-0">
             {/* Header */}
@@ -105,7 +99,7 @@ export const ReviewRoundSection: React.FC<ReviewRoundSectionProps> = ({
 
             {/* Cards Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Original */}
+                {/* Original File Card */}
                 <SubmissionReviewCard
                     type="original"
                     file={{
@@ -117,17 +111,21 @@ export const ReviewRoundSection: React.FC<ReviewRoundSectionProps> = ({
                     onPreview={onPreviewOriginal}
                 />
 
-                {/* Report (mocked) */}
+                {/* Report File Card */}
                 <SubmissionReviewCard
                     type="report"
-                    file={hasReport ? {
-                        fileName: `${submission.fileName.replace('.pdf', '')}_report.pdf`,
-                        fileSize: submission.fileSize,
-                        submittedAt: submission.submittedAt,
-                        verifiedAt: submission.verifiedAt,
-                        comment: submission.comment,
+                    // ถ้ามี reportFile ส่งเข้ามา แสดงว่าอาจารย์ตรวจแล้ว
+                    file={reportFile ? {
+                        fileName: reportFile.file_name,
+                        fileSize: reportFile.file_size,
+                        submittedAt: reportFile.reported_at, // วันที่รายงานผล
+                        verifiedAt: reportFile.reported_at,
+                        comment: reportFile.comment
                     } : undefined}
-                    reviewerName={hasReport ? 'อ.ผู้ตรวจ' : undefined}
+                    
+                    reviewerName={reportFile?.comment_by_name} 
+                    status={reportFile?.review_status}
+                    
                     onDownload={onDownloadReport}
                     onPreview={onPreviewReport}
                 />

@@ -22,6 +22,30 @@ export interface StudentMember {
   role: string;
 }
 
+export interface GroupReport {
+  id: number;
+  // ข้อมูลรอบและการตรวจ
+  roundNumber: number;      
+  attemptNumber?: number;   
+  submittedAt: string;  
+  
+  // สถานะ
+  verificationStatus: 'PASS' | 'FAIL' | 'ERROR'; // สถานะของระบบ
+  reviewStatus: 'PENDING' | 'PASSED' | 'NOT_PASSED' | 'NEEDS_REVISION'; // สถานะของอาจารย์
+
+  // ไฟล์
+  fileName: string;
+  fileSize?: number;    
+  fileUrl: string;
+  downloadUrl?: string | null;
+  
+  // CSV (สำหรับปุ่ม Preview Data)
+  csvUrl?: string | null;
+  csvDownloadUrl?: string | null;
+  
+  senderName?: string;
+}
+
 // Interface หลักสำหรับ Response (โครงสร้างแบบแบนราบ - Flattened)
 export interface AdvisedGroupResponse {
   groupId: string;
@@ -34,4 +58,5 @@ export interface AdvisedGroupResponse {
   term: number;
   students: StudentMember[];
   progress: GroupProgress[];
+  reports?: GroupReport[];
 }

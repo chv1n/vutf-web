@@ -1,6 +1,6 @@
 // src/services/report.service.ts
 import { api } from './api';
-import { ReportData, ReportFilterParams } from '../types/report';
+import { ReportData, ReportFilterParams, StudentReportData } from '../types/report';
 
 // Interface สำหรับ Response (Data + Meta)
 export interface ReportResponse {
@@ -44,5 +44,13 @@ export const reportService = {
    */
   submitReview: async (id: number, data: { reviewStatus: string; comment?: string }) => {
     return api.patch(`/report-file/${id}/review`, data);
-  }
+  },
+
+  /**
+   * สำหรับนักศึกษา: ดึง Report ที่ตรวจแล้วเท่านั้น
+   * GET /report-file/submission/:submissionId/student
+   */
+  getForStudent: async (submissionId: number): Promise<StudentReportData[]> => {
+    return api.get<StudentReportData[]>(`/report-file/submission/${submissionId}/student`);
+  },
 };
