@@ -9,8 +9,10 @@ import { useTitle } from '@/hooks/useTitle';
 import { useAuth } from '@/contexts/AuthContext';
 import { groupMemberService } from '@/services/group-member.service';
 import { submissionService } from '@/services/submission.service';
+import { reportService } from '@/services/report.service'; 
 import { ThesisGroup } from '@/types/thesis';
 import { Submission, formatFileSize } from '@/types/submission';
+import { StudentReportData } from '@/types/report'; 
 
 // Components
 import { GroupSelector } from '@/components/features/submission/GroupSelector';
@@ -39,11 +41,15 @@ const ThesisReportPage: React.FC = () => {
     const [groups, setGroups] = useState<GroupOption[]>([]);
     const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
     const [submissions, setSubmissions] = useState<Submission[]>([]);
+
+    // State สำหรับเก็บ Report ที่จับคู่กับ SubmissionId
+    const [reportsMap, setReportsMap] = useState<Record<number, StudentReportData>>({});
+
     const [isLoadingGroups, setIsLoadingGroups] = useState(true);
     const [isLoadingSubmissions, setIsLoadingSubmissions] = useState(false);
 
     // State สำหรับ Preview Modal
-    const [previewFile, setPreviewFile] = useState<{ url: string; downloadUrl: string; name: string; type: string; size: number;} | null>(null);
+    const [previewFile, setPreviewFile] = useState<{ url: string; downloadUrl: string; name: string; type: string; size: number; } | null>(null);
 
     /**
      * Fetch user's groups
@@ -77,19 +83,42 @@ const ThesisReportPage: React.FC = () => {
     }, [user?.id, selectedGroupId]);
 
     /**
-     * Fetch submissions for selected group
+     * Fetch submissions & Reports for selected group
      */
-    const fetchSubmissions = useCallback(async () => {
+    const fetchSubmissionsAndReports = useCallback(async () => {
         if (!selectedGroupId) return;
         setIsLoadingSubmissions(true);
+        setReportsMap({}); // Reset reports ก่อนโหลดใหม่
 
         try {
+            // 1. ดึง Submissions ทั้งหมดของกลุ่ม
             const data = await submissionService.getByGroup(selectedGroupId);
             // Sort by submittedAt descending (newest first)
-            const sorted = data.sort((a, b) =>
+            const sortedSubmissions = data.sort((a, b) =>
                 new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime()
             );
-            setSubmissions(sorted);
+            setSubmissions(sortedSubmissions);
+
+            // 2. ดึง Reports ของแต่ละ Submission แบบ Parallel
+            const reportsData: Record<number, StudentReportData> = {};
+
+            await Promise.all(sortedSubmissions.map(async (sub) => {
+                try {
+                    // ดึง report ที่ตรวจแล้ว (Status != PENDING)
+                    // รับค่ามาเป็น any ก่อน เพราะเราต้องแกะ key 'data' ออกมา
+                    const response: any = await reportService.getForStudent(sub.submissionId);
+                    const reports = response.data || response;
+
+                    if (Array.isArray(reports) && reports.length > 0) {
+                        reportsData[sub.submissionId] = reports[0];
+                    }
+                } catch (err) {
+                    console.error(`Error fetching report for submission ${sub.submissionId}:`, err);
+                }
+            }));
+
+            setReportsMap(reportsData);
+
         } catch (error) {
             console.error('Error fetching submissions:', error);
             setSubmissions([]);
@@ -106,26 +135,31 @@ const ThesisReportPage: React.FC = () => {
     // Fetch submissions when group changes
     useEffect(() => {
         if (selectedGroupId) {
-            fetchSubmissions();
+            fetchSubmissionsAndReports();
         }
-    }, [selectedGroupId, fetchSubmissions]);
+    }, [selectedGroupId, fetchSubmissionsAndReports]);
 
     /**
-     * Handle download
+     * Helper: Download File from URL
      */
-    const handleDownload = async (submissionId: number) => {
+    const downloadFile = (url: string) => {
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', '');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    /**
+     * Handle download (Original Submission)
+     */
+    const handleDownloadOriginal = async (submissionId: number) => {
         try {
             // เรียกใช้ API เพื่อขอ URL ใหม่ (downloadUrl)
             const res = await submissionService.getFileUrl(submissionId);
             const targetUrl = res.downloadUrl || res.url;
-
-            // สร้าง Link ชั่วคราวเพื่อ Force Download
-            const link = document.createElement('a');
-            link.href = targetUrl;
-            link.setAttribute('download', '');
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            downloadFile(targetUrl);
         } catch (error) {
             console.error('Error getting download URL:', error);
             alert('ไม่สามารถดาวน์โหลดไฟล์ได้');
@@ -133,9 +167,21 @@ const ThesisReportPage: React.FC = () => {
     };
 
     /**
-     * Handle Preview
+     * Handle download (Report File)
+     * ใช้ URL ที่ได้มาพร้อมกับ Object Report เลย ไม่ต้องยิง API ขอใหม่
      */
-    const handlePreview = async (submissionId: number, fileName: string, fileSize: number, mimeType?: string) => {
+    const handleDownloadReport = (report: StudentReportData) => {
+        if (report.urls.pdf.downloadUrl) {
+            downloadFile(report.urls.pdf.downloadUrl);
+        } else {
+            alert('ไม่พบลิงก์ดาวน์โหลด');
+        }
+    };
+
+    /**
+     * Handle Preview (Original Submission)
+     */
+    const handlePreviewOriginal = async (submissionId: number, fileName: string, fileSize: number, mimeType?: string) => {
         try {
             const res = await submissionService.getFileUrl(submissionId);
             setPreviewFile({
@@ -149,6 +195,19 @@ const ThesisReportPage: React.FC = () => {
             console.error('Error opening preview:', error);
             alert('ไม่สามารถเปิดไฟล์ได้');
         }
+    };
+
+    /**
+     * Handle Preview (Report File)
+     */
+    const handlePreviewReport = (report: StudentReportData) => {
+        setPreviewFile({
+            url: report.urls.pdf.url,
+            downloadUrl: report.urls.pdf.downloadUrl,
+            name: report.file_name,
+            type: report.file_type || 'application/pdf',
+            size: report.file_size,
+        });
     };
 
     // Loading groups
@@ -251,20 +310,29 @@ const ThesisReportPage: React.FC = () => {
                 {/* Submissions by round */}
                 {!isLoadingSubmissions && submissions.length > 0 && (
                     <div className="space-y-6">
-                        {submissions.map((submission, index) => (
-                            <ReviewRoundSection
-                                key={submission.submissionId}
-                                roundNumber={submission.inspectionRoundNumber || (submissions.length - index)}
-                                // roundTitle={submission.inspectionTitle || `รอบที่ ${submissions.length - index}`}
-                                submission={submission}
-                                // ส่ง Actions: Original File
-                                onDownloadOriginal={() => handleDownload(submission.submissionId)}
-                                onPreviewOriginal={() => handlePreview(submission.submissionId, submission.fileName, submission.fileSize, submission.mimeType)}
-                                // ส่ง Actions: Report File (ถ้า Logic เปลี่ยนให้แก้ตรงนี้)
-                                onDownloadReport={() => handleDownload(submission.submissionId)}
-                                onPreviewReport={() => handlePreview(submission.submissionId, submission.fileName, submission.fileSize, submission.mimeType)}
-                            />
-                        ))}
+                        {submissions.map((submission, index) => {
+                            // ดึง Report จาก Map มาเตรียมไว้
+                            const report = reportsMap[submission.submissionId];
+
+                            return (
+                                <ReviewRoundSection
+                                    key={submission.submissionId}
+                                    roundNumber={submission.inspectionRoundNumber || (submissions.length - index)}
+                                    submission={submission}
+
+                                    // ส่ง Report Data ไปให้ Component
+                                    reportFile={report}
+
+                                    // Actions: Original File
+                                    onDownloadOriginal={() => handleDownloadOriginal(submission.submissionId)}
+                                    onPreviewOriginal={() => handlePreviewOriginal(submission.submissionId, submission.fileName, submission.fileSize, submission.mimeType)}
+
+                                    // Actions: Report File (เช็คก่อนว่ามี report ไหม)
+                                    onDownloadReport={() => report && handleDownloadReport(report)}
+                                    onPreviewReport={() => report && handlePreviewReport(report)}
+                                />
+                            );
+                        })}
                     </div>
                 )}
             </motion.div>

@@ -1,3 +1,4 @@
+// src/pages/announcements/AnnouncementsPage.tsx
 import { useState, useEffect } from 'react';
 import { FiPlus, FiSearch, FiLoader, FiEdit2, FiTrash2, FiBell, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import Swal from 'sweetalert2';
@@ -31,7 +32,7 @@ const formatDateDisplay = (dateString: string) => {
 
 export const AnnouncementsPage = () => {
   const { user } = useAuth();
-  const isAdmin = user?.role === 'admin';
+  const canManage = user?.role === 'admin' || user?.role === 'instructor';
 
   // Data State
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
@@ -166,7 +167,7 @@ export const AnnouncementsPage = () => {
             </div>
 
             <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
-              {isAdmin && (
+              {canManage && (
                  <button 
                    onClick={() => { setSelectedItem(null); setIsModalOpen(true); }}
                    className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors"
@@ -217,7 +218,7 @@ export const AnnouncementsPage = () => {
                       </p>
                       
                       {/* Actions */}
-                      {isAdmin && (
+                      {canManage && (
                         <div className="mt-3 sm:mt-0 sm:absolute sm:right-0 sm:top-0 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity flex gap-2">
                            <button 
                              onClick={(e) => { e.stopPropagation(); setSelectedItem(item); setIsModalOpen(true); }}
