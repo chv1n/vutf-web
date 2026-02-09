@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { FiFileText, FiDownload, FiEye, FiX } from 'react-icons/fi';
 import { FaFilePdf, FaFileCsv } from 'react-icons/fa6'; 
 import { formatFileSize } from '@/types/submission';
-import Papa from 'papaparse'; 
+import { ThesisValidator } from '@/components/shared/thesis-validator/ThesisValidator';
 
 interface Props {
   title?: string; 
@@ -12,7 +12,12 @@ interface Props {
   fileUrl: string;      
   downloadUrl: string;  
   mimeType: string;
-  csv?: { url: string; downloadUrl: string } | null; 
+  csv?: { url: string; downloadUrl: string } | null;
+  originalFile?: {
+    name: string;
+    url: string;
+    downloadUrl: string;
+  } | null;
 }
 
 export const SubmissionFileCard: React.FC<Props> = ({ 
@@ -22,43 +27,11 @@ export const SubmissionFileCard: React.FC<Props> = ({
   fileUrl, 
   downloadUrl,
   mimeType,
-  csv 
+  csv,
+  originalFile
 }) => {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  
-  // State สำหรับ CSV Preview
-  const [isCsvPreviewOpen, setIsCsvPreviewOpen] = useState(false);
-  const [csvData, setCsvData] = useState<{ headers: string[], rows: string[][] } | null>(null);
-  const [isLoadingCsv, setIsLoadingCsv] = useState(false);
-
-  // ฟังก์ชันโหลด CSV
-  const handleCsvPreview = async () => {
-    if (!csv) return;
-    setIsCsvPreviewOpen(true);
-    
-    if (csvData) return; // ถ้าเคยโหลดแล้วไม่ต้องโหลดซ้ำ
-
-    setIsLoadingCsv(true);
-    try {
-      const response = await fetch(csv.url);
-      const csvText = await response.text();
-      
-      Papa.parse(csvText, {
-        complete: (results) => {
-          if (results.data && results.data.length > 0) {
-             const [headers, ...rows] = results.data as string[][];
-             setCsvData({ headers, rows });
-          }
-          setIsLoadingCsv(false);
-        },
-        header: false,
-        skipEmptyLines: true
-      });
-    } catch (error) {
-      console.error("Error fetching CSV:", error);
-      setIsLoadingCsv(false);
-    }
-  };
+  const [isValidatorOpen, setIsValidatorOpen] = useState(false);
 
   return (
     <>
@@ -67,7 +40,7 @@ export const SubmissionFileCard: React.FC<Props> = ({
           <FiFileText className="text-blue-500 dark:text-blue-400" /> {title}
         </h3>
         
-        {/* === PDF Section === */}
+        {/* === PDF Section (Report File) === */}
         <div className="flex flex-col lg:flex-row items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50/50 dark:bg-gray-700/30">
           <div className="flex items-center gap-4 w-full lg:w-auto">
             <div className="p-3 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-xl shadow-sm">
@@ -101,7 +74,7 @@ export const SubmissionFileCard: React.FC<Props> = ({
           </div>
         </div>
 
-        {/* === CSV Section (Show if exists) === */}
+        {/* === CSV Section (Validator Trigger) === */}
         {csv && (
            <div className="mt-3 flex flex-col lg:flex-row items-center justify-between p-4 border border-emerald-100 dark:border-emerald-900/30 rounded-xl bg-emerald-50/30 dark:bg-emerald-900/10">
               <div className="flex items-center gap-4 w-full lg:w-auto">
@@ -113,17 +86,18 @@ export const SubmissionFileCard: React.FC<Props> = ({
                     Data Report (CSV)
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    ข้อมูลดิบจากการตรวจสอบ
+                    ข้อมูลผลการตรวจสอบ
                   </p>
                 </div>
               </div>
 
               <div className="flex items-center gap-2 mt-4 lg:mt-0 w-full lg:w-auto">
+                {/* ปุ่มเปิด Validator */}
                 <button
-                  onClick={handleCsvPreview}
+                  onClick={() => setIsValidatorOpen(true)}
                   className="flex-1 lg:flex-none px-4 py-2.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-lg hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-all text-sm font-medium flex items-center justify-center gap-2 border border-emerald-100 dark:border-emerald-800"
                 >
-                  <FiEye size={18} /> ดูข้อมูล
+                  <FiEye size={18} /> เปิดดูผลตรวจ
                 </button>
 
                 <a
@@ -131,14 +105,14 @@ export const SubmissionFileCard: React.FC<Props> = ({
                   download={`report-data.csv`}
                   className="flex-1 lg:flex-none px-4 py-2.5 bg-white dark:bg-gray-700 border border-emerald-200 dark:border-emerald-900 text-emerald-700 dark:text-emerald-300 rounded-lg hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all text-sm font-medium flex items-center justify-center gap-2 shadow-sm"
                 >
-                  <FiDownload size={18} /> ดาวน์โหลด
+                  <FiDownload size={18} /> ดาวน์โหลด CSV
                 </a>
               </div>
            </div>
         )}
       </div>
 
-      {/* === PDF Preview Modal === */}
+      {/* === PDF Preview Modal (สำหรับไฟล์ Report ปกติ) === */}
       {isPreviewOpen && (
         <div className="fixed inset-0 z-[100] flex flex-col bg-gray-900/90 backdrop-blur-sm p-2 sm:p-4 animate-in fade-in duration-200">
            {/* Header */}
@@ -189,74 +163,17 @@ export const SubmissionFileCard: React.FC<Props> = ({
         </div>
       )}
 
-      {/* === CSV Preview Modal === */}
-      {isCsvPreviewOpen && (
-        <div className="fixed inset-0 z-[100] flex flex-col bg-gray-900/90 backdrop-blur-sm p-2 sm:p-4 animate-in fade-in duration-200">
-           {/* Header */}
-          <div className="flex items-center justify-between bg-gray-300 dark:bg-gray-800 p-4 rounded-t-2xl border-b dark:border-gray-700">
-            <div className="flex items-center gap-3">
-              <FaFileCsv className="text-emerald-500" size={24} />
-              <div className="min-w-0">
-                <p className="font-semibold text-gray-900 dark:text-white">Data Report Preview</p>
-                <p className="text-xs text-gray-500">CSV Data</p>
-              </div>
+      {/* === Thesis Validator Modal */}
+      {isValidatorOpen && csv && (
+        <div className="fixed inset-0 z-[100] bg-gray-900/90 backdrop-blur-sm flex items-center justify-center animate-in fade-in duration-200">
+            <div className="w-full h-full md:w-[95vw] md:h-[95vh] bg-white dark:bg-gray-900 md:rounded-xl shadow-2xl overflow-hidden">
+                <ThesisValidator
+                    pdfUrl={originalFile?.url || fileUrl} 
+                    csvUrl={csv.url}
+                    fileName={originalFile?.name || fileName}
+                    onClose={() => setIsValidatorOpen(false)}
+                />
             </div>
-            <div className="flex items-center gap-2">
-               {csv && (
-                 <a 
-                    href={csv.downloadUrl}
-                    download="report.csv"
-                    className="p-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors flex items-center gap-2 px-4 text-sm font-medium"
-                  >
-                    <FiDownload size={18} /> <span className="hidden sm:inline">Download</span>
-                  </a>
-               )}
-              <button 
-                onClick={() => setIsCsvPreviewOpen(false)}
-                className="p-2.5 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors"
-              >
-                <FiX size={24} />
-              </button>
-            </div>
-          </div>
-
-          <div className="flex-1 bg-white dark:bg-gray-900 rounded-b-2xl overflow-hidden shadow-2xl relative">
-             {isLoadingCsv ? (
-                <div className="h-full flex flex-col items-center justify-center gap-3 text-gray-500">
-                    <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-600"></div>
-                    <p>กำลังโหลดข้อมูล...</p>
-                </div>
-             ) : csvData ? (
-                <div className="w-full h-full overflow-auto p-6">
-                    <table className="w-full text-left border-collapse text-sm">
-                        <thead>
-                            <tr>
-                                {csvData.headers.map((head, i) => (
-                                    <th key={i} className="sticky top-0 bg-gray-100 dark:bg-gray-800 px-4 py-3 border-b border-gray-200 dark:border-gray-700 font-semibold text-gray-700 dark:text-gray-200 whitespace-nowrap">
-                                        {head}
-                                    </th>
-                                ))}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {csvData.rows.map((row, i) => (
-                                <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                                    {row.map((cell, j) => (
-                                        <td key={j} className="px-4 py-2 border-b border-gray-100 dark:border-gray-700/50 text-gray-600 dark:text-gray-300 whitespace-nowrap">
-                                            {cell}
-                                        </td>
-                                    ))}
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-             ) : (
-                <div className="h-full flex items-center justify-center text-gray-500">
-                    ไม่พบข้อมูล
-                </div>
-             )}
-          </div>
         </div>
       )}
     </>

@@ -20,6 +20,14 @@ export interface ReportData {
     size: number;
   };
 
+  originalFile?: {
+    name: string;
+    url: string;
+    downloadUrl: string;
+    type: string;
+    size: number;
+  } | null;
+
   csv?: {
     url: string;
     downloadUrl: string;

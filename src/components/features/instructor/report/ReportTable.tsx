@@ -5,8 +5,7 @@ import { FaFilePdf, FaFileCsv, FaFile } from 'react-icons/fa6';
 import { ReportData, ReviewStatus } from '@/types/report';
 import { ReportStatusBadge } from './ReportStatusBadge';
 import { Pagination } from '@/components/common/Pagination';
-import Papa from 'papaparse';
-
+import { ThesisValidator } from '@/components/shared/thesis-validator/ThesisValidator';
 
 interface Props {
     data: ReportData[];
@@ -17,8 +16,7 @@ interface Props {
     onPageChange: (newPage: number) => void;
 }
 
-// Type สำหรับ Mode
-type PreviewMode = 'PDF' | 'CSV';
+type PreviewMode = 'PDF' | 'VALIDATOR';
 
 export const ReportTable: React.FC<Props> = ({
     data,
@@ -29,16 +27,10 @@ export const ReportTable: React.FC<Props> = ({
     onPageChange
 }) => {
     const [previewFile, setPreviewFile] = useState<ReportData | null>(null);
-    
-    // State เก็บ Mode ว่าดูอะไรอยู่ (Default เป็น PDF)
     const [previewMode, setPreviewMode] = useState<PreviewMode>('PDF');
     
     const [openDropdownId, setOpenDropdownId] = useState<number | null>(null);
     const dropdownRef = useRef<HTMLDivElement>(null);
-
-    // CSV State
-    const [csvData, setCsvData] = useState<{ headers: string[], rows: string[][] } | null>(null);
-    const [isLoadingCsv, setIsLoadingCsv] = useState(false);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -69,7 +61,6 @@ export const ReportTable: React.FC<Props> = ({
             const fileType = getFileType(item.file.name);
             if (fileType === 'PDF') {
                 setPreviewMode('PDF');
-                setCsvData(null);
                 setPreviewFile(item);
             } else {
                 if (item.file.downloadUrl) {
@@ -77,30 +68,8 @@ export const ReportTable: React.FC<Props> = ({
                 }
             }
         } else if (type === 'CSV' && item.csv) {
-            setPreviewMode('CSV');
+            setPreviewMode('VALIDATOR');
             setPreviewFile(item);
-            setIsLoadingCsv(true);
-            setCsvData(null);
-
-            try {
-                const response = await fetch(item.csv.url);
-                const csvText = await response.text();
-
-                Papa.parse(csvText, {
-                    complete: (results) => {
-                        if (results.data && results.data.length > 0) {
-                            const [headers, ...rows] = results.data as string[][];
-                            setCsvData({ headers, rows });
-                        }
-                        setIsLoadingCsv(false);
-                    },
-                    header: false,
-                    skipEmptyLines: true
-                });
-            } catch (error) {
-                console.error("Error fetching CSV:", error);
-                setIsLoadingCsv(false);
-            }
         }
     };
 
@@ -130,8 +99,6 @@ export const ReportTable: React.FC<Props> = ({
         return 'bg-gray-50 text-gray-600 dark:bg-gray-700 dark:text-gray-400';
     };
 
-    const isViewingCsv = previewMode === 'CSV';
-
     if (isLoading) return <div className="p-12 text-center text-gray-500 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700">กำลังโหลดข้อมูลรายงาน...</div>;
     if (data.length === 0) return <div className="p-12 text-center text-gray-500 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700">ไม่พบรายงานการตรวจสอบ</div>;
 
@@ -141,7 +108,6 @@ export const ReportTable: React.FC<Props> = ({
                  {/* Table Content */}
                  <div className="overflow-x-visible">
                     <table className="w-full text-left border-collapse">
-                        {/* THEAD */}
                         <thead className="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-100 dark:border-gray-700">
                             <tr>
                                 <th className="px-6 py-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase rounded-tl-xl">Report File</th>
@@ -152,7 +118,6 @@ export const ReportTable: React.FC<Props> = ({
                                 <th className="px-6 py-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase text-right rounded-tr-xl">Actions</th>
                             </tr>
                         </thead>
-                        {/* TBODY */}
                         <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
                             {data.map((item) => {
                                 const fileType = getFileType(item.file.name);
@@ -191,10 +156,10 @@ export const ReportTable: React.FC<Props> = ({
                                                                 type="button"
                                                                 onClick={(e) => handlePreviewClick(e, item, 'CSV')}
                                                                 className="inline-flex items-center gap-1.5 px-2 py-1 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 text-xs font-medium rounded-md hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors border border-emerald-100 dark:border-emerald-900/50 cursor-pointer"
-                                                                title="ดูตัวอย่างข้อมูล (Preview)"
+                                                                title="เปิด Thesis Validator"
                                                             >
                                                                 <FaFileCsv size={12} />
-                                                                <span>Preview Data</span>
+                                                                <span>Check Result</span>
                                                                 <FiEye size={10} className="ml-0.5 opacity-60" />
                                                             </button>
 
@@ -328,20 +293,21 @@ export const ReportTable: React.FC<Props> = ({
                 <Pagination meta={meta} onPageChange={onPageChange} />
             </div>
 
-            {/* Preview Modal */}
-            {previewFile && (
+            {/* 4. MODAL SECTION: แสดงผลตาม PreviewMode */}
+            
+            {/* Case A: PDF Preview (สำหรับไฟล์ Report ทั่วไป) */}
+            {previewFile && previewMode === 'PDF' && (
                 <div className="fixed inset-0 z-[100] flex flex-col bg-gray-900/95 backdrop-blur-sm p-4 animate-in fade-in">
                     {/* Header */}
                     <div className="bg-white dark:bg-gray-800 rounded-t-xl p-4 flex justify-between items-center border-b border-gray-100 dark:border-gray-700">
-
                         {/* Left: File Info */}
                         <div className="flex items-center gap-3 overflow-hidden">
-                            <div className={`p-2.5 rounded-lg shrink-0 ${isViewingCsv ? 'bg-green-50 text-green-600' : getIconStyle(previewFile.file.name)}`}>
-                                {isViewingCsv ? <FaFileCsv size={20} /> : getFileIcon(previewFile.file.name)}
+                            <div className={`p-2.5 rounded-lg shrink-0 ${getIconStyle(previewFile.file.name)}`}>
+                                {getFileIcon(previewFile.file.name)}
                             </div>
                             <div className="flex flex-col min-w-0">
                                 <h3 className="font-semibold text-gray-800 dark:text-white truncate max-w-[200px] sm:max-w-md" title={previewFile.file.name}>
-                                    {isViewingCsv ? `Data Report: ${previewFile.file.name}` : previewFile.file.name}
+                                    {previewFile.file.name}
                                 </h3>
                                 <p className="text-xs text-gray-500 dark:text-gray-400">
                                     {formatSize(previewFile.file.size)}
@@ -351,9 +317,8 @@ export const ReportTable: React.FC<Props> = ({
 
                         {/* Right: Actions */}
                         <div className="flex items-center gap-2 shrink-0">
-                            {/* Download Button: เปลี่ยน URL ตาม Mode */}
                             <a
-                                href={isViewingCsv ? previewFile.csv?.downloadUrl : previewFile.file.downloadUrl}
+                                href={previewFile.file.downloadUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm"
@@ -361,15 +326,9 @@ export const ReportTable: React.FC<Props> = ({
                                 <FiDownload size={16} />
                                 <span className="hidden sm:inline">Download</span>
                             </a>
-
-                            {/* Close Button: Reset Mode */}
                             <button
                                 type="button"
-                                onClick={() => {
-                                    setPreviewFile(null);
-                                    setCsvData(null);
-                                    setPreviewMode('PDF'); // Reset กลับเป็น PDF ทุกครั้งที่ปิด
-                                }}
+                                onClick={() => setPreviewFile(null)}
                                 className="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                             >
                                 <FiX size={24} />
@@ -379,73 +338,26 @@ export const ReportTable: React.FC<Props> = ({
 
                     {/* Content Body */}
                     <div className="flex-1 bg-gray-100 dark:bg-gray-900 rounded-b-xl overflow-hidden relative flex items-center justify-center">
+                         {/* Show PDF */}
+                        <iframe
+                            src={`${previewFile.file.url}#toolbar=0`}
+                            className="w-full h-full"
+                            title="PDF Preview"
+                        />
+                    </div>
+                </div>
+            )}
 
-                        {/* CASE 1: Loading CSV */}
-                        {isViewingCsv && isLoadingCsv && (
-                            <div className="flex flex-col items-center gap-3 text-gray-500 dark:text-gray-400">
-                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-                                <p>กำลังโหลดและแปลงข้อมูล CSV...</p>
-                            </div>
-                        )}
-
-                        {/* CASE 2: Show CSV Table */}
-                        {isViewingCsv && !isLoadingCsv && csvData && (
-                            <div className="w-full h-full overflow-auto bg-white dark:bg-gray-800 p-6">
-                                <table className="w-full text-left border-collapse text-sm">
-                                    <thead>
-                                        <tr>
-                                            {csvData.headers.map((head, i) => (
-                                                <th key={i} className="sticky top-0 bg-gray-50 dark:bg-gray-700 px-4 py-2 border-b border-gray-200 dark:border-gray-600 font-semibold text-gray-700 dark:text-gray-200 whitespace-nowrap">
-                                                    {head}
-                                                </th>
-                                            ))}
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {csvData.rows.map((row, i) => (
-                                            <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                                                {row.map((cell, j) => (
-                                                    <td key={j} className="px-4 py-2 border-b border-gray-100 dark:border-gray-700/50 text-gray-600 dark:text-gray-300 whitespace-nowrap">
-                                                        {cell}
-                                                    </td>
-                                                ))}
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        )}
-                        
-                        {/* CASE 3: Show CSV Error (Empty/Fail) */}
-                        {isViewingCsv && !isLoadingCsv && !csvData && (
-                             <div className="text-center p-8 text-gray-500 dark:text-gray-400">
-                                <p>ไม่พบข้อมูลในไฟล์ CSV หรือเกิดข้อผิดพลาดในการโหลด</p>
-                             </div>
-                        )}
-
-                        {/* CASE 4: Show PDF (ใช้ Mode เช็ค) */}
-                        {!isViewingCsv && getFileType(previewFile.file.name) === 'PDF' && (
-                            <iframe
-                                src={`${previewFile.file.url}#toolbar=0`}
-                                className="w-full h-full"
-                                title="PDF Preview"
-                            />
-                        )}
-
-                        {/* CASE 5: Unsupported File (ในโหมด PDF) */}
-                        {!isViewingCsv && getFileType(previewFile.file.name) !== 'PDF' && (
-                            <div className="text-center p-8">
-                                <p className="text-gray-500 dark:text-gray-400 mb-4">ไม่สามารถแสดงตัวอย่างไฟล์ประเภทนี้ได้</p>
-                                <a
-                                    href={previewFile.file.downloadUrl}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
-                                >
-                                    ดาวน์โหลดเพื่อเปิดดู
-                                </a>
-                            </div>
-                        )}
+            {/* Case B: VALIDATOR Preview (สำหรับไฟล์ CSV ที่เป็น Thesis Result) */}
+            {previewFile && previewMode === 'VALIDATOR' && (
+                <div className="fixed inset-0 z-[100] bg-gray-900/90 backdrop-blur-sm flex items-center justify-center animate-in fade-in duration-200">
+                    <div className="w-full h-full md:w-[95vw] md:h-[95vh] bg-white dark:bg-gray-900 rounded-xl shadow-2xl overflow-hidden">
+                        <ThesisValidator
+                            pdfUrl={previewFile.originalFile?.url || previewFile.file.url}
+                            csvUrl={previewFile.csv?.url}
+                            fileName={previewFile.originalFile?.name || previewFile.file.name}
+                            onClose={() => setPreviewFile(null)}
+                        />
                     </div>
                 </div>
             )}

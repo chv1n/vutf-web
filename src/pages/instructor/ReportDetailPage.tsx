@@ -136,6 +136,7 @@ export const ReportDetailPage = () => {
                             downloadUrl={data.file.downloadUrl || '#'}
                             mimeType={safeMimeType}
                             csv={data.csv} 
+                            originalFile={data.originalFile}
                         />
                     ) : (
                         <div className="p-6 rounded-2xl bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 flex items-center gap-3 text-red-600 dark:text-red-400">
