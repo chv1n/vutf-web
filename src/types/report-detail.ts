@@ -17,6 +17,14 @@ export interface ReportDetail {
     type: string;
   };
 
+  originalFile?: {
+    name: string;
+    url: string;
+    downloadUrl: string;
+    type: string;
+    size: number;
+  } | null;
+  
   csv?: {
     url: string;
     downloadUrl: string;
