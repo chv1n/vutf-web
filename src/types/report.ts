@@ -6,6 +6,7 @@ export type ReviewStatus = 'PENDING' | 'PASSED' | 'NOT_PASSED' | 'NEEDS_REVISION
 
 export interface ReportData {
   id: number;
+  attemptNumber: number;
   createdAt: string;     
   verificationStatus: VerificationStatus;
   reviewStatus: ReviewStatus;
@@ -49,6 +50,7 @@ export interface ReportData {
     nameTh: string;
     nameEn: string;
     code: string;
+    courseType: string;
   };
 
   // Student Info
@@ -69,6 +71,9 @@ export interface ReportData {
     startDate: string;
     endDate: string;
     courseType: string;
+    year: string;       
+    term: string;    
+    roundNumber: number;
   } | null;
 
   context: {
@@ -80,6 +85,7 @@ export interface ReportData {
 export interface ReportFilterParams {
   page: number;
   limit: number;
+  inspectionId?: number;
   search?: string;
   academicYear?: string;
   term?: string;

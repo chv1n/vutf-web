@@ -1,3 +1,4 @@
+// src/components/features/instructor/StatusBadge.tsx
 import React from 'react';
 
 const STATUS_CONFIG = {
