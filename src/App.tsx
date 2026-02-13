@@ -31,10 +31,16 @@ import { InstructorProfilePage } from './pages/instructor/InstructorProfilePage'
 import { MyAdvisedGroupsPage } from './pages/instructor/MyAdvisedGroupsPage';
 import { ReportPage } from './pages/instructor/ReportPage';
 import { ReportDetailPage } from './pages/instructor/ReportDetailPage';
+import TrackThesisPage from './pages/admin/TrackThesisPage';
+import { Toaster } from 'react-hot-toast';
 
 function App() {
   return (
     <AuthProvider>
+      <Toaster 
+        position="top-right" 
+        reverseOrder={false} 
+      />
       <BrowserRouter>
         <Routes>
           {/* Public Routes - เข้าได้ทุกคน */}
@@ -96,6 +102,7 @@ function App() {
               <Route path="dashboard" element={<AdminDashboard />} />
               <Route path="users" element={<UserManagementPage />} />
               <Route path="topics" element={<ThesisTopicPage />} />
+              <Route path="track" element={<TrackThesisPage />} />
               <Route path="inspections" element={<InspectionManagePage />} />
               <Route path="announcements" element={<AnnouncementsPage />} />
             </Route>

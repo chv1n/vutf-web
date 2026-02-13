@@ -154,4 +154,18 @@ export const api = {
         });
         return handleResponse(response);
     },
+
+    getBlob: async (endpoint: string, params?: Record<string, any>): Promise<Blob> => {
+        const queryString = buildQueryString(params);
+        const response = await customFetch(`${endpoint}${queryString}`, {
+            method: 'GET',
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.message || 'ดาวน์โหลดไฟล์ล้มเหลว');
+        }
+
+        return response.blob(); // รับค่าเป็น Blob ไม่ใช่ JSON
+    },
 }
