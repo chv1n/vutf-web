@@ -33,6 +33,7 @@ import { ReportPage } from './pages/instructor/ReportPage';
 import { ReportDetailPage } from './pages/instructor/ReportDetailPage';
 import TrackThesisPage from './pages/admin/TrackThesisPage';
 import { Toaster } from 'react-hot-toast';
+import ThesisFilePage from './pages/admin/ThesisFilePage';
 
 function App() {
   return (
@@ -102,6 +103,7 @@ function App() {
               <Route path="dashboard" element={<AdminDashboard />} />
               <Route path="users" element={<UserManagementPage />} />
               <Route path="topics" element={<ThesisTopicPage />} />
+              <Route path="files" element={<ThesisFilePage />} />
               <Route path="track" element={<TrackThesisPage />} />
               <Route path="inspections" element={<InspectionManagePage />} />
               <Route path="announcements" element={<AnnouncementsPage />} />
