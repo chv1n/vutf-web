@@ -52,5 +52,18 @@ export const inspectionService = {
 
     toggleStatus: async (id: number) => {
         return await api.patch(`/inspections/${id}/status`, {});
-    }
+    },
+
+    getAvailableRoundsForGroup: async (groupId: string): Promise<InspectionRound[]> => {
+        const response = await api.get<any>(`/inspections/group/${groupId}/available`);
+        return response.data?.data || response.data || [];
+    },
+
+    getMyAvailableRounds: async (): Promise<InspectionRound[]> => {
+        const response = await api.get<any>('/inspections/my-available');
+        if (Array.isArray(response)) {
+            return response;
+        }
+        return response.data?.data || response.data || [];
+    },
 };

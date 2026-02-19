@@ -85,7 +85,7 @@ const AdminDashboard = () => {
                             <h2 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
                                 <FiPieChart className="text-indigo-500" /> Thesis Verification Stats
                             </h2>
-                            <p className="text-sm text-gray-400">Term 1/2568 • Round 2</p>
+                            {/* <p className="text-sm text-gray-400">Term 1/2568 • Round 2</p> */}
                         </div>
                         {/* Storage Pill */}
                         <div className="hidden sm:flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700 px-4 py-2 rounded-full border border-gray-100 dark:border-gray-600">

@@ -1,10 +1,10 @@
 // src/components/features/submission/SubmissionUploadForm.tsx
 // Form สำหรับอัพโหลดไฟล์ Submission
 
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiUploadCloud, FiFile, FiX, FiAlertCircle, FiCheckCircle } from 'react-icons/fi';
-import { useSubmission } from '@/hooks/useSubmission';
+import { FiUploadCloud, FiFile, FiX, FiAlertCircle, FiCheckCircle, FiLoader, FiLock } from 'react-icons/fi';
+import { useSubmission, useSubmissions } from '@/hooks/useSubmission';
 import {
     SUBMISSION_FILE_CONSTRAINTS,
     formatFileSize,
@@ -29,8 +29,7 @@ interface SubmissionUploadFormProps {
  * - Drag & Drop support
  * - PDF only validation
  * - 50MB max size validation
- * - Upload progress indicator
- * - Error handling with Thai messages
+ * - Check submission status (Disable if not PENDING)
  */
 export const SubmissionUploadForm: React.FC<SubmissionUploadFormProps> = ({
     groupId,
@@ -43,17 +42,35 @@ export const SubmissionUploadForm: React.FC<SubmissionUploadFormProps> = ({
     const [fileError, setFileError] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const { submitFile, loading, error, success, reset } = useSubmission();
+    // 1. Hook สำหรับอัปโหลด
+    const { submitFile, loading: isUploading, error: uploadError, success, reset } = useSubmission();
+
+    // 2. Hook สำหรับดึงสถานะงานที่เคยส่ง (เพื่อปิดปุ่มถ้าสถานะไม่ใช่ PENDING)
+    const { 
+        submissions, 
+        fetchSubmissions, 
+        loading: isFetchingStatus 
+    } = useSubmissions(groupId, inspectionId);
+
+    // ดึงสถานะตอน Render Component
+    useEffect(() => {
+        fetchSubmissions();
+    }, [fetchSubmissions]);
+
+    // หา Submission ของรอบนี้ (ถ้ามี)
+    const currentSubmission = submissions[0];
+    const isPending = currentSubmission?.status === 'PENDING';
+    
+    // เงื่อนไข: อัปโหลดได้ก็ต่อเมื่อยังไม่เคยส่ง หรือ เคยส่งแล้วแต่สถานะยังเป็น PENDING
+    const canUpload = !currentSubmission || isPending;
 
     /**
      * Validate file
      */
     const validateFile = useCallback((file: File): string | null => {
-        // Check file type
         if (!SUBMISSION_FILE_CONSTRAINTS.ALLOWED_TYPES.includes(file.type)) {
             return 'ไฟล์ต้องเป็น PDF เท่านั้น';
         }
-        // Check file size
         if (file.size > SUBMISSION_FILE_CONSTRAINTS.MAX_SIZE_BYTES) {
             return `ไฟล์ต้องมีขนาดไม่เกิน ${SUBMISSION_FILE_CONSTRAINTS.MAX_SIZE_MB}MB`;
         }
@@ -76,19 +93,11 @@ export const SubmissionUploadForm: React.FC<SubmissionUploadFormProps> = ({
         setSelectedFile(file);
     }, [validateFile, reset]);
 
-    /**
-     * Handle file input change
-     */
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (file) {
-            handleFileSelect(file);
-        }
+        if (file) handleFileSelect(file);
     };
 
-    /**
-     * Handle drag events
-     */
     const handleDragOver = (e: React.DragEvent) => {
         e.preventDefault();
         setIsDragOver(true);
@@ -102,11 +111,8 @@ export const SubmissionUploadForm: React.FC<SubmissionUploadFormProps> = ({
     const handleDrop = (e: React.DragEvent) => {
         e.preventDefault();
         setIsDragOver(false);
-
         const file = e.dataTransfer.files?.[0];
-        if (file) {
-            handleFileSelect(file);
-        }
+        if (file) handleFileSelect(file);
     };
 
     /**
@@ -123,33 +129,61 @@ export const SubmissionUploadForm: React.FC<SubmissionUploadFormProps> = ({
 
         if (result) {
             setSelectedFile(null);
-            if (fileInputRef.current) {
-                fileInputRef.current.value = '';
-            }
+            if (fileInputRef.current) fileInputRef.current.value = '';
+            fetchSubmissions(); // Refresh สถานะหลังส่งสำเร็จ
             onSuccess?.(result);
         }
     };
 
-    /**
-     * Clear selected file
-     */
     const handleClear = () => {
         setSelectedFile(null);
         setFileError(null);
         reset();
-        if (fileInputRef.current) {
-            fileInputRef.current.value = '';
-        }
+        if (fileInputRef.current) fileInputRef.current.value = '';
     };
 
-    /**
-     * Open file picker
-     */
     const openFilePicker = () => {
         fileInputRef.current?.click();
     };
 
-    const displayError = fileError || error;
+    // --- RENDER STATES ---
+
+    // 1. Loading State (กำลังโหลดเช็คสถานะจาก SWR/API)
+    if (isFetchingStatus && !currentSubmission) {
+        return (
+            <div className={`flex flex-col items-center justify-center text-gray-400 ${compact ? 'py-4' : 'py-8'}`}>
+                <FiLoader className="w-6 h-6 animate-spin mb-2" />
+                <p className="text-sm">กำลังตรวจสอบสถานะ...</p>
+            </div>
+        );
+    }
+
+    // 2. Disabled State (ส่งแล้ว และถูกตรวจแล้ว ไม่ใช่ PENDING)
+    if (!canUpload) {
+        return (
+            <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className={`flex flex-col items-center text-center bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl ${compact ? 'p-5' : 'p-8'}`}
+            >
+                <div className="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center mb-3">
+                    <FiLock className="w-6 h-6 text-gray-500 dark:text-gray-400" />
+                </div>
+                <h3 className={`font-medium text-gray-900 dark:text-white ${compact ? 'text-sm' : 'text-base'}`}>
+                    ปิดรับการส่งไฟล์ใหม่
+                </h3>
+                <p className={`text-gray-500 dark:text-gray-400 mt-1 max-w-sm ${compact ? 'text-xs' : 'text-sm'}`}>
+                    ไม่สามารถอัปโหลดไฟล์ใหม่ได้ เนื่องจากโครงงานของคุณถูกตรวจไปแล้ว
+                </p>
+                <div className="mt-4 px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded-full text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                    สถานะปัจจุบัน: {currentSubmission.status}
+                </div>
+            </motion.div>
+        );
+    }
+
+    // 3. Normal Form State
+    const displayError = fileError || uploadError;
 
     return (
         <div className={`${compact ? 'space-y-3' : 'space-y-4'}`}>
@@ -181,7 +215,6 @@ export const SubmissionUploadForm: React.FC<SubmissionUploadFormProps> = ({
 
                 <AnimatePresence mode="wait">
                     {selectedFile ? (
-                        // Selected file display
                         <motion.div
                             key="file"
                             initial={{ opacity: 0, scale: 0.95 }}
@@ -212,7 +245,6 @@ export const SubmissionUploadForm: React.FC<SubmissionUploadFormProps> = ({
                             </button>
                         </motion.div>
                     ) : (
-                        // Upload prompt
                         <motion.div
                             key="prompt"
                             initial={{ opacity: 0, scale: 0.95 }}
@@ -269,7 +301,7 @@ export const SubmissionUploadForm: React.FC<SubmissionUploadFormProps> = ({
                     animate={{ opacity: 1, y: 0 }}
                     type="button"
                     onClick={handleSubmit}
-                    disabled={loading}
+                    disabled={isUploading}
                     className={`
             w-full flex items-center justify-center gap-2
             ${compact ? 'py-2.5' : 'py-3'} px-4
@@ -282,7 +314,7 @@ export const SubmissionUploadForm: React.FC<SubmissionUploadFormProps> = ({
             disabled:opacity-60 disabled:cursor-not-allowed
           `}
                 >
-                    {loading ? (
+                    {isUploading ? (
                         <>
                             <svg className="animate-spin w-5 h-5" viewBox="0 0 24 24">
                                 <circle

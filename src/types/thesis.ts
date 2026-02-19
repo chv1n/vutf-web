@@ -49,6 +49,15 @@ export enum ThesisGroupStatus {
     REJECTED = 'rejected',
 }
 
+/**
+ * สถานะของวิทยานิพนธ์
+ */
+export enum ThesisStatus {
+    IN_PROGRESS = 'IN_PROGRESS',
+    PASSED = 'PASSED',
+    FAILED = 'FAILED'
+}
+
 // ============================================
 // ENTITIES
 // ============================================
@@ -67,6 +76,7 @@ export interface Thesis {
     start_term: number;
     file_url: string | null;
     created_at: string;
+    status?: ThesisStatus | string;
 }
 
 /**

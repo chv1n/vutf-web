@@ -2,6 +2,7 @@
 import { FiBell, FiMoon, FiSun } from 'react-icons/fi';
 import { useAuth } from '../../contexts/AuthContext'; 
 import { useTheme } from '../../hooks/useTheme';
+import { NotificationBell } from '../features/notifications/NotificationBell';
 
 interface HeaderProps {
   title: string;
@@ -45,10 +46,7 @@ export const Header = ({ title }: HeaderProps) => {
         </div>
 
         {/* Notification */}
-        <button className="relative p-2 text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-all">
-          <FiBell size={20} />
-          <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-white dark:border-gray-900"></span>
-        </button>
+        <NotificationBell />
 
         {/* User Profile: ปรับ padding-left ให้ลดลงในมือถือ */}
         <div className="flex items-center gap-3 pl-2 md:pl-4 border-l border-gray-200 dark:border-gray-700">
