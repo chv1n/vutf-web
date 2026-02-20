@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FiArrowRight, FiUsers, FiBell, FiLoader, FiSearch } from 'react-icons/fi';
+import { FiArrowRight, FiUsers, FiBell, FiLoader, FiSearch, FiClipboard, FiCheckCircle } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 
 // Services & Types
@@ -11,6 +11,7 @@ import { inspectionService } from '@/services/inspection.service';
 import { Announcement } from '@/types/announcement';
 import { InspectionRound } from '@/types/inspection';
 import { useDebounce } from '@/hooks/useDebounce';
+import { useOwnerGroups } from '@/hooks/useOwnerGroups';
 
 // Components
 import { ActiveInspectionCard } from '@/components/features/inspection';
@@ -36,6 +37,9 @@ const formatDateDisplay = (dateString: string) => {
 const StudentHome: React.FC = () => {
   const navigate = useNavigate();
 
+  const { groups } = useOwnerGroups();
+  const isThesisPassed = groups?.some(group => group.thesisStatus === 'PASSED') || false;
+
   // Announcements state
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -43,8 +47,7 @@ const StudentHome: React.FC = () => {
 
   const [viewingItem, setViewingItem] = useState<Announcement | null>(null);
 
-  // Active Inspection Round state
-  const [activeRound, setActiveRound] = useState<InspectionRound | null>(null);
+  const [activeRounds, setActiveRounds] = useState<InspectionRound[]>([]);
   const debouncedSearch = useDebounce(searchTerm, 500);
 
   // Fetch announcements
@@ -64,18 +67,25 @@ const StudentHome: React.FC = () => {
     fetchAnnouncements();
   }, [debouncedSearch]);
 
-  // Fetch active inspection round
+  // 2. Fetch active inspection rounds สำหรับ User ปัจจุบัน
   useEffect(() => {
-    const fetchActiveRound = async () => {
+    const fetchActiveRounds = async () => {
       try {
-        const data = await inspectionService.getActiveRound();
-        setActiveRound(data);
+        const data = await inspectionService.getMyAvailableRounds();
+
+        if (Array.isArray(data)) {
+          setActiveRounds(data);
+        } else {
+          setActiveRounds([]);
+        }
+
       } catch (error) {
-        setActiveRound(null);
+        console.error('Error fetching active rounds:', error);
+        setActiveRounds([]);
       }
     };
 
-    fetchActiveRound();
+    fetchActiveRounds();
   }, []);
 
   return (
@@ -101,7 +111,7 @@ const StudentHome: React.FC = () => {
           </button>
 
           <button
-            onClick={() => navigate('/student/upload')}
+            onClick={() => navigate('/student/inspections')}
             className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 dark:bg-indigo-600 text-white text-sm rounded-full font-medium shadow-md hover:bg-indigo-700 dark:hover:bg-indigo-500 hover:shadow-lg transition-all active:scale-95"
           >
             <span>Thesis Upload</span>
@@ -111,8 +121,42 @@ const StudentHome: React.FC = () => {
       </motion.div>
 
       {/* --- Section 2: Active Inspection Round --- */}
-      {activeRound && (
-        <ActiveInspectionCard round={activeRound} size="md" />
+      {isThesisPassed ? (
+        // 1. กรณีโครงงานผ่านแล้ว
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl p-8 border border-emerald-200 dark:border-emerald-800/50 flex flex-col items-center justify-center text-center transition-colors"
+        >
+          <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-800/50 rounded-full flex items-center justify-center mb-4 text-emerald-500 dark:text-emerald-400 shadow-sm">
+            <FiCheckCircle size={32} />
+          </div>
+          <h3 className="text-emerald-800 dark:text-emerald-300 font-bold text-lg">
+            โครงงานของคุณผ่านแล้ว 🎉
+          </h3>
+          <p className="text-emerald-600 dark:text-emerald-400 text-sm mt-2 max-w-md mx-auto">
+            ยินดีด้วย! โครงงานของคุณได้รับการอนุมัติและผ่านการประเมินเรียบร้อยแล้ว จึงไม่มีรอบการส่งเอกสารเพิ่มเติม
+          </p>
+        </motion.div>
+      ) : activeRounds.length > 0 ? (
+        // 2. กรณีมีรอบให้ส่งงาน
+        <ActiveInspectionCard rounds={activeRounds} size="md" />
+      ) : (
+        // 3. กรณีไม่มีรอบให้ส่งงาน (และยังไม่ผ่าน)
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-gray-50 dark:bg-gray-800/40 rounded-2xl p-8 border border-dashed border-gray-200 dark:border-gray-700 flex flex-col items-center justify-center text-center transition-colors"
+        >
+          <div className="w-12 h-12 bg-white dark:bg-gray-800 rounded-xl shadow-sm flex items-center justify-center mb-4 text-gray-400">
+            <FiClipboard size={24} />
+          </div>
+          <h3 className="text-gray-700 dark:text-gray-300 font-medium">ยังไม่มีรอบการส่งเอกสาร</h3>
+          <p className="text-gray-500 dark:text-gray-500 text-sm mt-1 max-w-md mx-auto">
+            ขณะนี้ยังไม่มีรอบการส่งงานที่เปิดรับสำหรับกลุ่มของคุณ <br />
+            หรือคุณอาจจะยังไม่ได้เข้าร่วมกลุ่ม/หัวข้อโครงงาน
+          </p>
+        </motion.div>
       )}
 
       {/* --- Section 3: Announcements --- */}
@@ -136,7 +180,7 @@ const StudentHome: React.FC = () => {
             </div>
           </div>
 
-          <div className="relative w-full md:w-80 z-10">
+          <div className="relative w-full md:w-80 z-0">
             <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-indigo-400 dark:text-indigo-400" />
             <input
               type="text"
@@ -177,8 +221,7 @@ const StudentHome: React.FC = () => {
 
                     {/* Content Column */}
                     <div className="flex-1 pb-6 sm:pb-8 border-b border-gray-50 dark:border-gray-700 last:border-0">
-                      <h3 
-                        // onClick เพื่อเปิด Modal
+                      <h3
                         onClick={() => setViewingItem(item)}
                         className="text-lg font-bold text-gray-800 dark:text-white mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors cursor-pointer"
                       >
@@ -197,7 +240,7 @@ const StudentHome: React.FC = () => {
       </motion.div>
 
       {/* Modal Component */}
-      <AnnouncementDetailModal 
+      <AnnouncementDetailModal
         isOpen={!!viewingItem}
         onClose={() => setViewingItem(null)}
         data={viewingItem}

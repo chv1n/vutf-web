@@ -10,6 +10,7 @@ import { submissionService } from '@/services/submission.service';
 
 interface SubmissionListProps {
     groupId: string;
+    inspectionId: number;
     refreshTrigger?: number;
     compact?: boolean;
 }
@@ -24,10 +25,11 @@ const getFileType = (fileName: string): string => {
 
 export const SubmissionList: React.FC<SubmissionListProps> = ({
     groupId,
+    inspectionId,
     refreshTrigger,
     compact = false,
 }) => {
-    const { submissions, loading, error, fetchSubmissions, downloadFile } = useSubmissions(groupId);
+    const { submissions, loading, error, fetchSubmissions, downloadFile } = useSubmissions(groupId, inspectionId);
 
     // State สำหรับเก็บไฟล์ที่เลือกดู (Preview)
     const [previewFile, setPreviewFile] = useState<{ url: string; downloadUrl: string; name: string; type: string; size: number; } | null>(null);

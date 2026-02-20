@@ -71,7 +71,7 @@ export function useSubmission() {
  * 
  * Single Responsibility: Fetch และ manage submissions list
  */
-export function useSubmissions(groupId: string | null) {
+export function useSubmissions(groupId: string | null, inspectionId?: number) {
     const [submissions, setSubmissions] = useState<Submission[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -87,7 +87,12 @@ export function useSubmissions(groupId: string | null) {
 
         try {
             const data = await submissionService.getByGroup(groupId);
-            setSubmissions(data);
+            if (inspectionId) {
+                const filteredData = data.filter((sub: Submission) => sub.inspectionId === inspectionId);
+                setSubmissions(filteredData);
+            } else {
+                setSubmissions(data);
+            }
         } catch (err: unknown) {
             const errorMessage = err instanceof Error
                 ? err.message
@@ -96,7 +101,7 @@ export function useSubmissions(groupId: string | null) {
         } finally {
             setLoading(false);
         }
-    }, [groupId]);
+    }, [groupId, inspectionId]);
 
     /**
      * Download file

@@ -1,5 +1,5 @@
 // src/hooks/useOwnerGroups.ts
-// Hook สำหรับ fetch กลุ่มที่ user เป็น Owner
+// Hook สำหรับ fetch กลุ่มที่ user เป็นสมาชิก (และเช็คสถานะ Owner)
 
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -10,24 +10,26 @@ interface OwnerGroup {
     thesisNameTh: string;
     thesisNameEn: string;
     thesisCode: string;
+    thesisStatus?: string;
 }
 
 /**
  * useOwnerGroups Hook
- * 
- * Single Responsibility: Fetch กลุ่มที่ user เป็น Owner
- * 
- * Returns:
- * - groups: รายการกลุ่มที่เป็น Owner
+ * * Single Responsibility: Fetch กลุ่มทั้งหมดที่ user สังกัดอยู่ และตรวจสอบว่าเป็น Owner หรือไม่
+ * * Returns:
+ * - groups: รายการกลุ่มทั้งหมดที่สังกัดอยู่
  * - loading: สถานะการโหลด
  * - error: ข้อความ error
  * - refresh: function สำหรับ reload
+ * - isOwner: เป็น Owner ของกลุ่มใดกลุ่มหนึ่งหรือไม่
+ * - hasMultipleGroups: มีกลุ่มมากกว่า 1 กลุ่มหรือไม่
  */
 export function useOwnerGroups() {
     const { user } = useAuth();
     const [groups, setGroups] = useState<OwnerGroup[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [isOwner, setIsOwner] = useState(false);
 
     const fetchOwnerGroups = useCallback(async () => {
         console.log("----------------------------------------------------- start fetchOwnerGroup ")
@@ -40,9 +42,8 @@ export function useOwnerGroups() {
             // Fetch กลุ่มทั้งหมดที่เป็นสมาชิก - returns ThesisGroup[]
             const myGroups = await groupMemberService.getMyGroups();
 
-
-            // Filter เฉพาะที่เป็น Owner และ approved
-            const ownerGroups: OwnerGroup[] = [];
+            const allGroups: OwnerGroup[] = [];
+            let userIsOwner = false;
 
             for (const group of myGroups) {
                 // Check if current user is the creator (Owner) of this group
@@ -51,21 +52,28 @@ export function useOwnerGroups() {
                     ? group.created_by?.user_uuid
                     : group.created_by;
 
-                const isOwner = creatorId === user.id;
+                const checkOwner = creatorId === user.id;
 
-                console.log('Group:', group.group_id, 'Creator:', creatorId, 'User:', user.id, 'isOwner:', isOwner);
+                console.log('Group:', group.group_id, 'Creator:', creatorId, 'User:', user.id, 'isOwner:', checkOwner);
 
-                if (isOwner) {
-                    ownerGroups.push({
-                        groupId: group.group_id,
-                        thesisNameTh: group.thesis?.thesis_name_th || 'ไม่มีชื่อ',
-                        thesisNameEn: group.thesis?.thesis_name_en || '-',
-                        thesisCode: group.thesis?.thesis_code || '-',
-                    });
+                // ถ้าเป็น Owner อย่างน้อย 1 กลุ่ม ให้เซ็ต flag เป็น true
+                if (checkOwner) {
+                    userIsOwner = true;
                 }
+
+                // Push ข้อมูลทุกกลุ่มลงไปเสมอ ไม่ต้องมี if (checkOwner) ครอบ
+                allGroups.push({
+                    groupId: group.group_id,
+                    thesisNameTh: group.thesis?.thesis_name_th || 'ไม่มีชื่อ',
+                    thesisNameEn: group.thesis?.thesis_name_en || '-',
+                    thesisCode: group.thesis?.thesis_code || '-',
+                    thesisStatus: group.thesis?.status,
+                });
             }
 
-            setGroups(ownerGroups);
+            setGroups(allGroups);
+            setIsOwner(userIsOwner);
+
         } catch (err: unknown) {
             const errorMessage = err instanceof Error
                 ? err.message
@@ -85,7 +93,7 @@ export function useOwnerGroups() {
         loading,
         error,
         refresh: fetchOwnerGroups,
-        isOwner: groups.length > 0,
+        isOwner,
         hasMultipleGroups: groups.length > 1,
     };
 }

@@ -34,6 +34,8 @@ import { ReportDetailPage } from './pages/instructor/ReportDetailPage';
 import TrackThesisPage from './pages/admin/TrackThesisPage';
 import { Toaster } from 'react-hot-toast';
 import ThesisFilePage from './pages/admin/ThesisFilePage';
+import SettingsPage from './pages/admin/SettingsPage';
+import { NotificationsPage } from './pages/notifications/NotificationsPage';
 
 function App() {
   return (
@@ -78,6 +80,7 @@ function App() {
               <Route path="profile" element={<StudentProfilePage />} />
               <Route path="report" element={<ThesisReportPage />} />
               <Route path="announcements" element={<AnnouncementsPage />} />
+              <Route path="notifications" element={<NotificationsPage />} />
               <Route path="settings" element={<div>Setting Page</div>} />
             </Route>
           </Route>
@@ -93,6 +96,7 @@ function App() {
               <Route path="report" element={<ReportPage />} />
               <Route path="report/:id" element={<ReportDetailPage />} />
               <Route path="announcements" element={<AnnouncementsPage />} />
+              <Route path="notifications" element={<NotificationsPage />} />
             </Route>
           </Route>
 
@@ -107,6 +111,8 @@ function App() {
               <Route path="track" element={<TrackThesisPage />} />
               <Route path="inspections" element={<InspectionManagePage />} />
               <Route path="announcements" element={<AnnouncementsPage />} />
+              <Route path="notifications" element={<NotificationsPage />} />
+              <Route path="settings" element={<SettingsPage />} />
             </Route>
           </Route>
 
