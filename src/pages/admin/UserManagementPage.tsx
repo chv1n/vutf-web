@@ -244,6 +244,7 @@ export const UserManagementPage = () => {
         ) : (
           <UserTable
             data={userMgr.data}
+            totalItems={userMgr.meta?.totalItems || 0}
             role={activeTab}
             isLoading={userMgr.isLoading}
             onEdit={(user) => { setSelectedUser(user); setIsUserModalOpen(true); }}

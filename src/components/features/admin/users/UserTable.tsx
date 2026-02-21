@@ -18,6 +18,7 @@ import { User } from '../../../../types/user';
 
 interface UserTableProps {
   data: User[];
+  totalItems: number;
   role: 'student' | 'instructor';
   isLoading: boolean;
   onEdit: (user: User) => void;
@@ -26,7 +27,7 @@ interface UserTableProps {
   onRefresh?: () => void;
 }
 
-export const UserTable = ({ data, role, isLoading, onEdit, onDelete, onDetail, onRefresh }: UserTableProps) => {
+export const UserTable = ({ data, totalItems, role, isLoading, onEdit, onDelete, onDetail, onRefresh }: UserTableProps) => {
   const [openActionId, setOpenActionId] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -99,7 +100,7 @@ export const UserTable = ({ data, role, isLoading, onEdit, onDelete, onDetail, o
             <h3 className="font-bold text-gray-800 dark:text-white text-base flex items-center gap-2">
               {role === 'student' ? 'ข้อมูลนักศึกษา' : 'ข้อมูลอาจารย์'}
               <span className="px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-300 text-xs font-medium">
-                {data.length}
+                {totalItems}
               </span>
             </h3>
             <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
