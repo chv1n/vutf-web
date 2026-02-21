@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-// import Swal from 'sweetalert2'; // ลบอันนี้ออก
-import { swal, toast } from '@/utils/swal'; // ✅ เรียกใช้จาก Utility ที่เราสร้างแทน
+import { swal, toast } from '@/utils/swal';
 import { FiPlus, FiSearch } from 'react-icons/fi';
 import CreateInspectionForm from '@/components/features/admin/inspection/CreateInspectionForm';
 import { inspectionService } from '@/services/inspection.service';
@@ -95,7 +94,6 @@ const InspectionManagePage = () => {
         } catch (error) {
             console.error(error);
             if (!isBackground) {
-                // ✅ ใช้ toast แทน Swal
                 toast.fire({
                     icon: 'error',
                     title: 'โหลดข้อมูลไม่สำเร็จ'
@@ -114,7 +112,6 @@ const InspectionManagePage = () => {
         try {
             await inspectionService.toggleStatus(id);
             fetchInspections(meta.page, searchQuery, true, filters);
-            // ✅ ใช้ toast แทน Swal
             toast.fire({
                 icon: 'success',
                 title: 'อัปเดตสถานะสำเร็จ'
@@ -125,7 +122,6 @@ const InspectionManagePage = () => {
     };
 
     const handleDelete = (id: number) => {
-        // ✅ ใช้ swal จาก Utility (ไม่ต้องใส่ customClass แล้ว)
         swal.fire({
             title: 'ยืนยันการลบ?',
             text: "ข้อมูลจะถูกซ่อนจากระบบ",
@@ -133,13 +129,12 @@ const InspectionManagePage = () => {
             showCancelButton: true,
             confirmButtonText: 'ใช่, ลบเลย',
             cancelButtonText: 'ยกเลิก',
-            confirmButtonColor: '#ef4444', // Override สีปุ่มเฉพาะกรณีลบ (สีแดง)
+            confirmButtonColor: '#ef4444',
         }).then(async (result) => {
             if (result.isConfirmed) {
                 try {
                     await inspectionService.remove(id);
                     fetchInspections(meta.page, searchQuery, false, filters);
-                    // ✅ ใช้ toast แจ้งเตือนความสำเร็จ
                     toast.fire({
                         icon: 'success',
                         title: 'ลบข้อมูลสำเร็จ'
@@ -178,8 +173,6 @@ const InspectionManagePage = () => {
                 courseTypeText = 'ทั้งหมด (All Types)';
         }
 
-        // ✅ ใช้ swal จาก Utility (ไม่ต้องใส่ customClass: popup/closeButton แล้ว)
-        // พื้นหลังจะเป็น Dark Mode อัตโนมัติตามที่ตั้งใน swal.ts
         swal.fire({
             html: `
                 <div class="text-left font-sans text-gray-900 dark:text-gray-100">

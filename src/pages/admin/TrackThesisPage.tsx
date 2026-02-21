@@ -1,5 +1,6 @@
 // src/pages/admin/TrackThesisPage.tsx
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { FiTrendingUp, FiXCircle, FiCheckCircle, FiFileText } from 'react-icons/fi';
 import { TrackFilter } from '@/components/features/admin/track/TrackFilter';
 import { UnsubmittedList } from '@/components/features/admin/track/UnsubmittedList';
@@ -10,11 +11,16 @@ import { TrackThesisFilterParams, UnsubmittedGroup } from '@/types/track-thesis'
 import { trackThesisService } from '@/services/track-thesis.service';
 
 const TrackThesisPage = () => {
-  const [activeTab, setActiveTab] = useState<'unsubmitted' | 'submitted' | 'reports'>('unsubmitted');
+  const location = useLocation(); 
+  const navState = location.state as any; 
+  const [activeTab, setActiveTab] = useState<'unsubmitted' | 'submitted' | 'reports'>(
+      navState?.activeTab || 'unsubmitted'
+  );
   const [selectedReportMap, setSelectedReportMap] = useState<Record<number, number>>({});
   const [filters, setFilters] = useState<TrackThesisFilterParams>({
-    search: '',
-    courseType: 'ALL',
+      search: navState?.search || '',
+      courseType: 'ALL',
+      inspectionId: navState?.inspectionId || undefined,
   });
 
   const [unsubmittedData, setUnsubmittedData] = useState<UnsubmittedGroup[]>([]);
