@@ -36,13 +36,14 @@ import { Toaster } from 'react-hot-toast';
 import ThesisFilePage from './pages/admin/ThesisFilePage';
 import SettingsPage from './pages/admin/SettingsPage';
 import { NotificationsPage } from './pages/notifications/NotificationsPage';
+import { AuditLogPage } from './pages/admin/AuditLogPage';
 
 function App() {
   return (
     <AuthProvider>
-      <Toaster 
-        position="top-right" 
-        reverseOrder={false} 
+      <Toaster
+        position="top-right"
+        reverseOrder={false}
       />
       <BrowserRouter>
         <Routes>
@@ -97,6 +98,19 @@ function App() {
               <Route path="report/:id" element={<ReportDetailPage />} />
               <Route path="announcements" element={<AnnouncementsPage />} />
               <Route path="notifications" element={<NotificationsPage />} />
+
+              <Route element={<ProtectedRoute allowedRoles={['instructor']} allowedPermissions={['manage:users']} />}>
+                <Route path="users" element={<UserManagementPage />} />
+              </Route>
+              <Route element={<ProtectedRoute allowedRoles={['instructor']} allowedPermissions={['approve:thesis_topic']} />}>
+                <Route path="topics" element={<ThesisTopicPage />} />
+              </Route>
+              <Route element={<ProtectedRoute allowedRoles={['instructor']} allowedPermissions={['manage:inspections']} />}>
+                <Route path="inspections" element={<InspectionManagePage />} />
+              </Route>
+              <Route element={<ProtectedRoute allowedRoles={['instructor']} allowedPermissions={['manage:thesis_format']} />}>
+                <Route path="settings" element={<SettingsPage />} />
+              </Route>
             </Route>
           </Route>
 
@@ -110,6 +124,7 @@ function App() {
               <Route path="files" element={<ThesisFilePage />} />
               <Route path="track" element={<TrackThesisPage />} />
               <Route path="inspections" element={<InspectionManagePage />} />
+              <Route path="audit-logs" element={<AuditLogPage />} />
               <Route path="announcements" element={<AnnouncementsPage />} />
               <Route path="notifications" element={<NotificationsPage />} />
               <Route path="settings" element={<SettingsPage />} />

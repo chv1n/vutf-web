@@ -1,6 +1,6 @@
-// src/components/features/admin/thesis-file/RecentActivityDrawer.tsx
 import { useState, useEffect } from 'react';
 import { FiX, FiActivity, FiRefreshCw } from 'react-icons/fi';
+import { useNavigate } from 'react-router-dom';
 import { ActivityTimeline } from './ActivityTimeline';
 import { auditLogService } from '../../../../services/audit-log.service';
 
@@ -12,6 +12,8 @@ interface RecentActivityDrawerProps {
 export const RecentActivityDrawer = ({ isOpen, onClose }: RecentActivityDrawerProps) => {
     const [activities, setActivities] = useState<any[]>([]); 
     const [loading, setLoading] = useState(false);
+    
+    const navigate = useNavigate();
 
     const loadActivities = async () => {
         setLoading(true);
@@ -39,6 +41,12 @@ export const RecentActivityDrawer = ({ isOpen, onClose }: RecentActivityDrawerPr
         }
     }, [isOpen]);
 
+    // ฟังก์ชันสำหรับเปลี่ยนหน้า
+    const handleViewAllLogs = () => {
+        onClose();
+        navigate('/admin/audit-logs');
+    };
+
     return (
         <div className={`fixed inset-0 z-[150] transition-opacity duration-300 ${isOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`}>
             <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" onClick={onClose} />
@@ -57,7 +65,6 @@ export const RecentActivityDrawer = ({ isOpen, onClose }: RecentActivityDrawerPr
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
-                        {/* ปุ่ม Refresh */}
                         <button onClick={loadActivities} className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-400 rounded-full">
                             <FiRefreshCw size={16} />
                         </button>
@@ -80,7 +87,10 @@ export const RecentActivityDrawer = ({ isOpen, onClose }: RecentActivityDrawerPr
                 </div>
 
                 <div className="p-4 border-t border-gray-100 dark:border-gray-800 text-center">
-                    <button className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors">
+                    <button 
+                        onClick={handleViewAllLogs}
+                        className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors cursor-pointer"
+                    >
                         ดูประวัติทั้งหมดแบบละเอียด
                     </button>
                 </div>

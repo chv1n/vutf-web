@@ -10,6 +10,7 @@ import {
     formatFileSize,
     type Submission
 } from '@/types/submission';
+import { PDFDocument } from 'pdf-lib';
 
 interface SubmissionUploadFormProps {
     /** ID ของกลุ่ม */
@@ -40,16 +41,17 @@ export const SubmissionUploadForm: React.FC<SubmissionUploadFormProps> = ({
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [isDragOver, setIsDragOver] = useState(false);
     const [fileError, setFileError] = useState<string | null>(null);
+    const [isValidating, setIsValidating] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     // 1. Hook สำหรับอัปโหลด
     const { submitFile, loading: isUploading, error: uploadError, success, reset } = useSubmission();
 
     // 2. Hook สำหรับดึงสถานะงานที่เคยส่ง (เพื่อปิดปุ่มถ้าสถานะไม่ใช่ PENDING)
-    const { 
-        submissions, 
-        fetchSubmissions, 
-        loading: isFetchingStatus 
+    const {
+        submissions,
+        fetchSubmissions,
+        loading: isFetchingStatus
     } = useSubmissions(groupId, inspectionId);
 
     // ดึงสถานะตอน Render Component
@@ -60,37 +62,79 @@ export const SubmissionUploadForm: React.FC<SubmissionUploadFormProps> = ({
     // หา Submission ของรอบนี้ (ถ้ามี)
     const currentSubmission = submissions[0];
     const isPending = currentSubmission?.status === 'PENDING';
-    
+
     // เงื่อนไข: อัปโหลดได้ก็ต่อเมื่อยังไม่เคยส่ง หรือ เคยส่งแล้วแต่สถานะยังเป็น PENDING
     const canUpload = !currentSubmission || isPending;
 
     /**
-     * Validate file
+     * Validate file (เปลี่ยนเป็น async เพื่ออ่านข้อมูล PDF)
      */
-    const validateFile = useCallback((file: File): string | null => {
+    const validateFile = useCallback(async (file: File): Promise<string | null> => {
+        // 1. เช็คประเภทไฟล์และขนาด Byte พื้นฐาน
         if (!SUBMISSION_FILE_CONSTRAINTS.ALLOWED_TYPES.includes(file.type)) {
             return 'ไฟล์ต้องเป็น PDF เท่านั้น';
         }
         if (file.size > SUBMISSION_FILE_CONSTRAINTS.MAX_SIZE_BYTES) {
             return `ไฟล์ต้องมีขนาดไม่เกิน ${SUBMISSION_FILE_CONSTRAINTS.MAX_SIZE_MB}MB`;
         }
-        return null;
+
+        // 2. เช็คขนาดหน้ากระดาษ A4 (21.0 x 29.7 cm)
+        try {
+            // โหลดไฟล์มาเป็น ArrayBuffer
+            const arrayBuffer = await file.arrayBuffer();
+            // ใช้ pdf-lib เปิดอ่านโครงสร้างไฟล์
+            const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
+
+            // ดึงข้อมูลหน้าทั้งหมด
+            const pages = pdfDoc.getPages();
+            if (pages.length === 0) return 'ไฟล์ PDF นี้ไม่มีหน้ากระดาษ';
+
+            // เช็คเฉพาะหน้าแรก
+            const firstPage = pages[0];
+            const { width, height } = firstPage.getSize(); // หน่วยที่ได้จะเป็น Points
+
+            // ขนาด A4 มาตรฐานในหน่วย Points (ประมาณ 595 x 842)
+            // เผื่อค่าความคลาดเคลื่อนไว้ 5 points
+            const isPortraitA4 = Math.abs(width - 595.28) < 5 && Math.abs(height - 841.89) < 5;
+            const isLandscapeA4 = Math.abs(width - 841.89) < 5 && Math.abs(height - 595.28) < 5;
+
+            if (!isPortraitA4 && !isLandscapeA4) {
+                // แปลง Point กลับเป็น เซนติเมตร ให้ User ดูเข้าใจง่าย (1 pt ≈ 0.0352778 cm)
+                const wCm = (width * 0.0352778).toFixed(1);
+                const hCm = (height * 0.0352778).toFixed(1);
+                return `ขนาดหน้ากระดาษไม่ใช่ A4 (ตรวจพบขนาด: ${wCm} x ${hCm} ซม.) กรุณาตั้งค่าหน้าเป็น A4`;
+            }
+
+        } catch (error) {
+            console.error("PDF Parsing error:", error);
+            return 'ไม่สามารถอ่านข้อมูลหน้ากระดาษของไฟล์ PDF นี้ได้ โปรดตรวจสอบว่าไฟล์ไม่ได้ถูกป้องกันด้วยรหัสผ่านหรือไฟล์เสียหาย';
+        }
+
+        return null; // ผ่านทุกเงื่อนไข
     }, []);
 
     /**
      * Handle file selection
      */
-    const handleFileSelect = useCallback((file: File) => {
+    const handleFileSelect = useCallback(async (file: File) => {
         setFileError(null);
         reset();
 
-        const validationError = validateFile(file);
-        if (validationError) {
-            setFileError(validationError);
-            return;
-        }
+        setIsValidating(true);
 
-        setSelectedFile(file);
+        try {
+            const validationError = await validateFile(file);
+
+            if (validationError) {
+                setFileError(validationError);
+                if (fileInputRef.current) fileInputRef.current.value = '';
+                return;
+            }
+
+            setSelectedFile(file);
+        } finally {
+            setIsValidating(false);
+        }
     }, [validateFile, reset]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -161,7 +205,7 @@ export const SubmissionUploadForm: React.FC<SubmissionUploadFormProps> = ({
     // 2. Disabled State (ส่งแล้ว และถูกตรวจแล้ว ไม่ใช่ PENDING)
     if (!canUpload) {
         return (
-            <motion.div 
+            <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 className={`flex flex-col items-center text-center bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl ${compact ? 'p-5' : 'p-8'}`}
@@ -210,11 +254,28 @@ export const SubmissionUploadForm: React.FC<SubmissionUploadFormProps> = ({
                     type="file"
                     accept=".pdf,application/pdf"
                     onChange={handleInputChange}
+                    disabled={isValidating}
                     className="hidden"
                 />
 
                 <AnimatePresence mode="wait">
-                    {selectedFile ? (
+                    {isValidating ? (
+                        <motion.div
+                            key="validating"
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            className="text-center"
+                        >
+                            <FiLoader className={`mx-auto ${compact ? 'w-8 h-8' : 'w-12 h-12'} text-blue-500 animate-spin`} />
+                            <p className={`${compact ? 'mt-2 text-sm' : 'mt-4 text-base'} font-medium text-gray-700 dark:text-gray-300`}>
+                                กำลังตรวจสอบรูปแบบไฟล์...
+                            </p>
+                            <p className={`${compact ? 'mt-1 text-xs' : 'mt-2 text-sm'} text-gray-500 dark:text-gray-400`}>
+                                โปรดรอสักครู่
+                            </p>
+                        </motion.div>
+                    ) : selectedFile ? (
                         <motion.div
                             key="file"
                             initial={{ opacity: 0, scale: 0.95 }}

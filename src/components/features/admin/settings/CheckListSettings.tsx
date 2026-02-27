@@ -11,7 +11,7 @@ export const CheckListSettings = ({ data, onChange }: Props) => {
     <SettingsCard title="Active Checks">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {(Object.keys(data) as Array<keyof CheckListConfig>).map((key) => (
-          <label key={key} className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition">
+          <label key={key} className="flex items-center space-x-3 p-3 border border-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition">
             <input
               type="checkbox"
               checked={data[key]}

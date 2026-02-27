@@ -27,7 +27,7 @@ export const FontSettings = ({ data, onChange }: Props) => {
             <select
               value={data.name}
               onChange={(e) => onChange('name', e.target.value)}
-              className="w-full px-3 py-2 border rounded-lg appearance-none bg-white focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white cursor-pointer"
+              className="w-full px-3 py-2 text-gray-500 border border-gray-300 rounded-lg appearance-none bg-white focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white cursor-pointer"
             >
               <option value="" disabled>-- Select Font --</option>
               {SUPPORTED_FONTS.map((font) => (
@@ -59,7 +59,7 @@ export const FontSettings = ({ data, onChange }: Props) => {
             type="number"
             value={data.size}
             onChange={(e) => onChange('size', parseFloat(e.target.value) || 0)}
-            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+            className="w-full px-3 py-2 text-gray-500 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
           />
         </div>
       </div>

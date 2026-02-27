@@ -4,6 +4,7 @@ import {
     FiHome, FiUser, FiFileText, FiBell, FiUsers,
     FiSettings, FiLogOut, FiX, FiList, FiFolder,
     FiTrendingUp, FiClipboard,
+    FiActivity,
 } from 'react-icons/fi';
 import { useAuth } from '../../contexts/AuthContext';
 import { IoSchool } from "react-icons/io5";
@@ -15,7 +16,7 @@ export const STUDENT_MENU = [
     { icon: FiFileText, label: 'Thesis Report', path: '/student/report' },
     { icon: FiUsers, label: 'Group Management', path: '/student/group-management' },
     { icon: FiClipboard, label: 'Inspection Round', path: '/student/inspections' },
-    { icon: FiSettings, label: 'Settings', path: '/student/settings' },
+    // { icon: FiSettings, label: 'Settings', path: '/student/settings' },
 ];
 
 // 2. เมนู Instructor
@@ -25,7 +26,7 @@ export const INSTRUCTOR_MENU = [
     { icon: FiUsers, label: 'Advised Groups', path: '/instructor/groups' },
     { icon: FiFileText, label: 'Thesis Report', path: '/instructor/report' },
     { icon: FiBell, label: 'Announcements', path: '/instructor/announcements' },
-    { icon: FiSettings, label: 'Settings', path: '/instructor/settings' },
+    // { icon: FiSettings, label: 'Settings', path: '/instructor/settings' },
 ];
 
 // 3. เมนู Admin
@@ -36,6 +37,7 @@ export const ADMIN_MENU = [
     { icon: FiFolder, label: 'Thesis File', path: '/admin/files' },
     { icon: FiTrendingUp, label: 'Track Thesis', path: '/admin/Track' },
     { icon: FiClipboard, label: 'Inspection Round', path: '/admin/inspections' },
+    { icon: FiActivity, label: 'Audit Logs', path: '/admin/audit-logs' },
     { icon: FiBell, label: 'Announcements', path: '/admin/announcements' },
     { icon: FiSettings, label: 'Settings', path: '/admin/settings' },
 ];
@@ -47,19 +49,78 @@ interface SidebarProps {
 
 export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
     const navigate = useNavigate();
-    const location = useLocation(); // เรียกใช้ hook นี้เพื่อให้ logic isHomeActive ทำงาน
+    const location = useLocation();
     const { user, logout } = useAuth();
 
     const role = user?.role?.toLowerCase() || '';
+    const userPerms = (user as any)?.permissions?.map((p: any) => `${p.action}:${p.resource}`) || [];
 
     let currentMenuItems = STUDENT_MENU;
-    if (role === 'instructor') currentMenuItems = INSTRUCTOR_MENU;
-    if (role === 'admin') currentMenuItems = ADMIN_MENU;
+    let extraMenuItems: any[] = []; 
+
+    if (role === 'instructor') {
+        currentMenuItems = [...INSTRUCTOR_MENU];
+
+        // ถ้ามีสิทธิ์ ให้เก็บใส่ Array ของ extraMenuItems แทน
+        if (userPerms.includes('manage:users')) {
+            extraMenuItems.push({ 
+                icon: FiUsers,
+                label: 'User Management', 
+                path: '/instructor/users' 
+            });
+        }
+        if (userPerms.includes('approve:thesis_topic')) {
+            extraMenuItems.push({ 
+                icon: FiList, 
+                label: 'Thesis Topic', 
+                path: '/instructor/topics' 
+            });
+        }
+        if (userPerms.includes('manage:inspections')) {
+            extraMenuItems.push({ 
+                icon: FiClipboard, 
+                label: 'Inspections', 
+                path: '/instructor/inspections' 
+            });
+        }
+        if (userPerms.includes('manage:thesis_format')) {
+            extraMenuItems.push({ 
+                icon: FiSettings, 
+                label: 'Format Settings', 
+                path: '/instructor/settings' 
+            });
+        }
+    } else if (role === 'admin') {
+        currentMenuItems = ADMIN_MENU;
+    }
 
     const handleLogout = () => {
         logout();
         navigate('/login');
     };
+
+    const renderMenuItem = (item: any) => (
+        <NavLink
+            key={item.path}
+            to={item.path}
+            onClick={() => onClose()}
+            className={({ isActive }) => {
+                const isHomeActive =
+                    item.path === '/student/dashboard' &&
+                    location.pathname === '/student/upload';
+
+                const shouldBeActive = isActive || isHomeActive;
+
+                return `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 font-medium ${shouldBeActive
+                        ? 'bg-blue-600 text-white shadow-md shadow-blue-200 dark:shadow-none translate-x-1'
+                        : 'text-gray-500 hover:bg-gray-50 hover:text-blue-600 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-blue-400'
+                    }`;
+            }}
+        >
+            <item.icon size={20} />
+            <span>{item.label}</span>
+        </NavLink>
+    );
 
     return (
         <>
@@ -96,28 +157,23 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
 
                 {/* Menu List */}
                 <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto custom-scrollbar">
-                    {currentMenuItems.map((item) => (
-                        <NavLink
-                            key={item.path}
-                            to={item.path}
-                            onClick={() => onClose()}
-                            className={({ isActive }) => {
-                                const isHomeActive =
-                                    item.path === '/student/dashboard' &&
-                                    location.pathname === '/student/upload';
+                    
+                    {/* 1. แสดงเมนูพื้นฐาน */}
+                    {currentMenuItems.map(renderMenuItem)}
 
-                                const shouldBeActive = isActive || isHomeActive;
+                    {/* 2. แสดงเส้นคั่นและเมนูพิเศษ (ถ้ามีสิทธิ์) */}
+                    {extraMenuItems.length > 0 && (
+                        <div className="pt-4 mt-4 border-t border-gray-100 dark:border-gray-800">
+                            {/* หัวข้อเล็กๆ เพื่อบอกว่านี่คือโซนพิเศษ */}
+                            <p className="px-4 mb-2 text-xs font-bold tracking-wider text-gray-400 uppercase">
+                                Admin Tools
+                            </p>
+                            <div className="space-y-1">
+                                {extraMenuItems.map(renderMenuItem)}
+                            </div>
+                        </div>
+                    )}
 
-                                return `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 font-medium ${shouldBeActive
-                                        ? 'bg-blue-600 text-white shadow-md shadow-blue-200 dark:shadow-none translate-x-1'
-                                        : 'text-gray-500 hover:bg-gray-50 hover:text-blue-600 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-blue-400'
-                                    }`;
-                            }}
-                        >
-                            <item.icon size={20} />
-                            <span>{item.label}</span>
-                        </NavLink>
-                    ))}
                 </nav>
 
                 {/* User Info & Sign Out */}
