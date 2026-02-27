@@ -24,6 +24,9 @@ import { classSectionService } from '../../services/class-section.service';
 import { User } from '../../types/user';
 import { ClassSection } from '../../types/class-section';
 
+// Utils
+import { swal } from '../../utils/swal';
+
 export const UserManagementPage = () => {
   // --- UI State ---
   const [activeTab, setActiveTab] = useState<'student' | 'instructor' | 'section'>('student');
@@ -110,6 +113,75 @@ export const UserManagementPage = () => {
     setSelectedTerm('');
     setSelectedSectionId('');
     setPage(1);
+  };
+
+  const handleViewDetail = (user: User) => {
+    const isStudent = user.role === 'student';
+    const roleLabel = isStudent ? 'นักศึกษา' : 'อาจารย์';
+
+    let name = '-';
+    let code = '-';
+    let sectionInfo = '-';
+    let phone = '-';
+
+    if (isStudent && user.student) {
+      name = `${user.student.prefix_name || ''}${user.student.first_name} ${user.student.last_name}`;
+      code = user.student.student_code;
+      phone = user.student.phone || '-';
+      if (user.student.section) {
+        sectionInfo = `${user.student.section.section_name} (${user.student.section.term}/${user.student.section.academic_year})`;
+      }
+    } else if (!isStudent && user.instructor) {
+      name = `${user.instructor.first_name} ${user.instructor.last_name}`;
+      code = user.instructor.instructor_code;
+    }
+
+    const firstChar = name !== '-' ? name.charAt(0) : '?';
+    const statusHtml = user.isActive
+      ? `<span class="px-2.5 py-1 text-xs font-medium bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 rounded-full border border-emerald-200 dark:border-emerald-800">ใช้งานปกติ</span>`
+      : `<span class="px-2.5 py-1 text-xs font-medium bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 rounded-full border border-red-200 dark:border-red-800">ถูกระงับ</span>`;
+
+    swal.fire({
+      title: `ข้อมูล${roleLabel}`,
+      html: `
+            <div class="text-left mt-4 space-y-5">
+                <div class="flex items-center gap-4 pb-5 border-b border-gray-100 dark:border-gray-700">
+                    <div class="w-16 h-16 bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400 rounded-full flex items-center justify-center text-3xl font-bold shadow-sm">
+                        ${firstChar}
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white m-0">${name}</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 m-0 mt-1">${user.email}</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-gray-50 dark:bg-gray-900/50 p-3 rounded-xl border border-gray-100 dark:border-gray-700">
+                        <span class="block text-xs text-gray-500 dark:text-gray-400 mb-1">รหัส${roleLabel}</span>
+                        <strong class="text-sm text-gray-900 dark:text-white font-mono">${code}</strong>
+                    </div>
+                    <div class="bg-gray-50 dark:bg-gray-900/50 p-3 rounded-xl border border-gray-100 dark:border-gray-700">
+                        <span class="block text-xs text-gray-500 dark:text-gray-400 mb-1">สถานะการใช้งาน</span>
+                        <div class="mt-1">${statusHtml}</div>
+                    </div>
+                    
+                    ${isStudent ? `
+                    <div class="bg-gray-50 dark:bg-gray-900/50 p-3 rounded-xl border border-gray-100 dark:border-gray-700">
+                        <span class="block text-xs text-gray-500 dark:text-gray-400 mb-1">เบอร์โทรศัพท์</span>
+                        <strong class="text-sm text-gray-900 dark:text-white font-mono">${phone}</strong>
+                    </div>
+                    <div class="bg-gray-50 dark:bg-gray-900/50 p-3 rounded-xl border border-gray-100 dark:border-gray-700">
+                        <span class="block text-xs text-gray-500 dark:text-gray-400 mb-1">กลุ่มเรียน (Section)</span>
+                        <strong class="text-sm text-gray-900 dark:text-white">${sectionInfo}</strong>
+                    </div>
+                    ` : ''}
+                </div>
+            </div>
+        `,
+      showCloseButton: true,
+      showConfirmButton: false,
+      width: '400px',
+    });
   };
 
   return (
@@ -253,7 +325,7 @@ export const UserManagementPage = () => {
               term: selectedTerm,
               sectionId: selectedSectionId ? Number(selectedSectionId) : undefined
             }))}
-            onDetail={(user) => userMgr.showDetail(user, activeTab)}
+            onDetail={handleViewDetail}
             onRefresh={() => userMgr.fetchUsers(activeTab, page, limit, debouncedSearch, {
               academicYear: selectedYear,
               term: selectedTerm,

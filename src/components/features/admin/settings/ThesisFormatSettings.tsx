@@ -121,7 +121,7 @@ export const ThesisFormatSettings = () => {
                         type="text"
                         value={(config.ignored_units || []).join(', ')}
                         onChange={(e) => setConfig(prev => ({ ...prev, ignored_units: e.target.value.split(',').map(s => s.trim()) }))}
-                        className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                        className="w-full px-3 py-2 text-gray-500 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                     />
                 </div>
             </SettingsCard>

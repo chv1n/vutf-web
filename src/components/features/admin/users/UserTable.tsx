@@ -1,3 +1,4 @@
+// src/components/features/admin/users/UserTable.tsx
 import { useState, useEffect, useRef } from 'react';
 import {
   FiEdit2,
@@ -13,8 +14,14 @@ import {
   FiActivity,
   FiSettings,
   FiHash,
+  FiShield,
+  FiUnlock,
 } from 'react-icons/fi';
 import { User } from '../../../../types/user';
+import { InstructorPermissionModal } from './InstructorPermissionModal';
+import { useAuth } from '@/contexts/AuthContext';
+import toast from 'react-hot-toast';
+import { userService } from '../../../../services/user.service';
 
 interface UserTableProps {
   data: User[];
@@ -30,6 +37,12 @@ interface UserTableProps {
 export const UserTable = ({ data, totalItems, role, isLoading, onEdit, onDelete, onDetail, onRefresh }: UserTableProps) => {
   const [openActionId, setOpenActionId] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  const [permissionModalOpen, setPermissionModalOpen] = useState(false);
+  const [selectedInstructorForPerm, setSelectedInstructorForPerm] = useState<User | null>(null);
+
+  const { user: currentUser } = useAuth();
+  const isAdmin = currentUser?.role === 'admin';
 
   // ปิดเมนูเมื่อคลิกข้างนอก
   useEffect(() => {
@@ -47,6 +60,16 @@ export const UserTable = ({ data, totalItems, role, isLoading, onEdit, onDelete,
   const handleToggleMenu = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     setOpenActionId(prev => prev === id ? null : id);
+  };
+
+  const handleUnlock = async (id: string) => {
+    try {
+      await userService.unlockUser(id);
+      toast.success('ปลดล็อคบัญชีเรียบร้อยแล้ว');
+      setOpenActionId(null);
+    } catch (error) {
+      toast.error('เกิดข้อผิดพลาด ไม่สามารถปลดล็อคได้');
+    }
   };
 
   // --- Loading State ---
@@ -84,12 +107,23 @@ export const UserTable = ({ data, totalItems, role, isLoading, onEdit, onDelete,
 
   return (
     <div className="w-full bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden flex flex-col transition-colors">
+      <InstructorPermissionModal
+        isOpen={permissionModalOpen}
+        onClose={() => {
+          setPermissionModalOpen(false);
+          setSelectedInstructorForPerm(null);
+        }}
+        user={selectedInstructorForPerm}
+        onSuccess={() => {
+          if (onRefresh) onRefresh(); // ถ้าเซฟเสร็จ ให้รีเฟรชตารางใหม่
+        }}
+      />
       {/* ส่วนหัวตาราง*/}
       <div className="px-6 py-5 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between bg-white dark:bg-gray-800 transition-colors">
         <div className="flex items-center gap-3">
           {/* Icon Box */}
-          <div className={`p-2.5 rounded-xl ${role === 'student' 
-            ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400' 
+          <div className={`p-2.5 rounded-xl ${role === 'student'
+            ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400'
             : 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400'
             }`}>
             {role === 'student' ? <FiUser size={20} /> : <FiUsers size={20} />}
@@ -118,7 +152,7 @@ export const UserTable = ({ data, totalItems, role, isLoading, onEdit, onDelete,
           </button>
         )}
       </div>
-      
+
       <div className="overflow-x-auto overflow-y-visible pb-24 sm:pb-0 min-h-[300px]">
         <table className="w-full text-left border-collapse">
           <thead>
@@ -186,9 +220,9 @@ export const UserTable = ({ data, totalItems, role, isLoading, onEdit, onDelete,
 
               // Random avatar color based on name length (updated for dark mode)
               const colors = [
-                'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', 
-                'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', 
-                'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', 
+                'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400',
+                'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400',
+                'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400',
                 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400'
               ];
               const colorClass = colors[name.length % colors.length];
@@ -251,8 +285,8 @@ export const UserTable = ({ data, totalItems, role, isLoading, onEdit, onDelete,
                     <button
                       onClick={(e) => handleToggleMenu(id, e)}
                       className={`p-2 rounded-lg transition-all duration-200 outline-none
-                        ${isOpen 
-                          ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400' 
+                        ${isOpen
+                          ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400'
                           : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:text-gray-500 dark:hover:text-gray-300 dark:hover:bg-gray-700'}
                       `}
                     >
@@ -280,6 +314,28 @@ export const UserTable = ({ data, totalItems, role, isLoading, onEdit, onDelete,
                             <FiEdit2 size={16} className="text-gray-400 dark:text-gray-500" /> แก้ไขข้อมูล
                           </button>
 
+                          {role === 'instructor' && item.isActive && isAdmin && (
+                            <button
+                              onClick={() => {
+                                setSelectedInstructorForPerm(item);
+                                setPermissionModalOpen(true);
+                                setOpenActionId(null);
+                              }}
+                              className="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-lg flex items-center gap-2.5 transition-colors"
+                            >
+                              <FiShield size={16} className="text-gray-400 dark:text-gray-500" /> จัดการสิทธิ์
+                            </button>
+                          )}
+
+                          {isAdmin && item.isLocked && (
+                            <button
+                              onClick={() => handleUnlock(id)}
+                              className="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-green-600 dark:hover:text-green-400 rounded-lg flex items-center gap-2.5 transition-colors"
+                            >
+                              <FiUnlock size={16} className="text-gray-400 dark:text-gray-500" /> Unlock Login
+                            </button>
+                          )}
+
                           <div className="h-px bg-gray-100 dark:bg-gray-700 my-1 mx-2"></div>
 
                           <button
@@ -287,7 +343,7 @@ export const UserTable = ({ data, totalItems, role, isLoading, onEdit, onDelete,
                             className="w-full text-left px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg flex items-center gap-2.5 transition-colors group/del"
                           >
                             <FiTrash2 size={16} className="text-red-400 dark:text-red-500 group-hover/del:text-red-600 dark:group-hover/del:text-red-400" />
-                            {item.isActive ? 'ระงับการใช้งาน' : 'ลบออกจากระบบ'}
+                            {item.isActive ? 'ระงับการใช้งาน' : 'ระงับการใช้งาน'}
                           </button>
                         </div>
                       </div>

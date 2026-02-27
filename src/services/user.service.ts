@@ -1,6 +1,6 @@
 // src/services/user.service.ts
 import { api } from './api';
-import { UserResponse, User } from '../types/user';
+import { UserResponse, User, Permission } from '../types/user';
 
 // Helper function
 const buildQuery = (params: Record<string, any>) => {
@@ -84,5 +84,20 @@ export const userService = {
 
   updateUser: async (id: string, data: any) => {
     return await api.patch(`/users/${id}`, data);
-  }
+  },
+
+  getAllPermissions: async (): Promise<Permission[]> => {
+    const response = await api.get<any>('/permissions');
+    return response.data;
+  },
+
+  updatePermissions: async (id: string, permissionIds: number[]) => {
+    const response = await api.patch<any>(`/users/${id}/permissions`, { permissionIds });
+    return response.data;
+  },
+
+  unlockUser: async (id: string) => {
+    const response = await api.patch<any>(`/users/${id}/unlock`, {}); 
+    return response.data;
+  },
 };

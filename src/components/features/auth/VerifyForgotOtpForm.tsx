@@ -10,12 +10,12 @@ export const VerifyForgotOtpForm = () => {
 
   const [otp, setOtp] = useState<string[]>(new Array(6).fill(""));
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
-  
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   // เพิ่ม State สำหรับนับถอยหลัง
-  const [countdown, setCountdown] = useState(60); 
+  const [countdown, setCountdown] = useState(60);
 
   useEffect(() => {
     if (!email) navigate('/forgot-password');
@@ -35,10 +35,10 @@ export const VerifyForgotOtpForm = () => {
     setOtp(newOtp);
     if (element.value && index < 5) inputRefs.current[index + 1]?.focus();
   };
-  
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
     if (e.key === "Backspace" && !otp[index] && index > 0) {
-        inputRefs.current[index - 1]?.focus();
+      inputRefs.current[index - 1]?.focus();
     }
   };
 
@@ -52,7 +52,12 @@ export const VerifyForgotOtpForm = () => {
       await authService.requestForgotPasswordOtp({ email });
       setCountdown(60); // รีเซ็ตเวลานับถอยหลัง
     } catch (err: any) {
-      setError('ไม่สามารถส่งรหัสใหม่ได้ในขณะนี้');
+      const extractedMessage = err?.response?.data?.message || err?.message;
+      if (extractedMessage && !extractedMessage.includes('Request failed')) {
+        setError(extractedMessage);
+      } else {
+        setError('ไม่สามารถส่งรหัสใหม่ได้ในขณะนี้');
+      }
     } finally {
       setLoading(false);
     }
@@ -101,19 +106,19 @@ export const VerifyForgotOtpForm = () => {
                 e.preventDefault();
                 const pasteData = e.clipboardData.getData('text').slice(0, 6).split('');
                 if (pasteData.length === 6) {
-                    setOtp(pasteData);
-                    inputRefs.current[5]?.focus();
+                  setOtp(pasteData);
+                  inputRefs.current[5]?.focus();
                 }
-            }}
+              }}
               disabled={loading}
             />
           ))}
         </div>
 
-        <button 
-            type="submit" 
-            disabled={loading || otp.join("").length !== 6}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl disabled:opacity-50 transition-all mb-6"
+        <button
+          type="submit"
+          disabled={loading || otp.join("").length !== 6}
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl disabled:opacity-50 transition-all mb-6"
         >
           {loading ? 'กำลังตรวจสอบ...' : 'ยืนยัน'}
         </button>
@@ -123,17 +128,17 @@ export const VerifyForgotOtpForm = () => {
       <div className="text-center text-sm text-gray-600">
         ยังไม่ได้รับรหัส? {' '}
         {countdown > 0 ? (
-            <span className="text-gray-400 cursor-not-allowed">
-                ส่งใหม่ได้ใน {countdown} วินาที
-            </span>
+          <span className="text-gray-400 cursor-not-allowed">
+            ส่งใหม่ได้ใน {countdown} วินาที
+          </span>
         ) : (
-            <button 
-                onClick={handleResendOtp}
-                disabled={loading}
-                className="text-blue-600 font-bold hover:underline disabled:opacity-50 cursor-pointer"
-            >
-                ส่งรหัสใหม่
-            </button>
+          <button
+            onClick={handleResendOtp}
+            disabled={loading}
+            className="text-blue-600 font-bold hover:underline disabled:opacity-50 cursor-pointer"
+          >
+            ส่งรหัสใหม่
+          </button>
         )}
       </div>
 

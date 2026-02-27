@@ -63,8 +63,12 @@ export const LoginForm = () => {
 
         } catch (err: any) {
             console.error('Login Failed:', err);
-            // แสดง Error จาก Backend หรือข้อความ Default
-            setError(err.response?.data?.message || 'อีเมลหรือรหัสผ่านไม่ถูกต้อง');
+            const extractedMessage = err?.response?.data?.message || err?.message;
+            if (extractedMessage && !extractedMessage.includes('Request failed')) {
+                setError(extractedMessage);
+            } else {
+                setError('อีเมลหรือรหัสผ่านไม่ถูกต้อง');
+            }
         } finally {
             setIsLoading(false);
         }

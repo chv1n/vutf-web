@@ -1,5 +1,10 @@
 // src/types/user.ts
 import { ClassSection } from './class-section';
+export interface Permission {
+  permissions_id: number;
+  action: string;
+  resource: string;
+}
 export interface User {
   user_uuid: string;
   email: string;
@@ -9,6 +14,8 @@ export interface User {
   updatedAt?: string;
   student?: StudentProfile;
   instructor?: InstructorProfile;
+  isLocked?: boolean;
+  permissions?: Permission[];
 }
 
 export interface StudentProfile {
