@@ -1,7 +1,17 @@
 // src/services/api.ts
 import { ApiResponse } from '@/types'
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api/v1';
+const getBaseUrl = () => {
+    const envUrl = import.meta.env.VITE_API_URL;
+    if (envUrl) {
+        // ถ้ามี URL จาก env (เช่น tunnel) ให้ต่อท้ายด้วย /api/v1
+        return `${envUrl}/api/v1`;
+    }
+    // ถ้าไม่มี (เช่นตอน dev local) ให้ใช้ /api/v1 เพื่อวิ่งผ่าน proxy ใน vite.config.ts
+    return '/api/v1';
+};
+
+const BASE_URL = getBaseUrl();
 
 // ตัวแปรสำหรับจัดการ Concurrency (Mutex Lock)
 let isRefreshing = false;
