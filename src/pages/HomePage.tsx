@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Button } from '@/components/common/Button'
+import { Link } from 'react-router-dom';
 
 export const HomePage = () => {
     const [count, setCount] = useState(0)
@@ -8,6 +9,14 @@ export const HomePage = () => {
         <div className="flex flex-col items-center justify-center py-20">
             <div className="glass-panel p-12 text-center max-w-2xl w-full relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-purple-500"></div>
+
+                <div className="absolute top-6 right-6 z-10">
+                    <Link to="/login">
+                        <Button variant="secondary">
+                            Log In
+                        </Button>
+                    </Link>
+                </div>
 
                 <h1 className="gradient-text text-6xl mb-6 font-heading font-bold">
                     VUTF Web
