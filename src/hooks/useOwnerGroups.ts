@@ -4,6 +4,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { groupMemberService } from '@/services/group-member.service';
+import { ThesisGroupStatus } from '@/types/thesis';
 
 interface OwnerGroup {
     groupId: string;
@@ -11,6 +12,8 @@ interface OwnerGroup {
     thesisNameEn: string;
     thesisCode: string;
     thesisStatus?: string;
+    status: ThesisGroupStatus | string;
+    rejection_reason?: string | null;
 }
 
 /**
@@ -68,6 +71,8 @@ export function useOwnerGroups() {
                     thesisNameEn: group.thesis?.thesis_name_en || '-',
                     thesisCode: group.thesis?.thesis_code || '-',
                     thesisStatus: group.thesis?.status,
+                    status: group.status,
+                    rejection_reason: group.rejection_reason,
                 });
             }
 

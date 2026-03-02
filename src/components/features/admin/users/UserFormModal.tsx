@@ -138,17 +138,20 @@ export const UserFormModal = ({ isOpen, onClose, onSubmit, initialData, role, is
     const validateSingleEmail = (email: string) => {
         if (!email) return true;
         if (role === 'student') return email.endsWith('@mail.rmutt.ac.th');
-        if (role === 'instructor') {
-            if (isEditMode && initialData) {
-                const currentEmail = initialData.email;
-                const isEmailChanged = email !== currentEmail;
-                const isPasswordChanged = !!formData.password;
+        // if (role === 'instructor') {
+        //     if (isEditMode && initialData) {
+        //         const currentEmail = initialData.email;
+        //         const isEmailChanged = email !== currentEmail;
+        //         const isPasswordChanged = !!formData.password;
 
-                if (isEmailChanged || isPasswordChanged) {
-                    return email.endsWith('@mail.rmutt.ac.th');
-                }
-                return true;
-            }
+        //         if (isEmailChanged || isPasswordChanged) {
+        //             return email.endsWith('@mail.rmutt.ac.th');
+        //         }
+        //         return true;
+        //     }
+        //     return true;
+        // }
+        if (role === 'instructor') {
             return true;
         }
         return true;
@@ -262,10 +265,10 @@ export const UserFormModal = ({ isOpen, onClose, onSubmit, initialData, role, is
                                             <div className="relative">
                                                 <input
                                                     type="text"
-                                                    className={`w-full pl-10 pr-10 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-900 dark:text-white bg-white dark:bg-gray-700 shadow-sm transition-all h-[42px] ${formData.sectionId 
-                                                        ? 'border-blue-500 bg-blue-50/10 dark:bg-blue-900/20 dark:border-blue-500' 
+                                                    className={`w-full pl-10 pr-10 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-900 dark:text-white bg-white dark:bg-gray-700 shadow-sm transition-all h-[42px] ${formData.sectionId
+                                                        ? 'border-blue-500 bg-blue-50/10 dark:bg-blue-900/20 dark:border-blue-500'
                                                         : 'border-gray-300 dark:border-gray-600'
-                                                    }`}
+                                                        }`}
                                                     placeholder="Search section..."
                                                     value={searchTerm}
                                                     onChange={(e) => {
@@ -298,10 +301,10 @@ export const UserFormModal = ({ isOpen, onClose, onSubmit, initialData, role, is
                                                                 <li
                                                                     key={sec.section_id}
                                                                     onClick={() => handleSelectSection(sec)}
-                                                                    className={`px-4 py-2.5 text-sm cursor-pointer flex justify-between items-center hover:bg-blue-50 dark:hover:bg-gray-600 transition-colors ${formData.sectionId === sec.section_id 
-                                                                        ? 'bg-blue-50 text-blue-700 font-medium dark:bg-blue-900/30 dark:text-blue-300' 
+                                                                    className={`px-4 py-2.5 text-sm cursor-pointer flex justify-between items-center hover:bg-blue-50 dark:hover:bg-gray-600 transition-colors ${formData.sectionId === sec.section_id
+                                                                        ? 'bg-blue-50 text-blue-700 font-medium dark:bg-blue-900/30 dark:text-blue-300'
                                                                         : 'text-gray-700 dark:text-gray-200'
-                                                                    }`}
+                                                                        }`}
                                                                 >
                                                                     <span className="truncate mr-2">{sec.section_name}</span>
                                                                     <span className="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-full whitespace-nowrap">
@@ -388,10 +391,10 @@ export const UserFormModal = ({ isOpen, onClose, onSubmit, initialData, role, is
                             <>
                                 <textarea
                                     required
-                                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 outline-none text-gray-900 dark:text-white bg-white dark:bg-gray-700 min-h-[150px] ${emailError 
-                                        ? 'border-red-500 focus:ring-red-200 dark:border-red-500 dark:focus:ring-red-900' 
+                                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 outline-none text-gray-900 dark:text-white bg-white dark:bg-gray-700 min-h-[150px] ${emailError
+                                        ? 'border-red-500 focus:ring-red-200 dark:border-red-500 dark:focus:ring-red-900'
                                         : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500'
-                                    }`}
+                                        }`}
                                     placeholder={`student1@mail.rmutt.ac.th\nstudent2@mail.rmutt.ac.th`}
                                     value={formData.email}
                                     onChange={e => setFormData({ ...formData, email: e.target.value })}
@@ -405,17 +408,17 @@ export const UserFormModal = ({ isOpen, onClose, onSubmit, initialData, role, is
                                 type="email"
                                 required={role === 'student'}
                                 disabled={isEmailDisabled}
-                                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 outline-none text-gray-900 dark:text-white bg-white dark:bg-gray-700 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500 dark:disabled:text-gray-500 ${emailError 
-                                    ? 'border-red-500 focus:ring-red-200 dark:border-red-500 dark:focus:ring-red-900' 
+                                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 outline-none text-gray-900 dark:text-white bg-white dark:bg-gray-700 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500 dark:disabled:text-gray-500 ${emailError
+                                    ? 'border-red-500 focus:ring-red-200 dark:border-red-500 dark:focus:ring-red-900'
                                     : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500'
-                                }`}
+                                    }`}
                                 placeholder="example@mail.rmutt.ac.th"
                                 value={formData.email}
                                 onChange={e => setFormData({ ...formData, email: e.target.value })}
                             />
                         )}
 
-                        {emailError && (
+                        {/* {emailError && (
                             <div className="flex items-center gap-1 mt-1.5 text-red-500 dark:text-red-400 animate-fadeIn">
                                 <FiAlertCircle size={14} />
                                 <span className="text-xs">
@@ -423,6 +426,14 @@ export const UserFormModal = ({ isOpen, onClose, onSubmit, initialData, role, is
                                         ? "หากแก้ไขอีเมลหรือรหัสผ่าน ต้องใช้อีเมล @mail.rmutt.ac.th เท่านั้น"
                                         : "อีเมลต้องลงท้ายด้วย @mail.rmutt.ac.th เท่านั้น"
                                     }
+                                </span>
+                            </div>
+                        )} */}
+                        {emailError && (
+                            <div className="flex items-center gap-1 mt-1.5 text-red-500 dark:text-red-400 animate-fadeIn">
+                                <FiAlertCircle size={14} />
+                                <span className="text-xs">
+                                    อีเมลต้องลงท้ายด้วย @mail.rmutt.ac.th เท่านั้น
                                 </span>
                             </div>
                         )}
@@ -438,10 +449,10 @@ export const UserFormModal = ({ isOpen, onClose, onSubmit, initialData, role, is
                             </label>
                             <input
                                 type="password"
-                                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 outline-none text-gray-900 dark:text-white bg-white dark:bg-gray-700 ${passwordError 
-                                    ? 'border-red-500 focus:ring-red-200 dark:border-red-500 dark:focus:ring-red-900' 
+                                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 outline-none text-gray-900 dark:text-white bg-white dark:bg-gray-700 ${passwordError
+                                    ? 'border-red-500 focus:ring-red-200 dark:border-red-500 dark:focus:ring-red-900'
                                     : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500'
-                                }`}
+                                    }`}
                                 value={formData.password}
                                 onChange={e => setFormData({ ...formData, password: e.target.value })}
                                 placeholder={isEditMode ? "••••••••" : "อย่างน้อย 6 ตัวอักษร"}

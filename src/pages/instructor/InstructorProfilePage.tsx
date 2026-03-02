@@ -355,7 +355,7 @@ export const InstructorProfilePage = () => {
                                 <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-full mb-2">
                                     <FiFilter className="text-gray-300 dark:text-gray-500" size={24} />
                                 </div>
-                                <p className="text-sm">ไม่พบข้อมูลตามเงื่อนไข</p>
+                                <p className="text-sm">ยังไม่มีข้อมูลกลุ่มที่ปรึกษา</p>
                             </div>
                         )}
                     </div>

@@ -1,3 +1,4 @@
+// src/components/features/inspection/InspectionAlerts.tsx
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -89,4 +90,18 @@ export const ThesisPassedAlert: React.FC = () => (
             ยินดีด้วย! โครงงานของคุณได้รับการอนุมัติและผ่านการประเมินเรียบร้อยแล้ว จึงไม่มีรอบการส่งเอกสารเพิ่มเติม
         </p>
     </motion.div>
+);
+
+export const GroupNotApprovedAlert: React.FC<{ status?: string }> = ({ status }) => (
+    <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6 text-center">
+        <FiInfo className="w-12 h-12 text-amber-500 mx-auto mb-4" />
+        <h3 className="text-lg font-bold text-amber-900">
+            {status === 'REJECTED' ? 'กลุ่มโครงงานถูกปฏิเสธ' : 'รอการอนุมัติกลุ่มโครงงาน'}
+        </h3>
+        <p className="text-amber-700 mt-2">
+            {status === 'REJECTED' 
+                ? 'ไม่สามารถส่งงานได้เนื่องจากกลุ่มของคุณไม่ผ่านการอนุมัติ กรุณาติดต่ออาจารย์ที่ปรึกษา' 
+                : 'คุณจะสามารถส่งงานได้หลังจากที่กลุ่มโครงงานได้รับการอนุมัติจากอาจารย์ที่ปรึกษาแล้วเท่านั้น'}
+        </p>
+    </div>
 );

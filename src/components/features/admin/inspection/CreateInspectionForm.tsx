@@ -41,6 +41,19 @@ const CreateInspectionForm: React.FC<Props> = ({ initialData, onSuccess, onCance
 
     useEffect(() => {
         if (initialData) {
+            // สร้างฟังก์ชันแปลงเวลาให้เป็น Local Time (YYYY-MM-DDTHH:mm)
+            const toLocalDateTimeString = (dateString: string) => {
+                if (!dateString) return '';
+                const d = new Date(dateString);
+                const year = d.getFullYear();
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                const hours = String(d.getHours()).padStart(2, '0');
+                const minutes = String(d.getMinutes()).padStart(2, '0');
+
+                return `${year}-${month}-${day}T${hours}:${minutes}`;
+            };
+
             setValue('academicYear', initialData.academicYear);
             setValue('term', initialData.term);
             setValue('roundNumber', Number(initialData.roundNumber));
@@ -48,8 +61,10 @@ const CreateInspectionForm: React.FC<Props> = ({ initialData, onSuccess, onCance
 
             setValue('title', initialData.title);
             setValue('description', initialData.description || '');
-            setValue('startDate', new Date(initialData.startDate).toISOString().slice(0, 16));
-            setValue('endDate', new Date(initialData.endDate).toISOString().slice(0, 16));
+
+            setValue('startDate', toLocalDateTimeString(initialData.startDate));
+            setValue('endDate', toLocalDateTimeString(initialData.endDate));
+
             setValue('status', initialData.status);
             setValue('isActive', initialData.isActive);
         }

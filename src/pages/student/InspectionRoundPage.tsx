@@ -7,13 +7,14 @@ import { useTitle } from '@/hooks/useTitle';
 import { useOwnerGroups } from '@/hooks/useOwnerGroups';
 import { inspectionService } from '@/services/inspection.service';
 import { InspectionRound } from '@/types/inspection';
+import { ThesisGroupStatus } from '@/types/thesis';
 
 // Components
 import { GroupSelector } from '@/components/features/submission/GroupSelector';
 import { SubmissionUploadForm, SubmissionList } from '@/components/features/submission';
 import { RoundSelector } from '@/components/features/inspection/RoundSelector';
 import { ActiveRoundInfo } from '@/components/features/inspection/ActiveRoundInfo';
-import { NoGroupAlert, SelectGroupAlert, NoRoundAlert, NotOwnerAlert, ThesisPassedAlert } from '@/components/features/inspection/InspectionAlerts';
+import { NoGroupAlert, SelectGroupAlert, NoRoundAlert, NotOwnerAlert, ThesisPassedAlert, GroupNotApprovedAlert } from '@/components/features/inspection/InspectionAlerts';
 
 /**
  * InspectionRoundPage - หน้า Inspection Round
@@ -42,6 +43,9 @@ const InspectionRoundPage: React.FC = () => {
 
     const selectedGroupData = groups.find(g => g.groupId === selectedGroupId);
     const isThesisPassed = selectedGroupData?.thesisStatus === 'PASSED';
+
+    const isGroupApproved = selectedGroupData?.status === ThesisGroupStatus.APPROVED;
+    const isGroupRejected = selectedGroupData?.status === ThesisGroupStatus.REJECTED;
 
     // Auto-select if single group
     useEffect(() => {
@@ -88,13 +92,14 @@ const InspectionRoundPage: React.FC = () => {
     }, [selectedGroupId, fetchAvailableRounds]);
 
     const isSubmissionAllowed = useCallback(() => {
-        if (!activeRound) return false;
+        if (!activeRound || !selectedGroupData) return false;
+        if (selectedGroupData.status !== 'approved') return false;
         if (activeRound.status !== 'OPEN' || !activeRound.isActive) return false;
         const now = new Date();
         const start = new Date(activeRound.startDate);
         const end = new Date(activeRound.endDate);
         return now >= start && now <= end;
-    }, [activeRound]);
+    }, [activeRound, selectedGroupData]);
 
     const handleUploadSuccess = () => setRefreshTrigger(prev => prev + 1);
 
@@ -175,13 +180,44 @@ const InspectionRoundPage: React.FC = () => {
                     </div>
                 )}
 
-                {/* 2. No Active Round Error */}
-                {!isLoadingRounds && selectedGroupId && availableRounds.length === 0 && (
-                    isThesisPassed ? (
-                        <ThesisPassedAlert />
-                    ) : (
-                        roundError && <NoRoundAlert error={roundError} />
-                    )
+                {/* 2. ส่วนตรวจสอบสถานะกลุ่ม */}
+                {!isLoadingRounds && selectedGroupId && (
+                    <>
+                        {/* 1. กรณีสอบผ่าน (PASSED) */}
+                        {isThesisPassed && <ThesisPassedAlert />}
+
+                        {/* 2. กรณีกลุ่มถูกปฏิเสธ (REJECTED) */}
+                        {!isThesisPassed && isGroupRejected && (
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
+                                className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 rounded-2xl p-8 text-center mb-6"
+                            >
+                                <div className="w-16 h-16 bg-red-100 dark:bg-red-800/50 rounded-full flex items-center justify-center mb-4 mx-auto text-red-500">
+                                    <FiInfo size={32} />
+                                </div>
+                                <h2 className="text-xl font-bold text-red-900 dark:text-red-200 mb-2">กลุ่มโครงงานถูกปฏิเสธ</h2>
+                                <p className="text-red-700 dark:text-red-300 mb-4">
+                                    เหตุผล: <span className="font-semibold">{selectedGroupData?.rejection_reason || 'ไม่ระบุเหตุผล'}</span>
+                                </p>
+                                <button
+                                    onClick={() => navigate('/student/group-management')}
+                                    className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-all"
+                                >
+                                    ไปที่หน้าจัดการกลุ่มเพื่อแก้ไข
+                                </button>
+                            </motion.div>
+                        )}
+
+                        {/* 3. กรณีรอการอนุมัติ (PENDING / INCOMPLETE) */}
+                        {!isThesisPassed && !isGroupApproved && !isGroupRejected && (
+                            <GroupNotApprovedAlert status={selectedGroupData?.status} />
+                        )}
+
+                        {/* 4. กรณีไม่มีรอบส่งงาน */}
+                        {isGroupApproved && !isThesisPassed && availableRounds.length === 0 && (
+                            roundError && <NoRoundAlert error={roundError} />
+                        )}
+                    </>
                 )}
 
                 {/* 3. Multiple Rounds Dropdown */}
@@ -194,7 +230,7 @@ const InspectionRoundPage: React.FC = () => {
                 )}
 
                 {/* 4. Active Round Info & Upload */}
-                {!isLoadingRounds && activeRound && selectedGroupId && (
+                {!isLoadingRounds && activeRound && selectedGroupId && isGroupApproved && (
                     <>
                         <motion.div
                             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}

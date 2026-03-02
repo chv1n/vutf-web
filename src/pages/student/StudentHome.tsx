@@ -12,10 +12,13 @@ import { Announcement } from '@/types/announcement';
 import { InspectionRound } from '@/types/inspection';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useOwnerGroups } from '@/hooks/useOwnerGroups';
+import { ThesisGroupStatus } from '@/types/thesis';
 
 // Components
 import { ActiveInspectionCard } from '@/components/features/inspection';
 import { AnnouncementDetailModal } from '@/components/features/announcements/AnnouncementDetailModal';
+
+import { NoGroupAlert, SelectGroupAlert } from '@/components/features/inspection/InspectionAlerts';
 
 // Helper: Format date
 const formatDateDisplay = (dateString: string) => {
@@ -37,8 +40,13 @@ const formatDateDisplay = (dateString: string) => {
 const StudentHome: React.FC = () => {
   const navigate = useNavigate();
 
-  const { groups } = useOwnerGroups();
+  const { groups, loading: isGroupsLoading } = useOwnerGroups();
   const isThesisPassed = groups?.some(group => group.thesisStatus === 'PASSED') || false;
+  const hasApprovedGroup = groups?.some(group => group.status === ThesisGroupStatus.APPROVED);
+  const hasPendingGroup = groups?.some(
+    group => group.status === ThesisGroupStatus.PENDING ||
+      group.status === ThesisGroupStatus.INCOMPLETE
+  );
 
   // Announcements state
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
@@ -120,44 +128,94 @@ const StudentHome: React.FC = () => {
         </div>
       </motion.div>
 
-      {/* --- Section 2: Active Inspection Round --- */}
-      {isThesisPassed ? (
-        // 1. กรณีโครงงานผ่านแล้ว
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl p-8 border border-emerald-200 dark:border-emerald-800/50 flex flex-col items-center justify-center text-center transition-colors"
-        >
-          <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-800/50 rounded-full flex items-center justify-center mb-4 text-emerald-500 dark:text-emerald-400 shadow-sm">
-            <FiCheckCircle size={32} />
+      {/* --- Section 2: Active Inspection Round & Group Validation --- */}
+      <div className="space-y-4">
+        {isGroupsLoading ? (
+          <div className="flex justify-center p-8 text-indigo-300">
+            <FiLoader className="animate-spin text-2xl" />
           </div>
-          <h3 className="text-emerald-800 dark:text-emerald-300 font-bold text-lg">
-            โครงงานของคุณผ่านแล้ว 🎉
-          </h3>
-          <p className="text-emerald-600 dark:text-emerald-400 text-sm mt-2 max-w-md mx-auto">
-            ยินดีด้วย! โครงงานของคุณได้รับการอนุมัติและผ่านการประเมินเรียบร้อยแล้ว จึงไม่มีรอบการส่งเอกสารเพิ่มเติม
-          </p>
-        </motion.div>
-      ) : activeRounds.length > 0 ? (
-        // 2. กรณีมีรอบให้ส่งงาน
-        <ActiveInspectionCard rounds={activeRounds} size="md" />
-      ) : (
-        // 3. กรณีไม่มีรอบให้ส่งงาน (และยังไม่ผ่าน)
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-gray-50 dark:bg-gray-800/40 rounded-2xl p-8 border border-dashed border-gray-200 dark:border-gray-700 flex flex-col items-center justify-center text-center transition-colors"
-        >
-          <div className="w-12 h-12 bg-white dark:bg-gray-800 rounded-xl shadow-sm flex items-center justify-center mb-4 text-gray-400">
-            <FiClipboard size={24} />
-          </div>
-          <h3 className="text-gray-700 dark:text-gray-300 font-medium">ยังไม่มีรอบการส่งเอกสาร</h3>
-          <p className="text-gray-500 dark:text-gray-500 text-sm mt-1 max-w-md mx-auto">
-            ขณะนี้ยังไม่มีรอบการส่งงานที่เปิดรับสำหรับกลุ่มของคุณ <br />
-            หรือคุณอาจจะยังไม่ได้เข้าร่วมกลุ่ม/หัวข้อโครงงาน
-          </p>
-        </motion.div>
-      )}
+        ) : isThesisPassed ? (
+          // 1. กรณีโครงงานผ่านแล้ว
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl p-8 border border-emerald-200 dark:border-emerald-800/50 flex flex-col items-center justify-center text-center transition-colors"
+          >
+            <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-800/50 rounded-full flex items-center justify-center mb-4 text-emerald-500 dark:text-emerald-400 shadow-sm">
+              <FiCheckCircle size={32} />
+            </div>
+            <h3 className="text-emerald-800 dark:text-emerald-300 font-bold text-lg">
+              โครงงานของคุณผ่านแล้ว 🎉
+            </h3>
+            <p className="text-emerald-600 dark:text-emerald-400 text-sm mt-2 max-w-md mx-auto">
+              ยินดีด้วย! โครงงานของคุณได้รับการอนุมัติและผ่านการประเมินเรียบร้อยแล้ว จึงไม่มีรอบการส่งเอกสารเพิ่มเติม
+            </p>
+          </motion.div>
+        ) : groups && groups.length > 0 ? (
+          // มีกลุ่มแล้ว ให้เช็คสถานะการอนุมัติ (ThesisGroupStatus)
+          (() => {
+            const group = groups[0]; // พิจารณากลุ่มแรกที่สังกัด
+
+            if (group.status === ThesisGroupStatus.APPROVED) {
+              // 2. กรณีกลุ่มได้รับอนุมัติแล้ว (APPROVED) -> แสดงรอบส่งงาน
+              return activeRounds.length > 0 ? (
+                <ActiveInspectionCard rounds={activeRounds} size="md" />
+              ) : (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-gray-50 dark:bg-gray-800/40 rounded-2xl p-8 border border-dashed border-gray-200 dark:border-gray-700 flex flex-col items-center justify-center text-center transition-colors"
+                >
+                  <div className="w-12 h-12 bg-white dark:bg-gray-800 rounded-xl shadow-sm flex items-center justify-center mb-4 text-gray-400">
+                    <FiClipboard size={24} />
+                  </div>
+                  <h3 className="text-gray-700 dark:text-gray-300 font-medium">ยังไม่มีรอบการส่งเอกสาร</h3>
+                  <p className="text-gray-500 dark:text-gray-500 text-sm mt-1 max-w-md mx-auto">
+                    ขณะนี้ยังไม่มีรอบการส่งงานที่เปิดรับสำหรับกลุ่มของคุณ
+                  </p>
+                </motion.div>
+              );
+            } else if (group.status === ThesisGroupStatus.REJECTED) {
+              // 3. กรณีกลุ่มถูกปฏิเสธ (REJECTED)
+              return (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 rounded-2xl p-6 text-center"
+                >
+                  <h3 className="text-red-800 dark:text-red-300 font-bold mb-1">หัวข้อโครงงานถูกปฏิเสธ</h3>
+                  <p className="text-red-600 dark:text-red-400 text-sm">
+                    เหตุผล: {group.rejection_reason || 'ไม่ระบุเหตุผล'}
+                  </p>
+                  <button
+                    onClick={() => navigate('/student/group-management')}
+                    className="mt-4 text-sm font-medium text-red-700 dark:text-red-300 underline underline-offset-4 cursor-pointer"
+                  >
+                    ไปที่หน้าจัดการกลุ่มเพื่อแก้ไขข้อมูล
+                  </button>
+                </motion.div>
+              );
+            } else {
+              // 4. กรณีรอการอนุมัติ (INCOMPLETE / PENDING)
+              return (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800/30 rounded-2xl p-6 text-center"
+                >
+                  <h3 className="text-amber-800 dark:text-amber-400 font-bold">กลุ่มของคุณยังไม่ได้รับการอนุมัติ</h3>
+                  <p className="text-amber-600 dark:text-amber-500 text-sm mt-1">
+                    รอเจ้าหน้าที่หรืออาจารย์ที่ปรึกษาอนุมัติกลุ่ม/หัวข้อโครงงานก่อน จึงจะสามารถส่งเล่มตามรอบตรวจได้
+                  </p>
+                </motion.div>
+              );
+            }
+          })()
+        ) : (
+          // 5. กรณีไม่มีข้อมูลกลุ่มเลย
+          <NoGroupAlert />
+        )}
+      </div>
 
       {/* --- Section 3: Announcements --- */}
       <motion.div
