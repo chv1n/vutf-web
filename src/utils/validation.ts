@@ -18,6 +18,7 @@ export const validateThaiPhone = (phone: string): boolean => {
 
 // ตรวจสอบรหัสผ่าน (8 ตัว+, มีตัวอักษร + ตัวเลข)
 export const validatePassword = (password: string): boolean => {
-  const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+  // บังคับว่าต้องมีตัวอักษรและตัวเลข ส่วนตัวอื่นๆ (เช่น @) มีหรือไม่มีก็ได้
+  const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/;
   return passwordRegex.test(password);
 };

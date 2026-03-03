@@ -10,7 +10,7 @@ export const ResetPasswordForm = () => {
   const navigate = useNavigate();
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -26,7 +26,7 @@ export const ResetPasswordForm = () => {
     }
     // ใช้ validatePassword ตัวเดียวกับตอนสมัครสมาชิก (8 ตัว+) ซึ่งครอบคลุม DTO ที่ขอ 6 ตัว
     if (!validatePassword(password)) {
-      setError('รหัสผ่านต้องมีตัวอักษรและตัวเลข (อย่างน้อย 8 ตัวอักษร)');
+      setError('รหัสผ่านต้องประกอบด้วยตัวพิมพ์เล็ก พิมพ์ใหญ่ และตัวเลข (อย่างน้อย 8 ตัวอักษร)');
       return;
     }
 
@@ -62,17 +62,17 @@ export const ResetPasswordForm = () => {
   return (
     <div className="w-full max-w-md">
       <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">ตั้งรหัสผ่านใหม่</h2>
-      
+
       {error && (
         <div className="mb-6 p-3 bg-red-50 text-red-600 rounded-lg text-sm border border-red-200">
-           {error}
+          {error}
         </div>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <Input
           label="รหัสผ่านใหม่"
-          type="password" 
+          type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           icon={<FiLock />}
@@ -81,14 +81,14 @@ export const ResetPasswordForm = () => {
         />
         <Input
           label="ยืนยันรหัสผ่านใหม่"
-          type="password" 
+          type="password"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
           icon={<FiLock />}
           required
           disabled={loading}
         />
-        
+
         <Button disabled={loading} className="w-full mt-4">
           {loading ? 'กำลังบันทึก...' : 'เปลี่ยนรหัสผ่าน'}
         </Button>
