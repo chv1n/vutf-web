@@ -13,17 +13,18 @@ import { reportService } from '@/services/report.service';
 import { ThesisGroup } from '@/types/thesis';
 import { Submission, formatFileSize } from '@/types/submission';
 import { StudentReportData } from '@/types/report'; 
+import { OwnerGroup } from '@/hooks/useOwnerGroups';
 
 // Components
 import { GroupSelector } from '@/components/features/submission/GroupSelector';
 import { ReviewRoundSection } from '@/components/features/submission/ReviewRoundSection';
 
-interface GroupOption {
-    groupId: string;
-    thesisNameTh: string;
-    thesisNameEn: string;
-    thesisCode: string;
-}
+// interface GroupOption {
+//     groupId: string;
+//     thesisNameTh: string;
+//     thesisNameEn: string;
+//     thesisCode: string;
+// }
 
 /**
  * ThesisReportPage - หน้าแสดงประวัติการส่งไฟล์
@@ -38,7 +39,7 @@ const ThesisReportPage: React.FC = () => {
     const { user } = useAuth();
 
     // State
-    const [groups, setGroups] = useState<GroupOption[]>([]);
+    const [groups, setGroups] = useState<OwnerGroup[]>([]);
     const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
     const [submissions, setSubmissions] = useState<Submission[]>([]);
 
@@ -62,11 +63,14 @@ const ThesisReportPage: React.FC = () => {
             const myGroups = await groupMemberService.getMyGroups();
 
             // Map to GroupOption format
-            const groupOptions: GroupOption[] = myGroups.map((g: ThesisGroup) => ({
+            const groupOptions: OwnerGroup[] = myGroups.map((g: ThesisGroup) => ({
                 groupId: g.group_id,
                 thesisNameTh: g.thesis?.thesis_name_th || 'ไม่มีชื่อ',
                 thesisNameEn: g.thesis?.thesis_name_en || '-',
                 thesisCode: g.thesis?.thesis_code || '-',
+                status: g.status,
+                thesisStatus: g.thesis?.status,
+                rejection_reason: g.rejection_reason
             }));
 
             setGroups(groupOptions);
