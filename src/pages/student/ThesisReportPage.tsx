@@ -9,15 +9,22 @@ import { useTitle } from '@/hooks/useTitle';
 import { useAuth } from '@/contexts/AuthContext';
 import { groupMemberService } from '@/services/group-member.service';
 import { submissionService } from '@/services/submission.service';
-import { reportService } from '@/services/report.service'; 
+import { reportService } from '@/services/report.service';
 import { ThesisGroup } from '@/types/thesis';
 import { Submission, formatFileSize } from '@/types/submission';
-import { StudentReportData } from '@/types/report'; 
+import { StudentReportData } from '@/types/report';
 import { OwnerGroup } from '@/hooks/useOwnerGroups';
 
 // Components
 import { GroupSelector } from '@/components/features/submission/GroupSelector';
 import { ReviewRoundSection } from '@/components/features/submission/ReviewRoundSection';
+import { ThesisValidator } from '@/components/shared/thesis-validator/ThesisValidator';
+import { PdfPreviewModal } from '@/components/shared/pdf-preview/PdfPreviewModal';
+
+import { PDFDocument, rgb } from 'pdf-lib';
+import { generateAnnotatedPdf } from '@/utils/pdf-export.util';
+import Papa from 'papaparse';
+import { Issue } from '@/components/shared/thesis-validator/ValidatorIssueList';
 
 // interface GroupOption {
 //     groupId: string;
@@ -50,7 +57,17 @@ const ThesisReportPage: React.FC = () => {
     const [isLoadingSubmissions, setIsLoadingSubmissions] = useState(false);
 
     // State สำหรับ Preview Modal
-    const [previewFile, setPreviewFile] = useState<{ url: string; downloadUrl: string; name: string; type: string; size: number; } | null>(null);
+    const [previewFile, setPreviewFile] = useState<{
+        url: string;
+        downloadUrl: string;
+        name: string;
+        type: string;
+        size: number;
+        mode?: 'PDF' | 'VALIDATOR';
+        csvUrl?: string;
+        reportId?: number;
+    } | null>(null);
+
 
     /**
      * Fetch user's groups
@@ -171,14 +188,44 @@ const ThesisReportPage: React.FC = () => {
     };
 
     /**
-     * Handle download (Report File)
-     * ใช้ URL ที่ได้มาพร้อมกับ Object Report เลย ไม่ต้องยิง API ขอใหม่
+     * Handle download (Annotated Report PDF)
+     * สร้าง PDF ใหม่ที่มีกรอบสีแดงตามข้อมูลใน CSV
      */
-    const handleDownloadReport = (report: StudentReportData) => {
-        if (report.urls.pdf.downloadUrl) {
-            downloadFile(report.urls.pdf.downloadUrl);
-        } else {
-            alert('ไม่พบลิงก์ดาวน์โหลด');
+    const handleDownloadReport = async (report: StudentReportData, submissionId: number) => {
+        try {
+            // 1. ดึงข้อมูล URL ไฟล์ต้นฉบับ
+            const originalFileRes = await submissionService.getFileUrl(submissionId);
+
+            // 2. ดึงและ Parse CSV เพื่อแปลงเป็น Issue[]
+            if (!report.urls.csv?.url) throw new Error("ไม่พบข้อมูลพิกัด (CSV)");
+            const csvText = await fetch(report.urls.csv.url).then(res => res.text());
+            const parsedResults = Papa.parse(csvText, { header: false, skipEmptyLines: true });
+
+            // แปลงข้อมูลแถว CSV ให้กลายเป็น Object รูปแบบ Issue
+            const mappedIssues: Issue[] = parsedResults.data.slice(1).map((row: any, index: number) => {
+                let bbox = null;
+                try {
+                    const bboxStr = row[4]?.toString().trim().replace(/^"|"$/g, '').replace(/^\(/, '[').replace(/\)$/, ']');
+                    if (bboxStr && bboxStr !== '[]') bbox = JSON.parse(bboxStr);
+                } catch (e) { }
+
+                return {
+                    id: index,
+                    page: parseInt(row[0]) || 1,
+                    code: row[1]?.toString() || 'UNK',
+                    severity: row[2]?.toString().toLowerCase() || 'warning',
+                    message: row[3]?.toString().replace(/^"|"$/g, '') || '',
+                    bbox: bbox,
+                    isIgnored: false
+                };
+            });
+
+            // 3. เรียกใช้ Utility ฟังก์ชันเดียวกับปุ่ม Export ของอาจารย์
+            await generateAnnotatedPdf(originalFileRes.url, report.file_name, mappedIssues);
+
+        } catch (error) {
+            console.error('Download Error:', error);
+            alert('เกิดข้อผิดพลาดในการสร้างไฟล์รายงาน');
         }
     };
 
@@ -194,6 +241,7 @@ const ThesisReportPage: React.FC = () => {
                 name: fileName,
                 type: mimeType || 'application/pdf',
                 size: fileSize,
+                mode: 'PDF'
             });
         } catch (error) {
             console.error('Error opening preview:', error);
@@ -204,14 +252,24 @@ const ThesisReportPage: React.FC = () => {
     /**
      * Handle Preview (Report File)
      */
-    const handlePreviewReport = (report: StudentReportData) => {
-        setPreviewFile({
-            url: report.urls.pdf.url,
-            downloadUrl: report.urls.pdf.downloadUrl,
-            name: report.file_name,
-            type: report.file_type || 'application/pdf',
-            size: report.file_size,
-        });
+    const handlePreviewReport = async (report: StudentReportData, submissionId: number) => {
+        try {
+            const originalFileRes = await submissionService.getFileUrl(submissionId);
+
+            setPreviewFile({
+                url: originalFileRes.url,
+                downloadUrl: report.urls.pdf.downloadUrl,
+                name: report.file_name,
+                type: report.file_type || 'application/pdf',
+                size: report.file_size,
+                mode: 'VALIDATOR',
+                csvUrl: report.urls.csv?.url,
+                reportId: report.id
+            });
+        } catch (error) {
+            console.error('Error fetching original file for report preview:', error);
+            alert('ไม่สามารถดึงไฟล์ต้นฉบับเพื่อนำมาแสดงผลได้');
+        }
     };
 
     // Loading groups
@@ -332,8 +390,8 @@ const ThesisReportPage: React.FC = () => {
                                     onPreviewOriginal={() => handlePreviewOriginal(submission.submissionId, submission.fileName, submission.fileSize, submission.mimeType)}
 
                                     // Actions: Report File (เช็คก่อนว่ามี report ไหม)
-                                    onDownloadReport={() => report && handleDownloadReport(report)}
-                                    onPreviewReport={() => report && handlePreviewReport(report)}
+                                    onDownloadReport={() => report && handleDownloadReport(report, submission.submissionId)}
+                                    onPreviewReport={() => report && handlePreviewReport(report, submission.submissionId)}
                                 />
                             );
                         })}
@@ -341,72 +399,36 @@ const ThesisReportPage: React.FC = () => {
                 )}
             </motion.div>
 
-            {/* Preview Modal */}
+            {/* Preview Modals */}
             {previewFile && (
-                <div className="fixed inset-0 z-[9999] flex flex-col bg-gray-900/95 backdrop-blur-sm p-0 sm:p-4 animate-in fade-in duration-200">
-                    {/* Header */}
-                    <div className="flex items-center justify-between bg-white dark:bg-gray-800 p-3 sm:p-4 rounded-none sm:rounded-t-xl border-b dark:border-gray-700 shrink-0 shadow-sm">
-                        <div className="flex items-center gap-3 overflow-hidden">
-                            <div className="p-2 bg-red-50 dark:bg-white rounded-lg text-red-500 shrink-0">
-                                <FaFilePdf size={24} />
-                            </div>
-                            <div className="min-w-0">
-                                <p className="font-semibold text-gray-900 dark:text-white truncate text-base sm:text-lg max-w-[200px] sm:max-w-md">
-                                    {previewFile.name}
-                                </p>
-                                <p className="text-xs text-gray-500 uppercase tracking-wider">
-                                    {previewFile.type.split('/')[1] || 'FILE'} • {formatFileSize(previewFile.size)}
-                                </p>
+                <>
+                    {/* Case A: PDF Preview ธรรมดา (สำหรับ Original File) */}
+                    {previewFile.mode === 'PDF' && (
+                        <PdfPreviewModal
+                            url={previewFile.url}
+                            downloadUrl={previewFile.downloadUrl}
+                            fileName={previewFile.name}
+                            fileSize={previewFile.size}
+                            onClose={() => setPreviewFile(null)}
+                        />
+                    )}
+
+                    {/* Case B: VALIDATOR Preview (สำหรับ Report File) */}
+                    {previewFile.mode === 'VALIDATOR' && previewFile.reportId && (
+                        <div className="fixed inset-0 z-[9999] bg-gray-900/90 backdrop-blur-sm flex items-center justify-center animate-in fade-in duration-200">
+                            <div className="w-full h-full md:w-[95vw] md:h-[95vh] bg-white dark:bg-gray-900 rounded-xl shadow-2xl overflow-hidden">
+                                <ThesisValidator
+                                    reportFileId={previewFile.reportId}
+                                    pdfUrl={previewFile.url}
+                                    csvUrl={previewFile.csvUrl}
+                                    fileName={previewFile.name}
+                                    onClose={() => setPreviewFile(null)}
+                                    isReadOnly={true}
+                                />
                             </div>
                         </div>
-
-                        <div className="flex items-center gap-2">
-                            {/* Download Button (Desktop) */}
-                            <a
-                                href={previewFile.downloadUrl}
-                                download={previewFile.name}
-                                className="hidden sm:flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-medium shadow-sm"
-                            >
-                                <FiDownload size={18} />
-                                <span>Download</span>
-                            </a>
-                            {/* Download Button (Mobile) */}
-                            <a
-                                href={previewFile.downloadUrl}
-                                download={previewFile.name}
-                                className="sm:hidden p-2 text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
-                            >
-                                <FiDownload size={24} />
-                            </a>
-
-                            <button
-                                onClick={() => setPreviewFile(null)}
-                                className="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-200 rounded-lg transition-colors"
-                            >
-                                <FiX size={24} />
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Body */}
-                    <div className="flex-1 bg-white dark:bg-gray-900 rounded-none sm:rounded-b-xl overflow-hidden shadow-2xl relative">
-                        {previewFile.type.includes('pdf') ? (
-                            <iframe
-                                src={`${previewFile.url}#toolbar=0`}
-                                className="w-full h-full border-none"
-                                title="File Preview"
-                            />
-                        ) : (
-                            <div className="w-full h-full flex flex-col items-center justify-center p-4 text-gray-400">
-                                <FiFile size={48} className="mb-4 opacity-30" />
-                                <p>ไม่สามารถแสดงตัวอย่างไฟล์ประเภทนี้ได้</p>
-                                <a href={previewFile.downloadUrl} download={previewFile.name} className="mt-4 text-blue-600 hover:underline">
-                                    ดาวน์โหลดไฟล์
-                                </a>
-                            </div>
-                        )}
-                    </div>
-                </div>
+                    )}
+                </>
             )}
         </div>
     );

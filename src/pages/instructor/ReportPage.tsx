@@ -136,6 +136,7 @@ export const ReportPage = () => {
                 onStatusChange={handleStatusChange}
                 meta={meta}
                 onPageChange={(p) => setFilters(prev => ({ ...prev, page: p }))}
+                onRefresh={fetchReports}
             />
         </div>
     );

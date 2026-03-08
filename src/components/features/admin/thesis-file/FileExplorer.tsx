@@ -11,6 +11,7 @@ import { FaFilePdf, FaFileCsv, FaFile } from 'react-icons/fa6';
 import { ThesisValidator } from '@/components/shared/thesis-validator/ThesisValidator';
 import { FileStatsHeader } from './FileStatsHeader';
 import { RecentActivityDrawer } from './RecentActivityDrawer';
+import { PdfPreviewModal } from '@/components/shared/pdf-preview/PdfPreviewModal';
 
 export const FileExplorer = () => {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -193,8 +194,8 @@ export const FileExplorer = () => {
             />
 
             {/* Breadcrumb */}
-            <FileBreadcrumb 
-                currentPath={currentPath} 
+            <FileBreadcrumb
+                currentPath={currentPath}
                 onNavigate={handleNavigate}
                 // Props สำหรับ Search
                 searchQuery={searchQuery}
@@ -254,7 +255,7 @@ export const FileExplorer = () => {
                 </>
             )}
 
-            
+
 
             {/* PREVIEW MODAL */}
             {previewNode && (
@@ -269,60 +270,24 @@ export const FileExplorer = () => {
                             </button>
 
                             <ThesisValidator
+                                reportFileId={Number(previewNode.id) || 0}
                                 pdfUrl={previewNode.metadata?.submissionPdfUrl || ""}
                                 csvUrl={previewNode.url || ""}
                                 fileName={previewNode.name}
                                 onClose={() => setPreviewNode(null)}
+                                isReadOnly={true}
                             />
                         </div>
                     </div>
                 ) : (
                     // PDF Preview
-                    <div className="fixed inset-0 z-[100] flex flex-col bg-gray-900/95 backdrop-blur-sm p-4 animate-in fade-in">
-                        <div className="bg-white dark:bg-gray-800 rounded-t-xl p-4 flex justify-between items-center border-b border-gray-100 dark:border-gray-700">
-                            <div className="flex items-center gap-3 overflow-hidden">
-                                <div className={`p-2.5 rounded-lg shrink-0 ${getIconStyle(previewNode.name)}`}>
-                                    {getFileIcon(previewNode.name)}
-                                </div>
-                                <div className="flex flex-col min-w-0">
-                                    <h3 className="font-semibold text-gray-800 dark:text-white truncate max-w-[200px] sm:max-w-md" title={previewNode.name}>
-                                        {previewNode.name}
-                                    </h3>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                                        {formatSize(previewNode.size)}
-                                    </p>
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-2 shrink-0">
-                                <button
-                                    type="button"
-                                    onClick={() => handleDownload(previewNode.downloadUrl || previewNode.url!)}
-                                    className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm"
-                                >
-                                    <FiDownload size={16} />
-                                    <span className="hidden sm:inline">Download</span>
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setPreviewNode(null)}
-                                    className="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors ml-2"
-                                >
-                                    <FiX size={24} />
-                                </button>
-                            </div>
-                        </div>
-                        <div className="flex-1 bg-gray-100 dark:bg-gray-900 rounded-b-xl overflow-hidden relative flex items-center justify-center">
-                            {previewNode.url ? (
-                                <iframe
-                                    src={`${previewNode.url}#toolbar=0`}
-                                    className="w-full h-full"
-                                    title="PDF Preview"
-                                />
-                            ) : (
-                                <div className="text-gray-500">Cannot load file URL</div>
-                            )}
-                        </div>
-                    </div>
+                    <PdfPreviewModal
+                        url={previewNode.url || ''}
+                        downloadUrl={previewNode.downloadUrl || previewNode.url || ''}
+                        fileName={previewNode.name}
+                        fileSize={previewNode.size}
+                        onClose={() => setPreviewNode(null)}
+                    />
                 )
             )}
 

@@ -10,6 +10,7 @@ interface Props {
   issues: Issue[];  
   currentPageIssues: Issue[];
   onToggleIgnore: (id: number) => void;
+  isReadOnly?: boolean;
 }
 
 export const ValidatorSidebar: React.FC<Props> = ({
@@ -19,6 +20,7 @@ export const ValidatorSidebar: React.FC<Props> = ({
   issues,
   currentPageIssues,
   onToggleIgnore,
+  isReadOnly = false
 }) => {
 
   const getPageColorClass = (p: number) => {
@@ -58,6 +60,7 @@ export const ValidatorSidebar: React.FC<Props> = ({
         currentPageIssues={currentPageIssues}
         handleTogglePageIgnore={handleTogglePageIgnore}
         toggleIssueStatus={onToggleIgnore}
+        isReadOnly={isReadOnly}
       />
     </div>
   );
