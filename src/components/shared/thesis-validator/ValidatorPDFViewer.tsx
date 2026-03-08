@@ -1,5 +1,5 @@
 // src/components/shared/thesis-validator/ValidatorPDFViewer.tsx
-import React from 'react';
+import React, { useState } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import { Issue } from './ValidatorIssueList';
 
@@ -17,6 +17,7 @@ interface Props {
   setPageDimensions: (dim: { width: number; height: number }) => void;
   issues: Issue[];
   onToggleIgnore: (id: number) => void;
+  isReadOnly?: boolean;
 }
 
 export const ValidatorPDFViewer: React.FC<Props> = ({
@@ -26,44 +27,43 @@ export const ValidatorPDFViewer: React.FC<Props> = ({
   pageDimensions,
   setPageDimensions,
   issues,
-  onToggleIgnore
+  onToggleIgnore,
+  isReadOnly = false
 }) => {
+  // 1. เพิ่ม State สำหรับเก็บเปอร์เซ็นต์การโหลด และสถานะการโหลด
+  const [loadProgress, setLoadProgress] = useState(0);
+  const [isDocumentLoading, setIsDocumentLoading] = useState(true);
 
   const renderOverlayBoxes = () => {
-    // ถ้ายังไม่มีขนาดหน้า หรือไม่มี Issue ให้ข้ามไป
     if (!pageDimensions.width || !pageDimensions.height || issues.length === 0) {
         return null;
     }
     
     return issues.map((issue) => {
-      // ตรวจสอบว่ามี bbox และต้องเป็น Array ที่มี 4 ค่า
       if (!issue.bbox || !Array.isArray(issue.bbox) || issue.bbox.length !== 4) return null;
       
       const [x0, y0, x1, y1] = issue.bbox;
 
-      // ปรับสีให้ชัดขึ้น และตรงกับ Sidebar (Error=Rose, Warning=Amber)
-      let borderColor = issue.severity === 'error' ? '#f43f5e' : '#fbbf24'; // Tailwind rose-500 / amber-400
+      let borderColor = issue.severity === 'error' ? '#f43f5e' : '#fbbf24'; 
       let bgColor = issue.severity === 'error' ? 'rgba(244, 63, 94, 0.2)' : 'rgba(251, 191, 36, 0.2)';
       
-      // ถ้า Ignored ให้เป็นสีฟ้า
       if (issue.isIgnored) {
-        borderColor = '#3b82f6'; // Blue-500
+        borderColor = '#3b82f6'; 
         bgColor = 'rgba(59, 130, 246, 0.15)';
       }
 
-      // คำนวณความกว้าง/สูง
-      // หมายเหตุ: สูตรนี้สำหรับ bbox แบบ [x_min, y_min, x_max, y_max]
-      // ถ้า bbox ใน CSV ของคุณเป็น [x, y, width, height] ให้แก้ width เป็น (x1 / ...) และ height เป็น (y1 / ...)
       const boxWidth = Math.abs(x1 - x0);
       const boxHeight = Math.abs(y1 - y0);
 
       return (
         <div
           key={issue.id}
-          onClick={(e) => { e.stopPropagation(); onToggleIgnore(issue.id); }}
-          className="absolute cursor-pointer transition-all duration-200 hover:opacity-80 hover:scale-[1.05] border-2 rounded-sm z-50 mix-blend-multiply"
+          onClick={(e) => { 
+            e.stopPropagation(); 
+            if (!isReadOnly) onToggleIgnore(issue.id); 
+          }}
+          className={`absolute transition-all duration-200 border-2 rounded-sm z-50 mix-blend-multiply ${isReadOnly ? 'cursor-default' : 'cursor-pointer hover:opacity-80 hover:scale-[1.05]'}`}
           style={{
-            // ใช้ % เพื่อให้ Responsive ตามขนาดหน้าจอ
             left: `${(x0 / pageDimensions.width) * 100}%`,
             top: `${(y0 / pageDimensions.height) * 100}%`,
             width: `${(boxWidth / pageDimensions.width) * 100}%`,
@@ -79,39 +79,68 @@ export const ValidatorPDFViewer: React.FC<Props> = ({
 
   return (
     <div className="flex-1 bg-gray-100 dark:bg-gray-900 overflow-auto flex justify-center p-8 relative scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600">
-       <div className="relative shadow-xl h-fit border border-gray-200 dark:border-gray-700 bg-white">
-         <Document
-            file={fileUrl}
-            onLoadSuccess={({ numPages }) => setNumPages(numPages)}
+      
+      {/* 2. Chrome-like Top Loading Bar */}
+      {isDocumentLoading && (
+        <div className="absolute top-0 left-0 right-0 h-1 bg-blue-100/50 dark:bg-gray-800 z-50 overflow-hidden">
+          <div 
+            className="h-full bg-blue-600 dark:bg-blue-500 transition-all duration-300 ease-out"
+            style={{ width: `${loadProgress}%` }}
+          />
+        </div>
+      )}
+
+      <div className="relative shadow-xl h-fit border border-gray-200 dark:border-gray-700 bg-white">
+        <Document
+          file={fileUrl}
+          // 3. จับ Event ตอนที่กำลังดาวน์โหลด PDF เพื่ออัปเดต %
+          onLoadProgress={({ loaded, total }) => {
+            if (total) {
+              setLoadProgress(Math.round((loaded / total) * 100));
+            }
+          }}
+          // 4. เมื่อโหลดสำเร็จ ให้ซ่อน Loading Bar
+          onLoadSuccess={({ numPages }) => {
+            setNumPages(numPages);
+            setIsDocumentLoading(false);
+          }}
+          // ปรับ UI ตรงกลางให้มี Spinner และโชว์เปอร์เซ็นต์ด้วย
+          loading={
+            <div className="flex flex-col items-center justify-center h-[800px] w-[600px] text-gray-500 gap-4">
+              <div className="w-10 h-10 border-4 border-gray-200 dark:border-gray-700 border-t-blue-600 dark:border-t-blue-500 rounded-full animate-spin"></div>
+              <span className="text-sm font-medium animate-pulse">กำลังโหลด PDF... {loadProgress}%</span>
+            </div>
+          }
+          error={
+            <div className="flex flex-col items-center justify-center h-[800px] w-[600px] text-red-500 gap-2">
+              <span className="text-4xl">⚠️</span>
+              <span className="font-medium">ไม่สามารถโหลดไฟล์ PDF ได้</span>
+            </div>
+          }
+        >
+          <Page
+            pageNumber={pageNumber}
+            width={750} 
+            className="bg-white"
+            renderTextLayer={false}       
+            renderAnnotationLayer={false} 
+            // เพิ่ม Placeholder ตอนเปลี่ยนหน้า
             loading={
-                <div className="flex items-center justify-center h-[800px] w-[600px] text-gray-400">
-                    Loading PDF...
-                </div>
+              <div className="flex items-center justify-center h-[1000px] w-[750px] bg-gray-50 animate-pulse text-gray-400 text-sm">
+                กำลังเรนเดอร์หน้า {pageNumber}...
+              </div>
             }
-            error={
-                <div className="flex items-center justify-center h-[800px] w-[600px] text-red-500">
-                    Failed to load PDF
-                </div>
-            }
-         >
-            <Page
-              pageNumber={pageNumber}
-              width={750} 
-              className="bg-white"
-              renderTextLayer={false}       
-              renderAnnotationLayer={false} 
-              onLoadSuccess={(page) => {
-                 // อัปเดตขนาดหน้าเมื่อโหลดเสร็จ เพื่อให้คำนวณตำแหน่ง Box ได้ถูกต้อง
-                 setPageDimensions({
-                   width: page.originalWidth,
-                   height: page.originalHeight
-                 });
-              }}
-            >
-               {renderOverlayBoxes()}
-            </Page>
-         </Document>
-       </div>
+            onLoadSuccess={(page) => {
+              setPageDimensions({
+                width: page.originalWidth,
+                height: page.originalHeight
+              });
+            }}
+          >
+            {renderOverlayBoxes()}
+          </Page>
+        </Document>
+      </div>
     </div>
   );
 };

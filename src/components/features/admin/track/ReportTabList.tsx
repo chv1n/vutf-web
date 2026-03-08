@@ -6,6 +6,7 @@ import { TrackThesisFilterParams } from '@/types/track-thesis';
 import { FiFileText, FiEye, FiDownload, FiX, FiClock, FiActivity, FiLayers } from 'react-icons/fi';
 import { FaFilePdf, FaFileCsv } from 'react-icons/fa6';
 import { ThesisValidator } from '@/components/shared/thesis-validator/ThesisValidator';
+import { PdfPreviewModal } from '@/components/shared/pdf-preview/PdfPreviewModal';
 
 interface Props {
     filters: TrackThesisFilterParams;
@@ -261,30 +262,22 @@ export const ReportTabList: React.FC<Props> = ({ filters, activeTab, selectedRep
             {previewFile && (
                 <div className="fixed inset-0 z-[100] flex flex-col bg-slate-900/95 backdrop-blur-sm p-2 sm:p-4 animate-in fade-in duration-200">
                     {previewMode === 'PDF' ? (
-                        <div className="flex flex-col h-full bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-2xl">
-                            <div className="flex items-center justify-between p-4 border-b dark:border-slate-800">
-                                <div className="flex items-center gap-3">
-                                    <FaFilePdf className="text-red-500" size={24} />
-                                    <div className="flex flex-col">
-                                        <span className="font-bold text-slate-900 dark:text-white truncate max-w-xs">{previewFile.file.name}</span>
-                                        <span className="text-xs text-slate-500">{formatSize(previewFile.file.size)}</span>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <button onClick={() => setPreviewFile(null)} className="p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
-                                        <FiX size={24} />
-                                    </button>
-                                </div>
-                            </div>
-                            <iframe src={`${previewFile.file.url}#toolbar=0`} className="flex-1 border-none" />
-                        </div>
+                        <PdfPreviewModal
+                            url={previewFile.file.url}
+                            downloadUrl={previewFile.file.downloadUrl || previewFile.file.url}
+                            fileName={previewFile.file.name}
+                            fileSize={previewFile.file.size}
+                            onClose={() => setPreviewFile(null)}
+                        />
                     ) : (
                         <div className="w-full h-full bg-white dark:bg-gray-900 rounded-2xl shadow-2xl overflow-hidden">
                             <ThesisValidator
+                                reportFileId={previewFile.id}
                                 pdfUrl={previewFile.originalFile?.url || previewFile.file.url}
                                 csvUrl={previewFile.csv?.url || ''}
                                 fileName={previewFile.originalFile?.name || previewFile.file.name}
                                 onClose={() => setPreviewFile(null)}
+                                isReadOnly={true}
                             />
                         </div>
                     )}

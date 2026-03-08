@@ -1,16 +1,18 @@
 // src/components/features/instructor/submission-detail/SubmissionFileCard.tsx
 import React, { useState } from 'react';
 import { FiFileText, FiDownload, FiEye, FiX } from 'react-icons/fi';
-import { FaFilePdf, FaFileCsv } from 'react-icons/fa6'; 
+import { FaFilePdf, FaFileCsv } from 'react-icons/fa6';
 import { formatFileSize } from '@/types/submission';
 import { ThesisValidator } from '@/components/shared/thesis-validator/ThesisValidator';
+import { PdfPreviewModal } from '@/components/shared/pdf-preview/PdfPreviewModal';
 
 interface Props {
-  title?: string; 
+  reportId: number;
+  title?: string;
   fileName: string;
   fileSize: number;
-  fileUrl: string;      
-  downloadUrl: string;  
+  fileUrl: string;
+  downloadUrl: string;
   mimeType: string;
   csv?: { url: string; downloadUrl: string } | null;
   originalFile?: {
@@ -20,11 +22,12 @@ interface Props {
   } | null;
 }
 
-export const SubmissionFileCard: React.FC<Props> = ({ 
+export const SubmissionFileCard: React.FC<Props> = ({
+  reportId,
   title = "เอกสารปริญญานิพนธ์",
-  fileName, 
-  fileSize, 
-  fileUrl, 
+  fileName,
+  fileSize,
+  fileUrl,
   downloadUrl,
   mimeType,
   csv,
@@ -39,7 +42,7 @@ export const SubmissionFileCard: React.FC<Props> = ({
         <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
           <FiFileText className="text-blue-500 dark:text-blue-400" /> {title}
         </h3>
-        
+
         {/* === PDF Section (Report File) === */}
         <div className="flex flex-col lg:flex-row items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50/50 dark:bg-gray-700/30">
           <div className="flex items-center gap-4 w-full lg:w-auto">
@@ -76,89 +79,69 @@ export const SubmissionFileCard: React.FC<Props> = ({
 
         {/* === CSV Section (Validator Trigger) === */}
         {csv && (
-           <div className="mt-3 flex flex-col lg:flex-row items-center justify-between p-4 border border-emerald-100 dark:border-emerald-900/30 rounded-xl bg-emerald-50/30 dark:bg-emerald-900/10">
-              <div className="flex items-center gap-4 w-full lg:w-auto">
-                <div className="p-3 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-xl shadow-sm">
-                  <FaFileCsv size={28} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-gray-900 dark:text-white truncate">
-                    Data Report (CSV)
-                  </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    ข้อมูลผลการตรวจสอบ
-                  </p>
-                </div>
+          <div className="mt-3 flex flex-col lg:flex-row items-center justify-between p-4 border border-emerald-100 dark:border-emerald-900/30 rounded-xl bg-emerald-50/30 dark:bg-emerald-900/10">
+            <div className="flex items-center gap-4 w-full lg:w-auto">
+              <div className="p-3 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-xl shadow-sm">
+                <FaFileCsv size={28} />
               </div>
-
-              <div className="flex items-center gap-2 mt-4 lg:mt-0 w-full lg:w-auto">
-                {/* ปุ่มเปิด Validator */}
-                <button
-                  onClick={() => setIsValidatorOpen(true)}
-                  className="flex-1 lg:flex-none px-4 py-2.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-lg hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-all text-sm font-medium flex items-center justify-center gap-2 border border-emerald-100 dark:border-emerald-800"
-                >
-                  <FiEye size={18} /> เปิดดูผลตรวจ
-                </button>
-
-                <a
-                  href={csv.downloadUrl}
-                  download={`report-data.csv`}
-                  className="flex-1 lg:flex-none px-4 py-2.5 bg-white dark:bg-gray-700 border border-emerald-200 dark:border-emerald-900 text-emerald-700 dark:text-emerald-300 rounded-lg hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all text-sm font-medium flex items-center justify-center gap-2 shadow-sm"
-                >
-                  <FiDownload size={18} /> ดาวน์โหลด CSV
-                </a>
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-gray-900 dark:text-white truncate">
+                  Data Report (CSV)
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  ข้อมูลผลการตรวจสอบ
+                </p>
               </div>
-           </div>
+            </div>
+
+            <div className="flex items-center gap-2 mt-4 lg:mt-0 w-full lg:w-auto">
+              {/* ปุ่มเปิด Validator */}
+              <button
+                onClick={() => setIsValidatorOpen(true)}
+                className="flex-1 lg:flex-none px-4 py-2.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-lg hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-all text-sm font-medium flex items-center justify-center gap-2 border border-emerald-100 dark:border-emerald-800"
+              >
+                <FiEye size={18} /> เปิดดูผลตรวจ
+              </button>
+
+              <a
+                href={csv.downloadUrl}
+                download={`report-data.csv`}
+                className="flex-1 lg:flex-none px-4 py-2.5 bg-white dark:bg-gray-700 border border-emerald-200 dark:border-emerald-900 text-emerald-700 dark:text-emerald-300 rounded-lg hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all text-sm font-medium flex items-center justify-center gap-2 shadow-sm"
+              >
+                <FiDownload size={18} /> ดาวน์โหลด CSV
+              </a>
+            </div>
+          </div>
         )}
       </div>
 
       {/* === PDF Preview Modal (สำหรับไฟล์ Report ปกติ) === */}
-      {isPreviewOpen && (
-        <div className="fixed inset-0 z-[100] flex flex-col bg-gray-900/90 backdrop-blur-sm p-2 sm:p-4 animate-in fade-in duration-200">
-           {/* Header */}
-          <div className="flex items-center justify-between bg-gray-300 dark:bg-gray-800 p-4 rounded-t-2xl border-b dark:border-gray-700">
-            <div className="flex items-center gap-3">
-              <FaFilePdf className="text-red-500" size={24} />
-              <div className="min-w-0">
-                <p className="font-semibold text-gray-900 dark:text-white truncate max-w-[200px] sm:max-w-md">
-                  {fileName}
-                </p>
-                <p className="text-xs text-gray-500">{formatFileSize(fileSize)}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <a 
-                href={downloadUrl}
-                download={fileName}
-                className="p-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors flex items-center gap-2 px-4 text-sm font-medium"
-              >
-                <FiDownload size={18} /> <span className="hidden sm:inline">Download</span>
-              </a>
-              <button 
-                onClick={() => setIsPreviewOpen(false)}
-                className="p-2.5 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors"
-              >
-                <FiX size={24} />
-              </button>
-            </div>
-          </div>
+      {isPreviewOpen && mimeType.includes('pdf') && (
+        <PdfPreviewModal
+          url={fileUrl}
+          downloadUrl={downloadUrl}
+          fileName={fileName}
+          fileSize={fileSize}
+          onClose={() => setIsPreviewOpen(false)}
+        />
+      )}
 
-          <div className="flex-1 bg-white dark:bg-gray-900 rounded-b-2xl overflow-hidden shadow-2xl relative">
-            {mimeType.includes('pdf') ? (
-              <iframe
-                src={`${fileUrl}#toolbar=0`}
-                className="w-full h-full border-none"
-                title="Preview"
-              />
-            ) : (
-              <div className="h-full flex flex-col items-center justify-center text-gray-500">
-                <FiFileText size={48} className="mb-4 opacity-20" />
-                <p>ไฟล์นี้ไม่รองรับการแสดงตัวอย่างในเบราว์เซอร์</p>
-                <a href={downloadUrl} download={fileName} className="mt-4 text-blue-600 font-medium hover:underline">
-                  คลิกที่นี่เพื่อดาวน์โหลดไฟล์
-                </a>
-              </div>
-            )}
+      {/* Fallback กรณีที่ไม่ใช่ PDF */}
+      {isPreviewOpen && !mimeType.includes('pdf') && (
+        <div className="fixed inset-0 z-[100] flex flex-col bg-gray-900/95 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="flex justify-end p-2">
+            <button onClick={() => setIsPreviewOpen(false)} className="p-2 text-white bg-white/10 hover:bg-white/20 rounded-full transition-colors">
+              <FiX size={24} />
+            </button>
+          </div>
+          <div className="flex-1 flex flex-col items-center justify-center p-4">
+            <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl flex flex-col items-center shadow-2xl text-center">
+              <FiFileText size={48} className="mb-4 text-gray-400 opacity-50" />
+              <p className="text-gray-500 dark:text-gray-400 mb-4">ไฟล์นี้ไม่รองรับการแสดงตัวอย่างในเบราว์เซอร์</p>
+              <a href={downloadUrl} download={fileName} className="px-6 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-medium flex items-center gap-2">
+                <FiDownload /> ดาวน์โหลดไฟล์
+              </a>
+            </div>
           </div>
         </div>
       )}
@@ -166,14 +149,15 @@ export const SubmissionFileCard: React.FC<Props> = ({
       {/* === Thesis Validator Modal */}
       {isValidatorOpen && csv && (
         <div className="fixed inset-0 z-[100] bg-gray-900/90 backdrop-blur-sm flex items-center justify-center animate-in fade-in duration-200">
-            <div className="w-full h-full md:w-[95vw] md:h-[95vh] bg-white dark:bg-gray-900 md:rounded-xl shadow-2xl overflow-hidden">
-                <ThesisValidator
-                    pdfUrl={originalFile?.url || fileUrl} 
-                    csvUrl={csv.url}
-                    fileName={originalFile?.name || fileName}
-                    onClose={() => setIsValidatorOpen(false)}
-                />
-            </div>
+          <div className="w-full h-full md:w-[95vw] md:h-[95vh] bg-white dark:bg-gray-900 md:rounded-xl shadow-2xl overflow-hidden">
+            <ThesisValidator
+              reportFileId={reportId}
+              pdfUrl={originalFile?.url || fileUrl}
+              csvUrl={csv.url}
+              fileName={originalFile?.name || fileName}
+              onClose={() => setIsValidatorOpen(false)}
+            />
+          </div>
         </div>
       )}
     </>

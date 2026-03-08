@@ -6,6 +6,7 @@ import { ReportData, ReviewStatus } from '@/types/report';
 import { ReportStatusBadge } from './ReportStatusBadge';
 import { Pagination } from '@/components/common/Pagination';
 import { ThesisValidator } from '@/components/shared/thesis-validator/ThesisValidator';
+import { PdfPreviewModal } from '@/components/shared/pdf-preview/PdfPreviewModal';
 
 interface Props {
     data: ReportData[];
@@ -14,6 +15,7 @@ interface Props {
     onStatusChange?: (id: number, status: ReviewStatus) => void;
     meta: { page: number; total: number; lastPage: number; limit: number };
     onPageChange: (newPage: number) => void;
+    onRefresh?: () => void;
 }
 
 type PreviewMode = 'PDF' | 'VALIDATOR';
@@ -24,11 +26,12 @@ export const ReportTable: React.FC<Props> = ({
     onReview,
     onStatusChange,
     meta,
-    onPageChange
+    onPageChange,
+    onRefresh
 }) => {
     const [previewFile, setPreviewFile] = useState<ReportData | null>(null);
     const [previewMode, setPreviewMode] = useState<PreviewMode>('PDF');
-    
+
     const [openDropdownId, setOpenDropdownId] = useState<number | null>(null);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -84,7 +87,7 @@ export const ReportTable: React.FC<Props> = ({
     };
 
     const getFileType = (fileName: string) => (fileName?.split('.').pop()?.toUpperCase() || 'FILE');
-    
+
     const getFileIcon = (fileName: string) => {
         const type = getFileType(fileName);
         if (type === 'PDF') return <FaFilePdf size={20} />;
@@ -99,253 +102,213 @@ export const ReportTable: React.FC<Props> = ({
         return 'bg-gray-50 text-gray-600 dark:bg-gray-700 dark:text-gray-400';
     };
 
-    if (isLoading) return <div className="p-12 text-center text-gray-500 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700">กำลังโหลดข้อมูลรายงาน...</div>;
-    if (data.length === 0) return <div className="p-12 text-center text-gray-500 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700">ไม่พบรายงานการตรวจสอบ</div>;
-
     return (
         <>
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-                 {/* Table Content */}
-                 <div className="overflow-x-visible">
-                    <table className="w-full text-left border-collapse">
-                        <thead className="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-100 dark:border-gray-700">
-                            <tr>
-                                <th className="px-6 py-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase rounded-tl-xl">Report File</th>
-                                <th className="px-6 py-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Project</th>
-                                <th className="px-6 py-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase text-center">System Result</th>
-                                <th className="px-6 py-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase text-center">Review Status</th>
-                                <th className="px-6 py-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase text-center">Created At</th>
-                                <th className="px-6 py-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase text-right rounded-tr-xl">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                            {data.map((item) => {
-                                const fileType = getFileType(item.file.name);
-                                return (
-                                    <tr key={item.id}
-                                        onClick={() => onReview(item)}
-                                        className="hover:bg-indigo-50/30 dark:hover:bg-indigo-900/10 transition-colors">
+            {/* แยกเงื่อนไขการโหลดมาครอบแค่ส่วนตาราง */}
+            {isLoading && !previewFile ? (
+                <div className="p-12 text-center text-gray-500 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700">กำลังโหลดข้อมูลรายงาน...</div>
+            ) : data.length === 0 ? (
+                <div className="p-12 text-center text-gray-500 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700">ไม่พบรายงานการตรวจสอบ</div>
+            ) : (
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                    <div className="overflow-x-visible">
+                        <table className="w-full text-left border-collapse">
+                            <thead className="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-100 dark:border-gray-700">
+                                <tr>
+                                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase rounded-tl-xl">Report File</th>
+                                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Project</th>
+                                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase text-center">System Result</th>
+                                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase text-center">Review Status</th>
+                                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase text-center">Created At</th>
+                                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase text-right rounded-tr-xl">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                                {data.map((item) => {
+                                    const fileType = getFileType(item.file.name);
+                                    return (
+                                        <tr key={item.id}
+                                            onClick={() => onReview(item)}
+                                            className="hover:bg-indigo-50/30 dark:hover:bg-indigo-900/10 transition-colors">
 
-                                        {/* 1. File Column */}
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-start gap-3">
-                                                <div className={`p-2.5 rounded-lg ${getIconStyle(item.file.name)}`}>
-                                                    {getFileIcon(item.file.name)}
+                                            {/* 1. File Column */}
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-start gap-3">
+                                                    <div className={`p-2.5 rounded-lg ${getIconStyle(item.file.name)}`}>
+                                                        {getFileIcon(item.file.name)}
+                                                    </div>
+                                                    <div className="max-w-[220px]">
+                                                        <button
+                                                            type="button"
+                                                            onClick={(e) => handlePreviewClick(e, item, 'MAIN')}
+                                                            className="font-medium text-gray-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 hover:underline text-left truncate block w-full text-sm cursor-pointer"
+                                                            title={item.file.name}
+                                                        >
+                                                            {item.file.name}
+                                                        </button>
+                                                        <div className="flex items-center gap-2 mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+                                                            <span className="font-semibold bg-gray-100 dark:bg-gray-700 px-1.5 rounded text-gray-600 dark:text-gray-300">
+                                                                {fileType}
+                                                            </span>
+                                                            <span>•</span>
+                                                            <span>{formatSize(item.file.size)}</span>
+                                                        </div>
+
+                                                        {item.csv && (
+                                                            <div className="flex items-center gap-2 mt-2">
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={(e) => handlePreviewClick(e, item, 'CSV')}
+                                                                    className="inline-flex items-center gap-1.5 px-2 py-1 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 text-xs font-medium rounded-md hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors border border-emerald-100 dark:border-emerald-900/50 cursor-pointer"
+                                                                    title="เปิด Thesis Validator"
+                                                                >
+                                                                    <FaFileCsv size={12} />
+                                                                    <span>Check Result</span>
+                                                                    <FiEye size={10} className="ml-0.5 opacity-60" />
+                                                                </button>
+
+                                                                <a
+                                                                    href={item.csv.downloadUrl}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    onClick={(e) => e.stopPropagation()}
+                                                                    className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300"
+                                                                    title="ดาวน์โหลดไฟล์ CSV"
+                                                                >
+                                                                    <FiDownload size={14} />
+                                                                </a>
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 </div>
-                                                <div className="max-w-[220px]">
+                                            </td>
+
+                                            {/* 2. Project Column */}
+                                            <td className="px-6 py-4">
+                                                <div className="flex flex-col max-w-[200px]">
+                                                    <span className="text-sm font-semibold text-indigo-600 dark:text-indigo-400 mb-0.5">
+                                                        {item.project?.code || 'NO CODE'}
+                                                    </span>
+                                                    <span className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate" title={item.project?.nameEn}>
+                                                        {item.project?.nameEn || 'No Project Name'}
+                                                    </span>
+                                                </div>
+                                            </td>
+
+                                            {/* 3. System Result */}
+                                            <td className="px-6 py-4 text-center">
+                                                <ReportStatusBadge type="verification" status={item.verificationStatus} />
+                                            </td>
+
+                                            {/* 4. Review Status (Dropdown) */}
+                                            <td className="px-6 py-4 text-center relative">
+                                                <div className="relative inline-block text-left">
                                                     <button
                                                         type="button"
-                                                        onClick={(e) => handlePreviewClick(e, item, 'MAIN')}
-                                                        className="font-medium text-gray-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 hover:underline text-left truncate block w-full text-sm cursor-pointer"
-                                                        title={item.file.name}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setOpenDropdownId(openDropdownId === item.id ? null : item.id);
+                                                        }}
+                                                        className="group hover:scale-105 transition-all duration-200 cursor-pointer focus:outline-none rounded-full flex items-center justify-center mx-auto"
                                                     >
-                                                        {item.file.name}
+                                                        <div className="flex items-center gap-1">
+                                                            <ReportStatusBadge type="review" status={item.reviewStatus} />
+                                                            <div className="w-5 h-5 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-400 group-hover:text-indigo-500 group-hover:bg-indigo-50 transition-colors">
+                                                                <FiChevronDown size={12} className={`transition-transform duration-200 ${openDropdownId === item.id ? 'rotate-180' : ''}`} />
+                                                            </div>
+                                                        </div>
                                                     </button>
-                                                    <div className="flex items-center gap-2 mt-0.5 text-xs text-gray-500 dark:text-gray-400">
-                                                        <span className="font-semibold bg-gray-100 dark:bg-gray-700 px-1.5 rounded text-gray-600 dark:text-gray-300">
-                                                            {fileType}
-                                                        </span>
-                                                        <span>•</span>
-                                                        <span>{formatSize(item.file.size)}</span>
-                                                    </div>
 
-                                                    {/* ปุ่ม CSV Preview */}
-                                                    {item.csv && (
-                                                        <div className="flex items-center gap-2 mt-2">
-                                                            <button
-                                                                type="button"
-                                                                onClick={(e) => handlePreviewClick(e, item, 'CSV')}
-                                                                className="inline-flex items-center gap-1.5 px-2 py-1 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 text-xs font-medium rounded-md hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors border border-emerald-100 dark:border-emerald-900/50 cursor-pointer"
-                                                                title="เปิด Thesis Validator"
-                                                            >
-                                                                <FaFileCsv size={12} />
-                                                                <span>Check Result</span>
-                                                                <FiEye size={10} className="ml-0.5 opacity-60" />
-                                                            </button>
-
-                                                            <a
-                                                                href={item.csv.downloadUrl}
-                                                                target="_blank"
-                                                                rel="noopener noreferrer"
-                                                                onClick={(e) => e.stopPropagation()}
-                                                                className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300"
-                                                                title="ดาวน์โหลดไฟล์ CSV"
-                                                            >
-                                                                <FiDownload size={14} />
-                                                            </a>
+                                                    {/* Dropdown Menu */}
+                                                    {openDropdownId === item.id && (
+                                                        <div
+                                                            ref={dropdownRef}
+                                                            className="absolute right-0 mt-2 w-44 rounded-xl shadow-xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 z-50 animate-in fade-in zoom-in-95 duration-200 origin-top-right overflow-hidden"
+                                                            style={{ top: '100%', left: '50%', transform: 'translateX(-50%)' }}
+                                                        >
+                                                            <div className="p-1" role="menu">
+                                                                <div className="px-3 py-1.5 text-[10px] font-bold text-gray-400 uppercase tracking-wider border-b border-gray-100 dark:border-gray-700 mb-1">
+                                                                    เลือกสถานะ
+                                                                </div>
+                                                                {statusOptions.map((option) => {
+                                                                    const isSelected = item.reviewStatus === option.value;
+                                                                    return (
+                                                                        <button
+                                                                            key={option.value}
+                                                                            type="button"
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation();
+                                                                                handleStatusSelect(item.id, option.value as any);
+                                                                            }}
+                                                                            className={`group flex items-center justify-between w-full px-3 py-2 text-xs rounded-lg transition-all duration-150 mb-0.5 ${isSelected ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 font-medium' : `text-gray-700 dark:text-gray-200 ${option.hoverBg} dark:hover:bg-gray-700`}`}
+                                                                        >
+                                                                            <div className="flex items-center gap-2.5">
+                                                                                <span className={`w-2 h-2 rounded-full ${option.dotColor} shadow-sm ring-1 ring-white dark:ring-gray-800`}></span>
+                                                                                <span>{option.label.split(' (')[0]}</span>
+                                                                            </div>
+                                                                            {isSelected && <FiCheck className="text-indigo-600 dark:text-indigo-400" size={14} />}
+                                                                        </button>
+                                                                    );
+                                                                })}
+                                                            </div>
                                                         </div>
                                                     )}
                                                 </div>
-                                            </div>
-                                        </td>
+                                            </td>
 
-                                        {/* 2. Project Column */}
-                                        <td className="px-6 py-4">
-                                            <div className="flex flex-col max-w-[200px]">
-                                                <span className="text-sm font-semibold text-indigo-600 dark:text-indigo-400 mb-0.5">
-                                                    {item.project?.code || 'NO CODE'}
-                                                </span>
-                                                <span className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate" title={item.project?.nameEn}>
-                                                    {item.project?.nameEn || 'No Project Name'}
-                                                </span>
-                                            </div>
-                                        </td>
+                                            {/* 5. Date */}
+                                            <td className="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                                                {new Date(item.createdAt).toLocaleDateString('th-TH', {
+                                                    day: 'numeric', month: 'short', year: '2-digit', hour: '2-digit', minute: '2-digit'
+                                                })}
+                                            </td>
 
-                                        {/* 3. System Result */}
-                                        <td className="px-6 py-4 text-center">
-                                            <ReportStatusBadge type="verification" status={item.verificationStatus} />
-                                        </td>
-
-                                        {/* 4. Review Status (Dropdown) */}
-                                        <td className="px-6 py-4 text-center relative">
-                                            <div className="relative inline-block text-left">
-                                                <button
-                                                    type="button"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        setOpenDropdownId(openDropdownId === item.id ? null : item.id);
-                                                    }}
-                                                    className="group hover:scale-105 transition-all duration-200 cursor-pointer focus:outline-none rounded-full flex items-center justify-center mx-auto"
-                                                >
-                                                    <div className="flex items-center gap-1">
-                                                        <ReportStatusBadge type="review" status={item.reviewStatus} />
-                                                        <div className="w-5 h-5 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-400 group-hover:text-indigo-500 group-hover:bg-indigo-50 transition-colors">
-                                                            <FiChevronDown size={12} className={`transition-transform duration-200 ${openDropdownId === item.id ? 'rotate-180' : ''}`} />
-                                                        </div>
-                                                    </div>
-                                                </button>
-
-                                                {/* Dropdown Menu */}
-                                                {openDropdownId === item.id && (
-                                                    <div
-                                                        ref={dropdownRef}
-                                                        className="absolute right-0 mt-2 w-44 rounded-xl shadow-xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 z-50 animate-in fade-in zoom-in-95 duration-200 origin-top-right overflow-hidden"
-                                                        style={{ top: '100%', left: '50%', transform: 'translateX(-50%)' }}
+                                            {/* 6. Actions */}
+                                            <td className="px-6 py-4 text-right">
+                                                <div className="flex items-center justify-end gap-2">
+                                                    <button
+                                                        type="button"
+                                                        onClick={(e) => { e.stopPropagation(); onReview(item); }}
+                                                        className="p-2 text-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 rounded-lg transition-colors"
+                                                        title="เปิดดูรายละเอียด"
                                                     >
-                                                        <div className="p-1" role="menu">
-                                                            <div className="px-3 py-1.5 text-[10px] font-bold text-gray-400 uppercase tracking-wider border-b border-gray-100 dark:border-gray-700 mb-1">
-                                                                เลือกสถานะ
-                                                            </div>
-                                                            {statusOptions.map((option) => {
-                                                                const isSelected = item.reviewStatus === option.value;
-                                                                return (
-                                                                    <button
-                                                                        key={option.value}
-                                                                        type="button"
-                                                                        onClick={(e) => {
-                                                                            e.stopPropagation();
-                                                                            handleStatusSelect(item.id, option.value as any);
-                                                                        }}
-                                                                        className={`group flex items-center justify-between w-full px-3 py-2 text-xs rounded-lg transition-all duration-150 mb-0.5 ${isSelected ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 font-medium' : `text-gray-700 dark:text-gray-200 ${option.hoverBg} dark:hover:bg-gray-700`}`}
-                                                                    >
-                                                                        <div className="flex items-center gap-2.5">
-                                                                            <span className={`w-2 h-2 rounded-full ${option.dotColor} shadow-sm ring-1 ring-white dark:ring-gray-800`}></span>
-                                                                            <span>{option.label.split(' (')[0]}</span>
-                                                                        </div>
-                                                                        {isSelected && <FiCheck className="text-indigo-600 dark:text-indigo-400" size={14} />}
-                                                                    </button>
-                                                                );
-                                                            })}
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </td>
+                                                        <FiEdit3 size={18} />
+                                                    </button>
+                                                    <a
+                                                        href={item.file.downloadUrl}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        onClick={(e) => e.stopPropagation()}
+                                                        className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors cursor-pointer"
+                                                        title="ดาวน์โหลด"
+                                                    >
+                                                        <FiDownload size={18} />
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
 
-                                        {/* 5. Date */}
-                                        <td className="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
-                                            {new Date(item.createdAt).toLocaleDateString('th-TH', {
-                                                day: 'numeric', month: 'short', year: '2-digit', hour: '2-digit', minute: '2-digit'
-                                            })}
-                                        </td>
-
-                                        {/* 6. Actions */}
-                                        <td className="px-6 py-4 text-right">
-                                            <div className="flex items-center justify-end gap-2">
-                                                <button
-                                                    type="button"
-                                                    onClick={(e) => { e.stopPropagation(); onReview(item); }}
-                                                    className="p-2 text-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 rounded-lg transition-colors"
-                                                    title="เปิดดูรายละเอียด"
-                                                >
-                                                    <FiEdit3 size={18} />
-                                                </button>
-                                                <a
-                                                    href={item.file.downloadUrl}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    onClick={(e) => e.stopPropagation()}
-                                                    className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors cursor-pointer"
-                                                    title="ดาวน์โหลด"
-                                                >
-                                                    <FiDownload size={18} />
-                                                </a>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
+                    {/* Pagination */}
+                    <Pagination meta={meta} onPageChange={onPageChange} />
                 </div>
-
-                {/* Pagination */}
-                <Pagination meta={meta} onPageChange={onPageChange} />
-            </div>
+            )}
 
             {/* 4. MODAL SECTION: แสดงผลตาม PreviewMode */}
-            
+
             {/* Case A: PDF Preview (สำหรับไฟล์ Report ทั่วไป) */}
             {previewFile && previewMode === 'PDF' && (
-                <div className="fixed inset-0 z-[100] flex flex-col bg-gray-900/95 backdrop-blur-sm p-4 animate-in fade-in">
-                    {/* Header */}
-                    <div className="bg-white dark:bg-gray-800 rounded-t-xl p-4 flex justify-between items-center border-b border-gray-100 dark:border-gray-700">
-                        {/* Left: File Info */}
-                        <div className="flex items-center gap-3 overflow-hidden">
-                            <div className={`p-2.5 rounded-lg shrink-0 ${getIconStyle(previewFile.file.name)}`}>
-                                {getFileIcon(previewFile.file.name)}
-                            </div>
-                            <div className="flex flex-col min-w-0">
-                                <h3 className="font-semibold text-gray-800 dark:text-white truncate max-w-[200px] sm:max-w-md" title={previewFile.file.name}>
-                                    {previewFile.file.name}
-                                </h3>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">
-                                    {formatSize(previewFile.file.size)}
-                                </p>
-                            </div>
-                        </div>
-
-                        {/* Right: Actions */}
-                        <div className="flex items-center gap-2 shrink-0">
-                            <a
-                                href={previewFile.file.downloadUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm"
-                            >
-                                <FiDownload size={16} />
-                                <span className="hidden sm:inline">Download</span>
-                            </a>
-                            <button
-                                type="button"
-                                onClick={() => setPreviewFile(null)}
-                                className="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                            >
-                                <FiX size={24} />
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Content Body */}
-                    <div className="flex-1 bg-gray-100 dark:bg-gray-900 rounded-b-xl overflow-hidden relative flex items-center justify-center">
-                         {/* Show PDF */}
-                        <iframe
-                            src={`${previewFile.file.url}#toolbar=0`}
-                            className="w-full h-full"
-                            title="PDF Preview"
-                        />
-                    </div>
-                </div>
+                <PdfPreviewModal
+                    url={previewFile.file.url}
+                    downloadUrl={previewFile.file.downloadUrl || previewFile.file.url}
+                    fileName={previewFile.file.name}
+                    fileSize={previewFile.file.size}
+                    onClose={() => setPreviewFile(null)}
+                />
             )}
 
             {/* Case B: VALIDATOR Preview (สำหรับไฟล์ CSV ที่เป็น Thesis Result) */}
@@ -353,10 +316,12 @@ export const ReportTable: React.FC<Props> = ({
                 <div className="fixed inset-0 z-[100] bg-gray-900/90 backdrop-blur-sm flex items-center justify-center animate-in fade-in duration-200">
                     <div className="w-full h-full md:w-[95vw] md:h-[95vh] bg-white dark:bg-gray-900 rounded-xl shadow-2xl overflow-hidden">
                         <ThesisValidator
+                            reportFileId={previewFile.id}
                             pdfUrl={previewFile.originalFile?.url || previewFile.file.url}
                             csvUrl={previewFile.csv?.url}
                             fileName={previewFile.originalFile?.name || previewFile.file.name}
                             onClose={() => setPreviewFile(null)}
+                            onSaveSuccess={onRefresh}
                         />
                     </div>
                 </div>

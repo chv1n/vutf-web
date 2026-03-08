@@ -7,6 +7,7 @@ import { useSubmissions } from '@/hooks/useSubmission';
 import { SubmissionStatusBadge } from './SubmissionStatusBadge';
 import { formatFileSize } from '@/types/submission';
 import { submissionService } from '@/services/submission.service';
+import { PdfPreviewModal } from '@/components/shared/pdf-preview/PdfPreviewModal';
 
 interface SubmissionListProps {
     groupId: string;
@@ -206,67 +207,32 @@ export const SubmissionList: React.FC<SubmissionListProps> = ({
             </AnimatePresence>
 
             {/* --- Preview Modal (Full Screen Style) --- */}
-            {previewFile && (
-                <div className="fixed inset-0 z-[9999] flex flex-col bg-gray-900/95 backdrop-blur-sm p-0 sm:p-4 animate-in fade-in duration-200">
+            {previewFile && previewFile.type.includes('pdf') && (
+                <PdfPreviewModal
+                    url={previewFile.url}
+                    downloadUrl={previewFile.downloadUrl}
+                    fileName={previewFile.name}
+                    fileSize={previewFile.size}
+                    onClose={() => setPreviewFile(null)}
+                />
+            )}
 
-                    {/* Header */}
-                    <div className="flex items-center justify-between bg-gray-300 dark:bg-gray-800 p-3 sm:p-4 rounded-none sm:rounded-t-xl border-b dark:border-gray-700 shrink-0 shadow-sm">
-                        <div className="flex items-center gap-3 overflow-hidden">
-                            <div className="p-2 bg-red-100 dark:bg-white rounded-lg text-red-500 shrink-0">
-                                <FaFilePdf size={24} />
-                            </div>
-                            <div className="min-w-0">
-                                <p className="font-semibold text-gray-900 dark:text-white truncate text-base sm:text-lg max-w-[200px] sm:max-w-md">
-                                    {previewFile.name}
-                                </p>
-                                <p className="text-xs text-gray-500 uppercase tracking-wider">
-                                    {previewFile.type.split('/')[1] || 'FILE'} • {formatFileSize(previewFile.size)}
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                            <a
-                                href={previewFile.downloadUrl} // ใช้ URL ที่ได้จาก backend
-                                download={previewFile.name}    // hint ชื่อไฟล์ให้ browser
-                                className="hidden sm:flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-medium shadow-sm"
-                            >
-                                <FiDownload size={18} />
-                                <span>Download</span>
-                            </a>
-
-                            {/* ปุ่ม Download สำหรับมือถือ (แสดงแค่ icon) */}
-                            <a
-                                href={previewFile.downloadUrl}
-                                download={previewFile.name}
-                                className="sm:hidden p-2 text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
-                            >
-                                <FiDownload size={24} />
-                            </a>
-
-                            <button
-                                onClick={() => setPreviewFile(null)}
-                                className="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-200 rounded-lg transition-colors"
-                            >
-                                <FiX size={24} />
-                            </button>
-                        </div>
+            {/* Fallback สำหรับไฟล์ที่ไม่ใช่ PDF */}
+            {previewFile && !previewFile.type.includes('pdf') && (
+                <div className="fixed inset-0 z-[9999] flex flex-col bg-gray-900/95 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+                    <div className="flex justify-end p-2">
+                        <button onClick={() => setPreviewFile(null)} className="p-2 text-white bg-white/10 hover:bg-white/20 rounded-full transition-colors">
+                            <FiX size={24} />
+                        </button>
                     </div>
-
-                    {/* Body */}
-                    <div className="flex-1 bg-white dark:bg-gray-900 rounded-none sm:rounded-b-xl overflow-hidden shadow-2xl relative">
-                        {previewFile.type.includes('pdf') ? (
-                            <iframe
-                                src={`${previewFile.url}#toolbar=0`}
-                                className="w-full h-full border-none"
-                                title="File Preview"
-                            />
-                        ) : (
-                            <div className="w-full h-full flex flex-col items-center justify-center p-4 text-gray-400">
-                                <FiFile size={48} className="mb-4 opacity-30" />
-                                <p>ไม่สามารถแสดงตัวอย่างไฟล์ประเภทนี้ได้</p>
-                            </div>
-                        )}
+                    <div className="flex-1 flex flex-col items-center justify-center p-4">
+                        <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl flex flex-col items-center shadow-2xl text-center">
+                            <FiFile size={48} className="mb-4 text-gray-400 opacity-50" />
+                            <p className="text-gray-500 dark:text-gray-400 mb-4">ไม่สามารถแสดงตัวอย่างไฟล์ประเภทนี้ได้ในเบราว์เซอร์</p>
+                            <a href={previewFile.downloadUrl} download={previewFile.name} className="px-6 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-medium flex items-center gap-2">
+                                <FiDownload /> ดาวน์โหลดไฟล์
+                            </a>
+                        </div>
                     </div>
                 </div>
             )}

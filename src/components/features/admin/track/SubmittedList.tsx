@@ -13,6 +13,7 @@ import {
   FiX
 } from 'react-icons/fi';
 import { FaFilePdf } from 'react-icons/fa6';
+import { PdfPreviewModal } from '@/components/shared/pdf-preview/PdfPreviewModal';
 
 interface Props {
   filters: TrackThesisFilterParams;
@@ -236,54 +237,34 @@ export const SubmittedList = ({ filters, activeTab }: Props) => {
       </div>
 
       {/* Modal Preview */}
-      {selectedFile && (
-        <div className="fixed inset-0 z-[100] flex flex-col bg-gray-900/90 backdrop-blur-sm p-2 sm:p-4 animate-in fade-in duration-200">
-          <div className="flex items-center justify-between bg-gray-300 dark:bg-gray-800 p-4 rounded-t-2xl border-b dark:border-gray-700">
-            <div className="flex items-center gap-4">
-              <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
-                <FaFilePdf className="text-red-500" size={28} />
-              </div>
-              <div className="flex flex-col">
-                <span className="font-bold text-lg text-gray-900 dark:text-white truncate max-w-xs sm:max-w-md leading-tight" title={selectedFile.name}>
-                  {selectedFile.name}
-                </span>
-                <span className="text-sm text-gray-500 dark:text-gray-400">
-                  {formatFileSize(selectedFile.size)}
-                </span>
-              </div>
-            </div>
+      {selectedFile && selectedFile.type === 'pdf' && (
+        <PdfPreviewModal
+          url={selectedFile.url}
+          downloadUrl={selectedFile.downloadUrl}
+          fileName={selectedFile.name}
+          fileSize={selectedFile.size}
+          onClose={() => setSelectedFile(null)}
+        />
+      )}
 
-            <div className="flex items-center gap-2">
-              <a
-                href={selectedFile.downloadUrl}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
-              >
-                <FiDownload /> <span className="hidden sm:inline">Download</span>
-              </a>
-              <button
-                onClick={() => setSelectedFile(null)}
-                className="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-              >
-                <FiX size={24} />
-              </button>
-            </div>
+      {/* Fallback สำหรับ Image และไฟล์อื่นๆ */}
+      {selectedFile && selectedFile.type !== 'pdf' && (
+        <div className="fixed inset-0 z-[100] flex flex-col bg-gray-900/95 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="flex justify-end p-2">
+            <button onClick={() => setSelectedFile(null)} className="p-2 text-white bg-white/10 hover:bg-white/20 rounded-full transition-colors">
+              <FiX size={24} />
+            </button>
           </div>
-
-          <div className="flex-1 bg-white dark:bg-gray-900 rounded-b-2xl overflow-hidden shadow-2xl relative">
-            {selectedFile.type === 'pdf' ? (
-              <iframe
-                src={`${selectedFile.url}#toolbar=0`}
-                className="w-full h-full border-none"
-                title="File Preview"
-              />
-            ) : selectedFile.type === 'image' ? (
-              <div className="w-full h-full flex items-center justify-center p-4 bg-gray-100 dark:bg-gray-950">
-                <img src={selectedFile.url} alt="Preview" className="max-w-full max-h-full object-contain rounded-md shadow-lg" />
-              </div>
+          <div className="flex-1 flex flex-col items-center justify-center p-4">
+            {selectedFile.type === 'image' ? (
+              <img src={selectedFile.url} alt="Preview" className="max-w-full max-h-full object-contain rounded-md shadow-2xl" />
             ) : (
-              <div className="flex flex-col items-center justify-center h-full text-gray-500">
-                <p>ไม่รองรับการพรีวิวไฟล์ประเภทนี้</p>
-                <a href={selectedFile.url} className="mt-4 text-blue-600 underline">ดาวน์โหลดไฟล์แทน</a>
+              <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl flex flex-col items-center shadow-2xl text-center">
+                <FiFileText size={48} className="mb-4 text-gray-400 opacity-50" />
+                <p className="text-gray-500 dark:text-gray-400 mb-4">ไม่รองรับการพรีวิวไฟล์ประเภทนี้ในเบราว์เซอร์</p>
+                <a href={selectedFile.downloadUrl} download={selectedFile.name} className="px-6 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-medium flex items-center gap-2">
+                  <FiDownload /> ดาวน์โหลดไฟล์
+                </a>
               </div>
             )}
           </div>

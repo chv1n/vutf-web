@@ -24,6 +24,7 @@ interface Props {
   currentPageIssues: Issue[];
   handleTogglePageIgnore: () => void;
   toggleIssueStatus: (id: number) => void;
+  isReadOnly?: boolean;
 }
 
 export const ValidatorIssueList: React.FC<Props> = ({
@@ -31,6 +32,7 @@ export const ValidatorIssueList: React.FC<Props> = ({
   currentPageIssues,
   handleTogglePageIgnore,
   toggleIssueStatus,
+  isReadOnly = false
 }) => {
   return (
     <>
@@ -43,7 +45,7 @@ export const ValidatorIssueList: React.FC<Props> = ({
           </span>
         </div>
 
-        {currentPageIssues.length > 0 && (
+        {currentPageIssues.length > 0 && !isReadOnly && (
           <button
             onClick={handleTogglePageIgnore}
             className={`text-[10px] font-bold px-3 py-1.5 rounded-full border transition-all flex items-center gap-1.5
@@ -85,13 +87,14 @@ export const ValidatorIssueList: React.FC<Props> = ({
           currentPageIssues.map((issue) => (
             <div
               key={issue.id}
-              onClick={() => toggleIssueStatus(issue.id)}
-              className={`group p-4 rounded-xl border cursor-pointer transition-all duration-200 relative select-none
+              onClick={() => !isReadOnly && toggleIssueStatus(issue.id)}
+              className={`group p-4 rounded-xl border transition-all duration-200 relative select-none
                             ${
                               issue.isIgnored
                                 ? "bg-slate-50 dark:bg-gray-800 border-slate-200 dark:border-gray-700 opacity-60"
                                 : "bg-white dark:bg-gray-800 border-slate-200 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-blue-200 dark:hover:border-blue-500 hover:-translate-y-0.5"
                             }
+                            ${isReadOnly ? "cursor-default" : "cursor-pointer hover:-translate-y-0.5"}
                         `}
             >
               <div className="flex justify-between items-start mb-2">

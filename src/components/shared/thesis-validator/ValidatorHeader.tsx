@@ -1,7 +1,9 @@
 // src/components/shared/thesis-validator/ValidatorHeader.tsx
 import React from 'react';
-import { FiChevronLeft, FiChevronRight, FiDownload, FiX, FiSkipForward } from 'react-icons/fi';
-import { FaKeyboard, FaFilePdf } from 'react-icons/fa6'; 
+import { FiChevronLeft, FiChevronRight, FiDownload, FiX, FiSkipForward, FiCheckCircle } from 'react-icons/fi';
+import { FaKeyboard, FaFilePdf } from 'react-icons/fa6';
+import { Issue } from './ValidatorIssueList';
+import { ExportPDFButton } from './ExportPDFButton';
 
 interface Props {
   fileName: string;
@@ -11,6 +13,10 @@ interface Props {
   onClose: () => void;
   onNextIssue: () => void;
   onDownloadReport?: () => void;
+  pdfUrl: string;
+  issues: Issue[];
+  onSaveToServer?: () => void;
+  isSaving?: boolean;
 }
 
 export const ValidatorHeader: React.FC<Props> = ({
@@ -20,33 +26,45 @@ export const ValidatorHeader: React.FC<Props> = ({
   setPageNumber,
   onClose,
   onNextIssue,
-  onDownloadReport
+  onDownloadReport,
+  pdfUrl,
+  issues,
+  onSaveToServer,
+  isSaving,
 }) => {
+
+  const resolvedCount = issues.filter(issue => issue.isIgnored).length;
+
   return (
     <div className="flex items-center justify-between px-6 py-3 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border-b border-slate-200 dark:border-gray-700 sticky top-0 z-30 shadow-sm transition-colors duration-200">
-      
+
       {/* Left: Title & Hint */}
       <div className="flex items-center gap-4">
         {/* PDF */}
         <div className="w-10 h-10 bg-slate-900 dark:bg-slate-700 text-white rounded-xl flex items-center justify-center shadow-lg shadow-slate-200 dark:shadow-none">
-           <FaFilePdf size={20} />
+          <FaFilePdf size={20} />
         </div>
-        
+
         <div>
-           <h1 className="text-base font-bold text-slate-800 dark:text-white leading-tight">{fileName}</h1>
-           <div className="flex items-center gap-2 text-[10px] text-slate-400 dark:text-gray-400 font-medium tracking-wide">
-              <span>AUTOMATED CHECK SYSTEM</span>
-              <span className="text-slate-300 dark:text-gray-600">|</span>
-              <span className="flex items-center gap-1 text-slate-500 dark:text-gray-300 bg-slate-100 dark:bg-gray-700 px-1.5 py-0.5 rounded">
-                 <FaKeyboard /> Press <b className="text-slate-800 dark:text-white">Enter</b> to Approve & Next
-              </span>
-           </div>
+          <h1 className="text-base font-bold text-slate-800 dark:text-white leading-tight">{fileName}</h1>
+          <div className="flex items-center gap-2 text-[10px] text-slate-400 dark:text-gray-400 font-medium tracking-wide">
+            <span>THESIS REVIEW SYSTEM</span>
+            <span className="text-slate-300 dark:text-gray-600">|</span>
+            <span className="flex items-center gap-1 text-slate-500 dark:text-gray-300 bg-slate-100 dark:bg-gray-700 px-1.5 py-0.5 rounded">
+              <FaKeyboard />
+              {onSaveToServer ? (
+                <>Press <b className="text-slate-800 dark:text-white">Enter</b> to Approve & Next</>
+              ) : (
+                <>Press <b className="text-slate-800 dark:text-white">Enter</b> to Next Page</>
+              )}
+            </span>
+          </div>
         </div>
       </div>
 
       {/* Right: Controls */}
       <div className="flex items-center gap-4">
-        
+
         <button
           onClick={onNextIssue}
           className="text-xs font-semibold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/40 px-3 py-2 rounded-lg border border-amber-200 dark:border-amber-800 transition-all flex items-center gap-2"
@@ -67,7 +85,7 @@ export const ValidatorHeader: React.FC<Props> = ({
             <FiChevronLeft size={16} />
           </button>
           <span className="text-xs font-mono px-4 w-24 text-center select-none text-slate-600 dark:text-gray-300">
-             Page <span className="font-bold text-slate-800 dark:text-white">{pageNumber}</span> <span className="text-slate-400 dark:text-gray-500">/ {numPages || "-"}</span>
+            Page <span className="font-bold text-slate-800 dark:text-white">{pageNumber}</span> <span className="text-slate-400 dark:text-gray-500">/ {numPages || "-"}</span>
           </span>
           <button
             onClick={() => setPageNumber(Math.min(numPages || 1, pageNumber + 1))}
@@ -78,12 +96,36 @@ export const ValidatorHeader: React.FC<Props> = ({
           </button>
         </div>
 
+        {onSaveToServer && resolvedCount > 0 && (
+          <button
+            onClick={onSaveToServer}
+            disabled={isSaving}
+            className="px-3 md:px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg shadow-md flex items-center gap-2 animate-in fade-in zoom-in duration-300"
+          >
+            {isSaving ? (
+              <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            ) : (
+              <FiCheckCircle size={14} className="flex-shrink-0" />
+            )}
+            <span className="hidden md:inline">Submit Review</span>
+            <span className="bg-indigo-500 text-[10px] px-1.5 py-0.5 rounded-full">
+              {resolvedCount}
+            </span>
+          </button>
+        )}
+
+        <ExportPDFButton
+          pdfUrl={pdfUrl}
+          fileName={fileName}
+          issues={issues}
+        />
+
         {/* ปุ่ม Download */}
         {onDownloadReport && (
           <button
             onClick={onDownloadReport}
             className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-slate-100 dark:text-gray-400 dark:hover:text-indigo-400 dark:hover:bg-gray-700 rounded-lg transition-colors"
-            title="Export Report"
+            title="Export CSV"
           >
             <FiDownload size={20} />
           </button>

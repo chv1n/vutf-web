@@ -129,13 +129,14 @@ export const ReportDetailPage = () => {
 
                     {data.file ? (
                         <SubmissionFileCard
-                            title="เอกสารรายงานผลการตรวจสอบ (Verification Report)" 
+                            reportId={data.id}
+                            title="เอกสารรายงานผลการตรวจสอบ (Verification Report)"
                             fileName={data.file.name || 'Unknown Filename'}
                             fileSize={data.file.size || 0}
                             fileUrl={data.file.url || '#'}
                             downloadUrl={data.file.downloadUrl || '#'}
                             mimeType={safeMimeType}
-                            csv={data.csv} 
+                            csv={data.csv}
                             originalFile={data.originalFile}
                         />
                     ) : (
