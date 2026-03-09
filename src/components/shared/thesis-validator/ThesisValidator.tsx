@@ -4,6 +4,7 @@ import Papa from 'papaparse';
 import { ValidatorHeader } from './ValidatorHeader';
 import { ValidatorSidebar } from './ValidatorSidebar';
 import { ValidatorPDFViewer } from './ValidatorPDFViewer';
+import { ValidatorAddIssueModal, NewIssueData } from './ValidatorAddIssueModal';
 import { Issue } from './ValidatorIssueList';
 import { api } from '@/services/api';
 
@@ -32,6 +33,11 @@ export const ThesisValidator: React.FC<Props> = ({
   const [pageDimensions, setPageDimensions] = useState({ width: 0, height: 0 });
   const [isLoadingCsv, setIsLoadingCsv] = useState(!!csvUrl);
   const [isSavingToServer, setIsSavingToServer] = useState(false);
+  const [activeMargins, setActiveMargins] = useState<string[]>([]);
+  const [zoomLevel, setZoomLevel] = useState(1);
+  const [isDrawingMode, setIsDrawingMode] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [tempBBox, setTempBBox] = useState<number[] | null>(null);
 
   // 1. Fetch & Parse CSV
   useEffect(() => {
@@ -208,11 +214,35 @@ export const ThesisValidator: React.FC<Props> = ({
     URL.revokeObjectURL(url);
   }, [generateUpdatedCSVString, fileName]);
 
-  const handleSaveToServer = useCallback(async () => {
-    const csvString = generateUpdatedCSVString();
+  const getCsvStringFromIssues = useCallback((currentIssues: Issue[]) => {
+    if (currentIssues.length === 0) return null;
+
+    // กรองเอาเฉพาะที่ยังไม่ถูก Ignore
+    const activeIssues = currentIssues.filter(issue => !issue.isIgnored);
+
+    const csvData = activeIssues.map(issue => {
+      let bboxStr = '';
+      if (issue.bbox) {
+        // แปลง [ ] เป็น ( ) ตาม format เดิม
+        bboxStr = JSON.stringify(issue.bbox).replace('[', '(').replace(']', ')');
+      }
+      return [issue.page, issue.code, issue.severity, issue.message, bboxStr];
+    });
+
+    const finalData = [
+      ["page", "code", "severity", "message", "bbox"],
+      ...csvData
+    ];
+
+    return Papa.unparse(finalData);
+  }, []);
+
+  // ฟังก์ชันหลักสำหรับบันทึกข้อมูลขึ้น Server (รับข้อมูล issues เข้ามาโดยตรง)
+  const performSaveToServer = useCallback(async (targetIssues: Issue[]) => {
+    const csvString = getCsvStringFromIssues(targetIssues);
     if (!csvString) {
-      alert("ไม่มีข้อมูลให้บันทึก");
-      return;
+      // กรณีไม่มี issue เหลือเลย (อาจถูกลบหรือ ignore หมด) ให้ส่งไฟล์เปล่าที่มีแต่ header
+      // หรือจัดการตามที่ระบบ Backend ต้องการ
     }
 
     setIsSavingToServer(true);
@@ -221,21 +251,58 @@ export const ThesisValidator: React.FC<Props> = ({
         csvContent: csvString
       });
 
-      alert("✅ บันทึกไฟล์ขึ้น Server สำเร็จ!");
-
-      // สั่งลบ Issue ที่ถูกตั้งเป็นสีฟ้า (isIgnored) ออกจากหน้าจอ
+      // ถ้าบันทึกสำเร็จ ให้กรองเอา issue ที่ถูก ignore ออกจากหน้าจอ
       setIssues(prev => prev.filter(issue => !issue.isIgnored));
 
       if (onSaveSuccess) {
         onSaveSuccess();
       }
+      return true;
     } catch (error: any) {
       console.error("Save error:", error);
-      alert(`❌ ${error.message || 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้'}`);
+      alert(`❌ ไม่สามารถบันทึกลงฐานข้อมูลได้: ${error.message}`);
+      return false;
     } finally {
       setIsSavingToServer(false);
     }
-  }, [generateUpdatedCSVString, reportFileId, onSaveSuccess]);
+  }, [getCsvStringFromIssues, reportFileId, onSaveSuccess]);
+
+  const handleSaveToServer = useCallback(async () => {
+    await performSaveToServer(issues);
+    alert("✅ บันทึกการตรวจสอบทั้งหมดเรียบร้อยแล้ว!");
+  }, [performSaveToServer, issues]);
+
+  const handleDrawComplete = useCallback((bbox: number[]) => {
+    setTempBBox(bbox);
+    setIsModalOpen(true); // เปิด Modal ฟอร์ม
+  }, []);
+
+  const handleSaveNewIssue = useCallback(async (data: NewIssueData) => {
+    const newIssue: Issue = {
+      id: Date.now(),
+      page: pageNumber,
+      code: data.code,
+      severity: data.severity,
+      message: data.message,
+      bbox: tempBBox,
+      isIgnored: false
+    };
+
+    // สร้างรายการ Issues ใหม่รวมกับของเดิม
+    const updatedIssues = [...issues, newIssue];
+
+    // อัปเดต State หน้าจอ
+    setIssues(updatedIssues);
+
+    // บันทึกลงฐานข้อมูลทันที
+    const success = await performSaveToServer(updatedIssues);
+
+    if (success) {
+      setIsModalOpen(false);
+      setTempBBox(null);
+      setIsDrawingMode(false);
+    }
+  }, [pageNumber, tempBBox, issues, performSaveToServer]);
 
   // 4. Keyboard Shortcuts Listener
   useEffect(() => {
@@ -261,7 +328,14 @@ export const ThesisValidator: React.FC<Props> = ({
           }
           break;
         case 'Escape':
-          onClose();
+          if (isDrawingMode) {
+            setIsDrawingMode(false);
+          } else if (isModalOpen) {
+            setIsModalOpen(false);
+            setTempBBox(null);
+          } else {
+            onClose();
+          }
           break;
         default:
           break;
@@ -287,10 +361,17 @@ export const ThesisValidator: React.FC<Props> = ({
           issues={issues}
           onSaveToServer={!isReadOnly ? handleSaveToServer : undefined}
           isSaving={isSavingToServer}
+          activeMargins={activeMargins}
+          setActiveMargins={setActiveMargins}
+          zoomLevel={zoomLevel}
+          setZoomLevel={setZoomLevel}
+          isDrawingMode={isDrawingMode}
+          setIsDrawingMode={setIsDrawingMode}
+          isReadOnly={isReadOnly}
         />
       </div>
 
-      <div className="flex flex-1 overflow-hidden relative">
+      <div className="flex flex-col md:flex-row flex-1 overflow-hidden relative">
         {isLoadingCsv && (
           <div className="absolute inset-0 z-50 bg-white/80 dark:bg-gray-900/80 flex items-center justify-center backdrop-blur-sm">
             <div className="flex flex-col items-center gap-3">
@@ -309,6 +390,10 @@ export const ThesisValidator: React.FC<Props> = ({
           issues={currentPageIssues}
           onToggleIgnore={toggleIgnore}
           isReadOnly={isReadOnly}
+          activeMargins={activeMargins}
+          zoomLevel={zoomLevel}
+          isDrawingMode={isDrawingMode}
+          onDrawComplete={handleDrawComplete}
         />
 
         <ValidatorSidebar
@@ -319,6 +404,16 @@ export const ThesisValidator: React.FC<Props> = ({
           currentPageIssues={currentPageIssues}
           onToggleIgnore={toggleIgnore}
           isReadOnly={isReadOnly}
+        />
+
+        <ValidatorAddIssueModal
+          isOpen={isModalOpen}
+          onClose={() => {
+            setIsModalOpen(false);
+            setTempBBox(null);
+          }}
+          onSave={handleSaveNewIssue}
+          bbox={tempBBox}
         />
       </div>
     </div>

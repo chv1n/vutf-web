@@ -35,6 +35,7 @@ export const SubmissionList: React.FC<SubmissionListProps> = ({
     // State สำหรับเก็บไฟล์ที่เลือกดู (Preview)
     const [previewFile, setPreviewFile] = useState<{ url: string; downloadUrl: string; name: string; type: string; size: number; } | null>(null);
     const [previewLoading, setPreviewLoading] = useState<number | null>(null);
+    const [downloadLoading, setDownloadLoading] = useState<number | null>(null);
 
     useEffect(() => {
         fetchSubmissions();
@@ -67,6 +68,22 @@ export const SubmissionList: React.FC<SubmissionListProps> = ({
             alert("ไม่สามารถเปิดไฟล์ได้ กรุณาลองใหม่ หรือรีเฟรชหน้าจอ");
         } finally {
             setPreviewLoading(null);
+        }
+    };
+
+    const handleDownload = async (submissionId: number) => {
+        try {
+            setDownloadLoading(submissionId);
+
+            // เรียกฟังก์ชันดาวน์โหลดจาก hook
+            await downloadFile(submissionId);
+
+            // หน่วงเวลาเล็กน้อยเพื่อให้ User เห็นสถานะบนมือถือ (UX)
+            await new Promise(resolve => setTimeout(resolve, 800));
+        } catch (error) {
+            console.error("Download failed", error);
+        } finally {
+            setDownloadLoading(null);
         }
     };
 
@@ -113,64 +130,69 @@ export const SubmissionList: React.FC<SubmissionListProps> = ({
                         className={`
               bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl shadow-sm
               hover:shadow-md transition-shadow duration-200
-              ${compact ? 'p-3' : 'p-4'}
+              ${compact ? 'p-3' : 'p-4 sm:p-5'}
             `}
                     >
-                        <div className="flex items-start gap-3">
+                        <div className="flex items-start gap-3 sm:gap-4">
                             {/* File Icon */}
                             <div className={`
-                ${compact ? 'w-10 h-10' : 'w-12 h-12'}
+                ${compact ? 'w-10 h-10' : 'w-10 h-10 sm:w-12 sm:h-12'}
                 bg-gradient-to-br from-red-500 to-red-600 dark:from-red-600 dark:to-red-700
                 rounded-xl flex items-center justify-center
                 shadow-lg shadow-red-200 dark:shadow-none flex-shrink-0
               `}>
-                                <FiFile className={`${compact ? 'w-5 h-5' : 'w-6 h-6'} text-white`} />
+                                <FiFile className={`${compact ? 'w-5 h-5' : 'w-5 h-5 sm:w-6 sm:h-6'} text-white`} />
                             </div>
 
                             {/* File Info */}
                             <div className="flex-1 min-w-0">
                                 <div className="flex items-start justify-between gap-2">
-                                    <div className="min-w-0">
-                                        <h4 className={`${compact ? 'text-sm' : 'text-base'} font-semibold text-gray-900 dark:text-white truncate`}>
+                                    <div className="min-w-0 flex-1">
+                                        <h4 className={`
+                                            ${compact ? 'text-sm' : 'text-sm sm:text-base'} 
+                                            font-semibold text-gray-900 dark:text-white break-words line-clamp-2
+                                        `}>
                                             {submission.fileName}
                                         </h4>
-                                        <div className="flex items-center gap-2 mt-1">
-                                            <span className="text-xs text-gray-500 dark:text-gray-400">
+                                        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-1">
+                                            <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
                                                 {formatFileSize(submission.fileSize)}
                                             </span>
-                                            <span className="text-gray-300 dark:text-gray-600">•</span>
-                                            <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
-                                                <FiCalendar className="w-3 h-3" />
+                                            <span className="text-gray-300 dark:text-gray-600 hidden sm:inline">•</span>
+                                            <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1 whitespace-nowrap">
+                                                <FiCalendar className="w-3 h-3 flex-shrink-0" />
                                                 {formatDate(submission.submittedAt)}
                                             </span>
                                         </div>
                                     </div>
 
                                     {/* Status Badge */}
-                                    <SubmissionStatusBadge
-                                        status={submission.status}
-                                        size={compact ? 'sm' : 'md'}
-                                    />
+                                    <div className="flex-shrink-0 mt-0.5">
+                                        <SubmissionStatusBadge
+                                            status={submission.status}
+                                            size={compact ? 'sm' : 'md'}
+                                        />
+                                    </div>
                                 </div>
 
                                 {/* Comment Section */}
                                 {submission.comment && (
-                                    <div className="mt-2 px-3 py-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                                        <p className="text-xs text-gray-400 dark:text-gray-500 mb-0.5">ความเห็น:</p>
-                                        <p className="text-sm text-gray-700 dark:text-gray-300">{submission.comment}</p>
+                                    <div className="mt-2.5 px-3 py-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                                        <p className="text-[11px] sm:text-xs text-gray-400 dark:text-gray-500 mb-0.5">ความเห็น:</p>
+                                        <p className="text-xs sm:text-sm text-gray-700 dark:text-gray-300 line-clamp-3">{submission.comment}</p>
                                     </div>
                                 )}
 
                                 {/* Actions Button Group */}
-                                <div className="flex items-center gap-2 mt-3">
+                                <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 mt-3.5">
                                     {/* ปุ่มดูตัวอย่าง (Preview) */}
                                     <button
                                         type="button"
                                         onClick={() => handlePreview(submission.submissionId, submission.fileName, submission.fileSize, submission.mimeType)}
                                         disabled={previewLoading === submission.submissionId}
                                         className={`
-                      flex items-center gap-1.5
-                      ${compact ? 'px-2.5 py-1.5 text-xs' : 'px-3 py-2 text-sm'}
+                      flex items-center justify-center gap-1.5 flex-1 sm:flex-none
+                      ${compact ? 'px-2.5 py-1.5 text-xs' : 'px-3 py-2 text-xs sm:text-sm'}
                       text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 
                       hover:bg-blue-100 dark:hover:bg-blue-900/40
                       rounded-lg font-medium transition-colors disabled:opacity-50
@@ -187,17 +209,22 @@ export const SubmissionList: React.FC<SubmissionListProps> = ({
                                     {/* ปุ่มดาวน์โหลด (Download) */}
                                     <button
                                         type="button"
-                                        onClick={() => downloadFile(submission.submissionId)}
+                                        onClick={() => handleDownload(submission.submissionId)}
+                                        disabled={downloadLoading === submission.submissionId}
                                         className={`
-                      flex items-center gap-1.5
-                      ${compact ? 'px-2.5 py-1.5 text-xs' : 'px-3 py-2 text-sm'}
-                      text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 
-                      hover:bg-gray-200 dark:hover:bg-gray-600
-                      rounded-lg font-medium transition-colors
-                    `}
+                                      flex items-center justify-center gap-1.5 flex-1 sm:flex-none
+                                      ${compact ? 'px-2.5 py-1.5 text-xs' : 'px-3 py-2 text-xs sm:text-sm'}
+                                      text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 
+                                      hover:bg-gray-200 dark:hover:bg-gray-600
+                                      rounded-lg font-medium transition-colors disabled:opacity-50
+                                    `}
                                     >
-                                        <FiDownload className="w-4 h-4" />
-                                        ดาวน์โหลด
+                                        {downloadLoading === submission.submissionId ? (
+                                            <FiLoader className="w-4 h-4 animate-spin" />
+                                        ) : (
+                                            <FiDownload className="w-4 h-4" />
+                                        )}
+                                        {downloadLoading === submission.submissionId ? 'กำลังโหลด...' : 'ดาวน์โหลด'}
                                     </button>
                                 </div>
                             </div>
@@ -226,10 +253,10 @@ export const SubmissionList: React.FC<SubmissionListProps> = ({
                         </button>
                     </div>
                     <div className="flex-1 flex flex-col items-center justify-center p-4">
-                        <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl flex flex-col items-center shadow-2xl text-center">
+                        <div className="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-2xl flex flex-col items-center shadow-2xl text-center w-full max-w-sm">
                             <FiFile size={48} className="mb-4 text-gray-400 opacity-50" />
-                            <p className="text-gray-500 dark:text-gray-400 mb-4">ไม่สามารถแสดงตัวอย่างไฟล์ประเภทนี้ได้ในเบราว์เซอร์</p>
-                            <a href={previewFile.downloadUrl} download={previewFile.name} className="px-6 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-medium flex items-center gap-2">
+                            <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400 mb-4">ไม่สามารถแสดงตัวอย่างไฟล์ประเภทนี้ได้ในเบราว์เซอร์</p>
+                            <a href={previewFile.downloadUrl} download={previewFile.name} className="w-full sm:w-auto px-6 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-medium flex items-center justify-center gap-2">
                                 <FiDownload /> ดาวน์โหลดไฟล์
                             </a>
                         </div>

@@ -30,29 +30,34 @@ export const ReportDetailPage = () => {
         if (id) fetchDetail(Number(id));
     }, [id]);
 
-    const fetchDetail = async (reportId: number) => {
+    const fetchDetail = async (reportId: number, isSilent = false) => {
         try {
-            setLoading(true);
-            const res = await reportService.getOne(reportId);
 
-            // Handle Data Wrapper
+            if (!isSilent) {
+                setLoading(true);
+            }
+
+            const res = await reportService.getOne(reportId);
             const responseData = (res as any).data || res;
             const currentReport = responseData as unknown as ReportDetail;
 
             setData(currentReport);
 
             const submissionId = (currentReport as any).context?.submissionId || (currentReport as any).submissionId;
-
             if (submissionId) {
                 fetchHistory(submissionId);
             }
 
         } catch (error) {
             console.error(error);
-            toast.fire({ icon: 'error', title: 'ไม่สามารถโหลดข้อมูลรายงานได้' });
-            navigate(-1);
+            if (!isSilent) {
+                toast.fire({ icon: 'error', title: 'ไม่สามารถโหลดข้อมูลรายงานได้' });
+                navigate(-1);
+            }
         } finally {
-            setLoading(false);
+            if (!isSilent) {
+                setLoading(false);
+            }
         }
     };
 
@@ -125,7 +130,12 @@ export const ReportDetailPage = () => {
 
                 {/* === Left Column === */}
                 <div className="flex-1 space-y-6">
-                    <ReportHeaderCard data={data} />
+                    <ReportHeaderCard
+                        data={data}
+                        onStatusUpdate={() => {
+                            if (id) fetchDetail(Number(id));
+                        }}
+                    />
 
                     {data.file ? (
                         <SubmissionFileCard
@@ -138,6 +148,9 @@ export const ReportDetailPage = () => {
                             mimeType={safeMimeType}
                             csv={data.csv}
                             originalFile={data.originalFile}
+                            onReportUpdate={() => {
+                                if (id) fetchDetail(Number(id), true);
+                            }}
                         />
                     ) : (
                         <div className="p-6 rounded-2xl bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 flex items-center gap-3 text-red-600 dark:text-red-400">

@@ -1,6 +1,6 @@
 // src/services/report.service.ts
 import { api } from './api';
-import { ReportData, ReportFilterParams, StudentReportData } from '../types/report';
+import { ReportData, ReportFilterParams, StudentReportData, VerificationStatus } from '../types/report';
 
 // Interface สำหรับ Response (Data + Meta)
 export interface ReportResponse {
@@ -36,7 +36,7 @@ export const reportService = {
   getBySubmissionId: async (submissionId: number): Promise<ReportData[]> => {
     return api.get<ReportData[]>(`/report-file/submission/${submissionId}`);
   },
-  
+
 
   /**
    * อาจารย์กดตรวจสอบ/ให้ผลลัพธ์ (Review)
@@ -52,5 +52,13 @@ export const reportService = {
    */
   getForStudent: async (submissionId: number): Promise<StudentReportData[]> => {
     return api.get<StudentReportData[]>(`/report-file/submission/${submissionId}/student`);
+  },
+
+  /**
+   * อัปเดตสถานะการตรวจสอบอัตโนมัติ (Verification Status)
+   * PATCH /report-file/:id/verification-status
+   */
+  updateVerificationStatus: async (id: number, status: VerificationStatus) => {
+    return api.patch(`/report-file/${id}/verification-status`, { status });
   },
 };

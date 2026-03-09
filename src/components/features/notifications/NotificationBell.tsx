@@ -57,9 +57,19 @@ export const NotificationBell = () => {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 md:w-96 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 z-[60] overflow-hidden animate-fade-in-down">
-
-          <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50/50 dark:bg-gray-800">
+        <div 
+          className="
+            absolute right-0 mt-2 
+            w-[320px] md:w-96 
+            bg-white dark:bg-[#1a202c]
+            rounded-xl shadow-2xl 
+            border border-gray-200 dark:border-gray-600 
+            z-[50] 
+            overflow-hidden animate-fade-in-down
+          "
+        >
+          {/* Header ของ Dropdown */}
+          <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-800">
             <h3 className="font-semibold text-gray-800 dark:text-white">Notifications</h3>
             {unreadCount > 0 && (
               <button
@@ -71,7 +81,7 @@ export const NotificationBell = () => {
             )}
           </div>
 
-          <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
+          <div className="max-h-[400px] overflow-y-auto custom-scrollbar relative z-[10000]">
             {notifications.length === 0 ? (
               <div className="p-8 text-center text-gray-500 dark:text-gray-400 flex flex-col items-center">
                 <FiBell size={32} className="mb-2 opacity-20" />
@@ -88,9 +98,9 @@ export const NotificationBell = () => {
             )}
           </div>
 
-          <div className="p-2 border-t border-gray-100 dark:border-gray-700 text-center">
+          <div className="p-2 border-t border-gray-100 dark:border-gray-700 text-center bg-white dark:bg-[#1a202c]">
             <button
-              className="text-xs text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition-colors w-full py-1"
+              className="text-xs text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition-colors w-full py-2"
               onClick={handleViewAll}
             >
               View all notifications

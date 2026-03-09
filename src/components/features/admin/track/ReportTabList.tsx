@@ -7,6 +7,7 @@ import { FiFileText, FiEye, FiDownload, FiX, FiClock, FiActivity, FiLayers } fro
 import { FaFilePdf, FaFileCsv } from 'react-icons/fa6';
 import { ThesisValidator } from '@/components/shared/thesis-validator/ThesisValidator';
 import { PdfPreviewModal } from '@/components/shared/pdf-preview/PdfPreviewModal';
+import { Pagination } from './Pagination';
 
 interface Props {
     filters: TrackThesisFilterParams;
@@ -21,34 +22,27 @@ export const ReportTabList: React.FC<Props> = ({ filters, activeTab, selectedRep
     const [reports, setReports] = useState<ReportData[]>([]);
     const [loading, setLoading] = useState(false);
 
+    // --- Client-Side Pagination States ---
+    const [page, setPage] = useState(1);
+    const limit = 10; 
+
     const [previewFile, setPreviewFile] = useState<ReportData | null>(null);
     const [previewMode, setPreviewMode] = useState<PreviewMode>('PDF');
 
-    // 1. จัดกลุ่ม Reports ตาม Submission ID
-    const groupedReports = useMemo(() => {
-        const groups: Record<number, ReportData[]> = {};
-        reports.forEach(report => {
-            const subId = report.context.submissionId;
-            if (!groups[subId]) groups[subId] = [];
-            groups[subId].push(report);
-        });
+    // รีเซ็ตหน้าเมื่อเปลี่ยน Filter
+    useEffect(() => {
+        setPage(1);
+    }, [filters]);
 
-        // เรียงลำดับแต่ละกลุ่มตามวันที่ (เก่าไปใหม่) เพื่อทำ Timeline
-        Object.values(groups).forEach(list => {
-            list.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-        });
-
-        return groups;
-    }, [reports]);
-
+    // ดึงข้อมูล "ทั้งหมด" มาจาก Backend (ตั้ง limit: 1000)
     useEffect(() => {
         const fetchReports = async () => {
             if (activeTab !== 'reports') return;
             try {
                 setLoading(true);
                 const params: ReportFilterParams = {
-                    page: 1,
-                    limit: 100,
+                    page: 1,     
+                    limit: 1000,  
                     inspectionId: filters.inspectionId,
                     search: filters.search,
                     academicYear: filters.academicYear,
@@ -56,10 +50,12 @@ export const ReportTabList: React.FC<Props> = ({ filters, activeTab, selectedRep
                     round: filters.roundNumber,
                     courseType: filters.courseType === 'ALL' ? undefined : filters.courseType,
                     verificationStatus: filters.verificationStatus as VerificationStatus,
+                    sortOrder: filters.sortOrder, 
                 };
 
                 const res = await reportService.getAll(params);
                 setReports(res.data || []);
+
             } catch (err) {
                 console.error("Failed to load reports:", err);
             } finally {
@@ -71,20 +67,51 @@ export const ReportTabList: React.FC<Props> = ({ filters, activeTab, selectedRep
         return () => clearTimeout(timer);
     }, [filters, activeTab]);
 
-    const formatSize = (bytes: number) => {
-        if (!bytes) return '0 Bytes';
-        const k = 1024;
-        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-    };
+    // 🟢 Logic หลัก: จัดกลุ่ม -> เรียงลำดับกลุ่ม -> หั่นแบ่งหน้า
+    const { paginatedGroups, totalItems, totalPages } = useMemo(() => {
+        // 1. จัดกลุ่ม Reports ตาม Submission ID
+        const groups: Record<number, ReportData[]> = {};
+        reports.forEach(report => {
+            const subId = report.context.submissionId;
+            if (!groups[subId]) groups[subId] = [];
+            groups[subId].push(report);
+        });
+
+        // 2. แปลงเป็น Array เพื่อให้เรียงลำดับ (Sort) ได้
+        let groupArray = Object.entries(groups).map(([subId, attempts]) => {
+            // เรียง Attempt ภายในกลุ่ม (เก่า -> ใหม่ เสมอ เพื่อให้ปุ่ม 1, 2, 3 เรียงถูกต้อง)
+            attempts.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+            
+            return {
+                subId: Number(subId),
+                attempts,
+                // หาวันที่ของ Attempt ล่าสุด เพื่อเอาไว้ใช้ Sort ตัวการ์ด
+                latestDate: new Date(attempts[attempts.length - 1].createdAt).getTime()
+            };
+        });
+
+        // 3. จัดเรียง "ตัวการ์ด (กลุ่ม)" ตามที่ User เลือก (ล่าสุด หรือ เก่าสุด)
+        groupArray.sort((a, b) => {
+            return filters.sortOrder === 'ASC' 
+                ? a.latestDate - b.latestDate 
+                : b.latestDate - a.latestDate;
+        });
+
+        // 4. หั่นข้อมูล (Slice) ตามหน้าที่กำลังเปิดอยู่
+        const total = groupArray.length; // จำนวน "กลุ่ม" ทั้งหมด
+        const paginated = groupArray.slice((page - 1) * limit, page * limit);
+
+        return {
+            paginatedGroups: paginated,
+            totalItems: total,
+            totalPages: Math.ceil(total / limit) || 1
+        };
+    }, [reports, filters.sortOrder, page]); // คำนวณใหม่เมื่อข้อมูลเปลี่ยน, การเรียงเปลี่ยน หรือเปลี่ยนหน้า
 
     const displayRoundInfo = useMemo(() => {
-        // กรณีใช้ Custom Filter
         if (filters.academicYear && filters.term) {
             return `ประจำรอบ: ปี ${filters.academicYear}/${filters.term} รอบที่ ${filters.roundNumber || '-'}`;
         }
-        // กรณีใช้ Active Round หรือดึงจากข้อมูลที่มีอยู่
         if (reports.length > 0 && reports[0].inspectionRound) {
             const r = reports[0].inspectionRound;
             return `ประจำรอบ: ปี ${r.year}/${r.term} รอบที่ ${r.roundNumber}`;
@@ -94,17 +121,15 @@ export const ReportTabList: React.FC<Props> = ({ filters, activeTab, selectedRep
 
     if (loading) return <div className="p-12 text-center text-slate-500 animate-pulse">กำลังโหลดข้อมูล...</div>;
 
-    const submissionIds = Object.keys(groupedReports).map(Number);
-
     return (
         <div className="space-y-6">
-            {submissionIds.length > 0 && (
+            {totalItems > 0 && (
                 <div className="flex flex-col sm:flex-row justify-between items-end sm:items-center gap-3 mb-4 px-1 transition-colors duration-200">
                     <div className="w-full sm:w-auto">
                         <h3 className="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
-                            ระบบตรวจแล้วจำนวน
+                            ระบบตรวจแล้วทั้งหมด
                             <span className="text-blue-600 dark:text-blue-600 text-2xl mx-1">
-                                {submissionIds.length}
+                                {totalItems}
                             </span>
                             กลุ่ม
                         </h3>
@@ -117,16 +142,16 @@ export const ReportTabList: React.FC<Props> = ({ filters, activeTab, selectedRep
                     )}
                 </div>
             )}
-            {submissionIds.length === 0 ? (
+
+            {totalItems === 0 ? (
                 <div className="text-center py-16 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700">
                     <FiFileText className="mx-auto h-12 w-12 text-slate-400 mb-3" />
                     <p className="text-slate-500 font-medium">ไม่พบรายการผลการตรวจ</p>
                 </div>
             ) : (
                 <div className="grid gap-6">
-                    {submissionIds.map((subId) => {
-                        const attempts = groupedReports[subId];
-                        // เลือก Report ตัวที่จะแสดง: ตามที่คลิกเลือกไว้ หรือถ้าไม่มีให้เอาตัวล่าสุด (ตัวสุดท้ายของ Array)
+                    {/* 🟢 ใช้ paginatedGroups ในการลูปแสดงการ์ดแทน */}
+                    {paginatedGroups.map(({ subId, attempts }) => {
                         const activeReportId = selectedReportMap[subId] || attempts[attempts.length - 1].id;
                         const activeReport = attempts.find(r => r.id === activeReportId) || attempts[attempts.length - 1];
 
@@ -176,13 +201,13 @@ export const ReportTabList: React.FC<Props> = ({ filters, activeTab, selectedRep
                                             <FiLayers /> Attempts:
                                         </span>
                                         <div className="flex items-center gap-2">
-                                            {attempts.map((attempt, idx) => (
+                                            {attempts.map((attempt) => (
                                                 <button
                                                     key={attempt.id}
                                                     onClick={() => setSelectedReportMap(prev => ({ ...prev, [subId]: attempt.id }))}
                                                     className={`w-8 h-8 rounded-full text-xs font-bold transition-all flex items-center justify-center border-2 ${activeReportId === attempt.id
                                                         ? 'bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-200 scale-110'
-                                                        : 'bg-white border-slate-200 text-slate-400 hover:border-blue-300 hover:text-blue-500'
+                                                        : 'bg-white border-slate-200 text-slate-400 hover:border-blue-300 hover:text-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:hover:border-blue-500'
                                                         }`}
                                                 >
                                                     {attempt.attemptNumber}
@@ -234,9 +259,7 @@ export const ReportTabList: React.FC<Props> = ({ filters, activeTab, selectedRep
 
                                             <a
                                                 href={activeReport.file.downloadUrl}
-                                                className="p-2.5 bg-slate-100 text-slate-600 rounded-lg hover:bg-slate-200 transition-colors
-               dark:bg-slate-700 dark:text-slate-300 
-               dark:hover:bg-slate-100 dark:hover:text-black"
+                                                className="p-2.5 bg-slate-100 text-slate-600 rounded-lg hover:bg-slate-200 transition-colors dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-100 dark:hover:text-black"
                                                 title="Download Report"
                                             >
                                                 <FiDownload size={18} />
@@ -244,7 +267,7 @@ export const ReportTabList: React.FC<Props> = ({ filters, activeTab, selectedRep
                                         </div>
                                     </div>
 
-                                    {/* Comments (Optional - show if exists) */}
+                                    {/* Comments (Optional) */}
                                     {activeReport.comment && (
                                         <div className="mt-4 p-3 bg-amber-50/50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/30 rounded-lg">
                                             <p className="text-[10px] font-bold text-amber-700 dark:text-amber-500 uppercase mb-1">Instructor Comment:</p>
@@ -257,6 +280,14 @@ export const ReportTabList: React.FC<Props> = ({ filters, activeTab, selectedRep
                     })}
                 </div>
             )}
+
+            <Pagination
+                currentPage={page}
+                totalPages={totalPages}
+                totalItems={totalItems}
+                limit={limit}
+                onPageChange={setPage}
+            />
 
             {/* Modal Previews */}
             {previewFile && (

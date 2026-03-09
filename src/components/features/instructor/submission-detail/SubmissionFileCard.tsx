@@ -20,6 +20,7 @@ interface Props {
     url: string;
     downloadUrl: string;
   } | null;
+  onReportUpdate?: () => void;
 }
 
 export const SubmissionFileCard: React.FC<Props> = ({
@@ -31,7 +32,8 @@ export const SubmissionFileCard: React.FC<Props> = ({
   downloadUrl,
   mimeType,
   csv,
-  originalFile
+  originalFile,
+  onReportUpdate
 }) => {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isValidatorOpen, setIsValidatorOpen] = useState(false);
@@ -156,6 +158,11 @@ export const SubmissionFileCard: React.FC<Props> = ({
               csvUrl={csv.url}
               fileName={originalFile?.name || fileName}
               onClose={() => setIsValidatorOpen(false)}
+              onSaveSuccess={() => {
+                if (onReportUpdate) {
+                  onReportUpdate(); 
+                }
+              }}
             />
           </div>
         </div>

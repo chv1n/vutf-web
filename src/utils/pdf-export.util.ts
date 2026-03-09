@@ -70,8 +70,16 @@ export const generateAnnotatedPdf = async (pdfUrl: string, fileName: string, iss
     const link = document.createElement('a');
     link.href = url;
     link.download = `annotated_${fileName}`;
+    link.target = '_blank'; // ช่วยในบางเบราว์เซอร์
+    link.rel = 'noopener noreferrer';
+    
+    // ต้อง append ลง body ก่อนสั่ง click เสมอ
     document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+
+    // หน่วงเวลาก่อนเอาออกและลบ URL เพื่อให้ระบบดาวน์โหลดในมือถือทำงานทัน
+    setTimeout(() => {
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    }, 2000);
 };
