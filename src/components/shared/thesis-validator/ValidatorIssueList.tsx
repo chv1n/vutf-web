@@ -37,7 +37,8 @@ export const ValidatorIssueList: React.FC<Props> = ({
   return (
     <>
       {/* Issue List Header */}
-      <div className="px-6 py-4 bg-slate-50/50 dark:bg-gray-800/50 border-b border-slate-100 dark:border-gray-700 flex justify-between items-center sticky top-0 z-10">
+      {/* ลด Padding บนมือถือ */}
+      <div className="px-4 py-3 md:px-6 md:py-4 bg-slate-50/50 dark:bg-gray-800/50 border-b border-slate-100 dark:border-gray-700 flex justify-between items-center sticky top-0 z-10 shrink-0">
         <div>
           <h3 className="text-sm font-bold text-slate-800 dark:text-gray-200">Page {pageNumber}</h3>
           <span className="text-[10px] text-slate-400 dark:text-gray-500">
@@ -48,7 +49,7 @@ export const ValidatorIssueList: React.FC<Props> = ({
         {currentPageIssues.length > 0 && !isReadOnly && (
           <button
             onClick={handleTogglePageIgnore}
-            className={`text-[10px] font-bold px-3 py-1.5 rounded-full border transition-all flex items-center gap-1.5
+            className={`text-[9px] md:text-[10px] font-bold px-2.5 md:px-3 py-1 md:py-1.5 rounded-full border transition-all flex items-center gap-1 md:gap-1.5
                         ${
                           currentPageIssues.every((i) => i.isIgnored)
                             ? "bg-slate-200 dark:bg-gray-700 text-slate-500 dark:text-gray-400 border-slate-300 dark:border-gray-600 hover:bg-slate-300 dark:hover:bg-gray-600"
@@ -70,16 +71,17 @@ export const ValidatorIssueList: React.FC<Props> = ({
       </div>
 
       {/* Issue List Content */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50/30 dark:bg-gray-900/30 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-gray-700">
+      <div className="flex-1 overflow-y-auto p-3 md:p-4 space-y-2 md:space-y-3 bg-slate-50/30 dark:bg-gray-900/30 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-gray-700">
         {currentPageIssues.length === 0 ? (
-          <div className="h-full flex flex-col items-center justify-center text-slate-300 dark:text-gray-600 gap-4">
-            <div className="w-16 h-16 bg-slate-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
+          <div className="h-full flex flex-col items-center justify-center text-slate-300 dark:text-gray-600 gap-3 md:gap-4 pb-4">
+            {/* ย่อขนาดไอคอนบนมือถือ */}
+            <div className="w-12 h-12 md:w-16 md:h-16 bg-slate-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
               <FontAwesomeIcon
                 icon={faMagnifyingGlass}
-                className="text-2xl text-slate-200 dark:text-gray-600"
+                className="text-xl md:text-2xl text-slate-200 dark:text-gray-600"
               />
             </div>
-            <span className="text-xs font-medium">
+            <span className="text-[11px] md:text-xs font-medium">
               No issues found on this page
             </span>
           </div>
@@ -88,7 +90,8 @@ export const ValidatorIssueList: React.FC<Props> = ({
             <div
               key={issue.id}
               onClick={() => !isReadOnly && toggleIssueStatus(issue.id)}
-              className={`group p-4 rounded-xl border transition-all duration-200 relative select-none
+              // ลด Padding ภายในการ์ดบนมือถือ
+              className={`group p-3 md:p-4 rounded-xl border transition-all duration-200 relative select-none
                             ${
                               issue.isIgnored
                                 ? "bg-slate-50 dark:bg-gray-800 border-slate-200 dark:border-gray-700 opacity-60"
@@ -97,9 +100,9 @@ export const ValidatorIssueList: React.FC<Props> = ({
                             ${isReadOnly ? "cursor-default" : "cursor-pointer hover:-translate-y-0.5"}
                         `}
             >
-              <div className="flex justify-between items-start mb-2">
+              <div className="flex justify-between items-start mb-1.5 md:mb-2">
                 <span
-                  className={`font-bold tracking-wider px-2 py-0.5 rounded text-[9px] uppercase border
+                  className={`font-bold tracking-wider px-2 py-0.5 rounded text-[8px] md:text-[9px] uppercase border
                                 ${
                                   issue.severity === "error"
                                     ? "bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 border-rose-100 dark:border-rose-800"
@@ -110,14 +113,14 @@ export const ValidatorIssueList: React.FC<Props> = ({
                   {issue.code}
                 </span>
                 {issue.isIgnored && (
-                  <span className="text-blue-500 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/50 p-1 rounded-full w-5 h-5 flex items-center justify-center">
+                  <span className="text-blue-500 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/50 p-1 rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center">
                     <FontAwesomeIcon icon={faCheck} size="xs" />
                   </span>
                 )}
               </div>
 
               <p
-                className={`text-xs leading-relaxed ${
+                className={`text-[11px] md:text-xs leading-relaxed ${
                   issue.isIgnored
                     ? "text-slate-400 dark:text-gray-500 line-through decoration-slate-300 dark:decoration-gray-600"
                     : "text-slate-600 dark:text-gray-300"

@@ -2,17 +2,18 @@
 // Card แสดง submission file (Original หรือ Report)
 
 import React from 'react';
-import { 
-    FiFile, 
-    FiDownload, 
-    FiCalendar, 
-    FiUser, 
-    FiMessageSquare, 
+import {
+    FiFile,
+    FiDownload,
+    FiCalendar,
+    FiUser,
+    FiMessageSquare,
     FiEye,
     FiCheckCircle,
     FiXCircle,
     FiAlertCircle,
-    FiClock
+    FiClock,
+    FiLoader
 } from 'react-icons/fi';
 import { formatFileSize } from '@/types/submission';
 
@@ -30,13 +31,15 @@ interface SubmissionReviewCardProps {
     /** ชื่อผู้ตรวจ (สำหรับ Report) */
     reviewerName?: string;
     /** สถานะการตรวจ */
-    status?: string; 
+    status?: string;
     /** Callback เมื่อกด download */
     onDownload?: () => void;
     /** Callback เมื่อกด preview */
     onPreview?: () => void;
     /** Loading state */
-    loading?: boolean;
+    isPreviewLoading?: boolean;
+    isDownloadLoading?: boolean;
+    isDisabled?: boolean;
 }
 
 /**
@@ -53,7 +56,9 @@ export const SubmissionReviewCard: React.FC<SubmissionReviewCardProps> = ({
     status,
     onDownload,
     onPreview,
-    loading = false,
+    isPreviewLoading = false,
+    isDownloadLoading = false,
+    isDisabled = false,
 }) => {
     const isOriginal = type === 'original';
     const title = isOriginal ? 'Original' : 'Report';
@@ -158,37 +163,37 @@ export const SubmissionReviewCard: React.FC<SubmissionReviewCardProps> = ({
 
                 {/* Actions: Mobile=Row, Desktop=Col */}
                 <div className="flex flex-row sm:flex-col gap-2 shrink-0 w-full sm:w-auto">
-                    {/* ปุ่ม Preview */}
+                    {/* 🌟 3. ปุ่ม Preview */}
                     <button
                         type="button"
                         onClick={onPreview}
-                        disabled={loading}
+                        disabled={isDisabled || isPreviewLoading || isDownloadLoading}
                         className={`
-            flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium 
-            rounded-lg transition-colors border w-full
-            ${isOriginal
+                            flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium 
+                            rounded-lg transition-colors border w-full
+                            ${isOriginal
                                 ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 border-blue-100 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/40'
                                 : 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/40'
                             }
-            disabled:opacity-50 disabled:cursor-not-allowed
-        `}
+                            disabled:opacity-50 disabled:cursor-not-allowed
+                        `}
                     >
-                        <FiEye className="w-3.5 h-3.5" />
-                        <span className="hidden sm:inline">Preview</span>
+                        {isPreviewLoading ? <FiLoader className="w-3.5 h-3.5 animate-spin" /> : <FiEye className="w-3.5 h-3.5" />}
+                        <span className="hidden sm:inline">{isPreviewLoading ? 'กำลังโหลด...' : 'Preview'}</span>
                     </button>
 
-                    {/* ปุ่ม Download */}
+                    {/* 🌟 4. ปุ่ม Download */}
                     <button
                         type="button"
                         onClick={onDownload}
-                        disabled={loading}
+                        disabled={isDisabled || isPreviewLoading || isDownloadLoading}
                         className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300
-            bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 
-            border border-transparent rounded-lg transition-colors w-full
-            disabled:opacity-50 disabled:cursor-not-allowed"
+                            bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 
+                            border border-transparent rounded-lg transition-colors w-full
+                            disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        <FiDownload className="w-3.5 h-3.5" />
-                        <span className="hidden sm:inline">Download</span>
+                        {isDownloadLoading ? <FiLoader className="w-3.5 h-3.5 animate-spin" /> : <FiDownload className="w-3.5 h-3.5" />}
+                        <span className="hidden sm:inline">{isDownloadLoading ? 'กำลังโหลด...' : 'Download'}</span>
                     </button>
                 </div>
             </div>

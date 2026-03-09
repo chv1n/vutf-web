@@ -1,14 +1,32 @@
 // src/components/features/instructor/report-detail/ReportHeaderCard.tsx
-import React from 'react';
-import { FiClock, FiCalendar, FiTag, FiCheckCircle } from 'react-icons/fi';
+import React, { useState, useRef, useEffect } from 'react';
+import { FiClock, FiCalendar, FiTag, FiCheckCircle, FiChevronDown, FiCheck } from 'react-icons/fi';
 import { ReportDetail } from '@/types/report-detail';
+import { VerificationStatus } from '@/types/report';
 import { ReportStatusBadge } from '../report/ReportStatusBadge';
+import { reportService } from '@/services/report.service';
 
 interface Props {
     data: ReportDetail;
+    onStatusUpdate?: () => void; // เพิ่ม Prop เพื่อให้ Parent Component สั่ง Refetch ข้อมูลใหม่เมื่ออัปเดตเสร็จ
 }
 
-export const ReportHeaderCard: React.FC<Props> = ({ data }) => {
+export const ReportHeaderCard: React.FC<Props> = ({ data, onStatusUpdate }) => {
+    // State สำหรับจัดการ Dropdown
+    const [showDropdown, setShowDropdown] = useState(false);
+    const [isUpdating, setIsUpdating] = useState(false);
+    const dropdownRef = useRef<HTMLDivElement>(null);
+
+    // ปิด Dropdown เมื่อคลิกพื้นที่อื่น
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setShowDropdown(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     // Helper: จัดรูปแบบวันที่
     const formatDate = (dateString?: string) => {
@@ -18,7 +36,30 @@ export const ReportHeaderCard: React.FC<Props> = ({ data }) => {
         });
     };
 
-    // Helper: ดึง courseType
+    // Helper: จัดการเมื่อเลือกสถานะใหม่
+    const handleStatusChange = async (newStatus: VerificationStatus) => {
+        if (newStatus === data.verificationStatus) {
+            setShowDropdown(false);
+            return;
+        }
+
+        try {
+            setIsUpdating(true);
+            await reportService.updateVerificationStatus(data.id, newStatus);
+            setShowDropdown(false);
+
+            // เรียกฟังก์ชันรีเฟรชข้อมูลหน้าเว็บจาก Component แม่
+            if (onStatusUpdate) {
+                onStatusUpdate();
+            }
+        } catch (error) {
+            console.error('Failed to update verification status:', error);
+            alert('เกิดข้อผิดพลาดในการอัปเดตสถานะ'); // สามารถเปลี่ยนเป็น Toast Notification ได้
+        } finally {
+            setIsUpdating(false);
+        }
+    };
+
     const courseType = data.courseType;
 
     return (
@@ -27,7 +68,6 @@ export const ReportHeaderCard: React.FC<Props> = ({ data }) => {
             <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 dark:bg-blue-900/20 rounded-bl-full opacity-50" />
 
             <div className="relative z-10">
-
                 {/* Top Row: Tags & Status */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                     {/* Left: Project Code & Course Type */}
@@ -48,7 +88,70 @@ export const ReportHeaderCard: React.FC<Props> = ({ data }) => {
 
                     {/* Right: Status Badges */}
                     <div className="flex items-center gap-3">
-                        <ReportStatusBadge type="verification" status={data.verificationStatus} />
+
+                        {/* 🌟 ส่วนที่แก้ไข: Interactive Verification Status Dropdown */}
+                        <div className="relative" ref={dropdownRef}>
+                            <button
+                                onClick={() => setShowDropdown(!showDropdown)}
+                                disabled={isUpdating}
+                                className={`flex items-center gap-1 hover:opacity-80 transition-opacity rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 ${isUpdating ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                title="คลิกเพื่อเปลี่ยนสถานะระบบตรวจสอบ"
+                            >
+                                <ReportStatusBadge type="verification" status={data.verificationStatus} />
+                                <FiChevronDown className={`text-gray-400 transition-transform ${showDropdown ? 'rotate-180' : ''}`} />
+                            </button>
+
+                            {/* Dropdown Menu */}
+                            {showDropdown && (
+                                <div className="absolute top-full right-0 mt-2 w-56 bg-white dark:bg-[#1E2330] rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 z-50">
+                                    <div className="px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-700">
+                                        แก้ไขสถานะจากระบบ
+                                    </div>
+                                    <div className="p-2 space-y-1">
+                                        {(['PASS', 'FAIL', 'ERROR'] as VerificationStatus[]).map((status) => {
+                                            const isSelected = data.verificationStatus === status;
+
+                                            // กำหนดสีของจุด (Dot) และข้อความ
+                                            let dotColor = '';
+                                            let label = '';
+                                            if (status === 'PASS') {
+                                                dotColor = 'bg-emerald-500'; // สีเขียว
+                                                label = 'ผ่านเกณฑ์ (PASS)';
+                                            } else if (status === 'FAIL') {
+                                                dotColor = 'bg-rose-500'; // สีแดง
+                                                label = 'ไม่ผ่านเกณฑ์ (FAIL)';
+                                            } else if (status === 'ERROR') {
+                                                dotColor = 'bg-amber-500'; // สีส้ม
+                                                label = 'ระบบขัดข้อง (ERROR)';
+                                            }
+
+                                            return (
+                                                <button
+                                                    key={status}
+                                                    onClick={() => handleStatusChange(status)}
+                                                    className={`w-full flex items-center justify-between px-3 py-2.5 text-sm rounded-lg transition-colors ${isSelected
+                                                            ? 'bg-blue-50 dark:bg-[#2A2F45] text-blue-700 dark:text-white font-medium'
+                                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
+                                                        }`}
+                                                >
+                                                    <div className="flex items-center gap-3">
+                                                        <span className={`w-2.5 h-2.5 rounded-full ${dotColor}`}></span>
+                                                        <span>{label}</span>
+                                                    </div>
+
+                                                    {/* แสดงเครื่องหมายถูกเฉพาะอันที่เลือก */}
+                                                    {isSelected && (
+                                                        <FiCheck className="text-blue-600 dark:text-indigo-400 text-lg" />
+                                                    )}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                        {/* 🌟 จบส่วนที่แก้ไข */}
+
                         <span className="text-gray-300 dark:text-gray-600 h-4 border-l border-gray-300 dark:border-gray-600 mx-1"></span>
                         <ReportStatusBadge type="review" status={data.reviewStatus} />
                     </div>
@@ -95,7 +198,7 @@ export const ReportHeaderCard: React.FC<Props> = ({ data }) => {
                                     <p className="text-xs font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wide mb-1 flex items-center gap-2">
                                         รอบการตรวจ: <span className="text-gray-900 dark:text-white normal-case text-sm truncate">{data.inspectionRound.title}</span>
                                     </p>
-                                    
+
                                     {/* startDate / endDate และ format วันที่ */}
                                     <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-gray-700 rounded-lg border border-purple-100 dark:border-purple-900/30 shadow-sm text-xs font-medium text-gray-600 dark:text-gray-300 mt-2">
                                         <FiCalendar className="text-purple-500 dark:text-purple-400" />

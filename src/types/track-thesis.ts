@@ -13,6 +13,7 @@ export interface TrackThesisFilterParams {
     limit?: number;
     verificationStatus?: string;
     submissionStatus?: string;
+    sortOrder?: 'DESC' | 'ASC' | string;
 }
 
 export interface MemberInfo {

@@ -14,6 +14,7 @@ import {
 } from 'react-icons/fi';
 import { FaFilePdf } from 'react-icons/fa6';
 import { PdfPreviewModal } from '@/components/shared/pdf-preview/PdfPreviewModal';
+import { Pagination } from './Pagination';
 
 interface Props {
   filters: TrackThesisFilterParams;
@@ -25,6 +26,11 @@ export const SubmittedList = ({ filters, activeTab }: Props) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+
   const [selectedFile, setSelectedFile] = useState<{
     url: string;
     downloadUrl: string;
@@ -32,6 +38,10 @@ export const SubmittedList = ({ filters, activeTab }: Props) => {
     type?: string;
     size?: number;
   } | null>(null);
+
+  useEffect(() => {
+    setPage(1);
+  }, [filters]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -44,15 +54,23 @@ export const SubmittedList = ({ filters, activeTab }: Props) => {
 
         const params = {
           ...filters,
-          status: filters.submissionStatus
+          status: filters.submissionStatus,
+          page,
+          limit
         };
 
         const res = await trackThesisService.getSubmittedGroups(params);
 
         if (res.success && Array.isArray(res.data)) {
           setData(res.data as any as SubmittedGroup[]);
+          if (res.meta) {
+            setTotalPages(res.meta.totalPages || 1);
+            setTotalItems(res.meta.totalItems || res.data.length);
+          }
         } else {
           setData([]);
+          setTotalItems(0);
+          setTotalPages(1);
         }
       } catch (err: any) {
         console.error(err);
@@ -65,7 +83,7 @@ export const SubmittedList = ({ filters, activeTab }: Props) => {
 
     const timer = setTimeout(fetchData, 500);
     return () => clearTimeout(timer);
-  }, [filters, activeTab]);
+  }, [filters, activeTab, page, limit]);
 
   const getFileType = (fileName: string) => {
     const ext = fileName.split('.').pop()?.toLowerCase();
@@ -118,7 +136,7 @@ export const SubmittedList = ({ filters, activeTab }: Props) => {
     <div className="space-y-4">
       <div className="px-1 flex justify-between items-end">
         <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200 flex items-center gap-2">
-          ส่งแล้วจำนวน <span className="text-green-600 text-2xl">{data.length}</span> กลุ่ม
+          ส่งแล้วทั้งหมด <span className="text-green-600 text-2xl">{totalItems}</span> กลุ่ม
         </h3>
         {data.length > 0 && (
           <p className="text-sm font-medium text-slate-500 dark:text-slate-400 bg-slate-100/50 dark:bg-slate-800/50 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm">
@@ -235,6 +253,14 @@ export const SubmittedList = ({ filters, activeTab }: Props) => {
           </div>
         ))}
       </div>
+
+      <Pagination
+        currentPage={page}
+        totalPages={totalPages}
+        totalItems={totalItems}
+        limit={limit}
+        onPageChange={setPage}
+      />
 
       {/* Modal Preview */}
       {selectedFile && selectedFile.type === 'pdf' && (

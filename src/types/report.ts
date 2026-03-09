@@ -93,6 +93,7 @@ export interface ReportFilterParams {
   courseType?: string;
   verificationStatus?: VerificationStatus;
   reviewStatus?: ReviewStatus;
+  sortOrder?: 'DESC' | 'ASC' | string;
 }
 
 export interface StudentReportData {

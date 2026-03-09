@@ -5,7 +5,7 @@ import { toast } from '@/utils/swal';
 import { ReportFilters } from '@/components/features/instructor/report/ReportFilters';
 import { ReportTable } from '@/components/features/instructor/report/ReportTable';
 import { InspectionRoundHeader, HeaderInfo } from '@/components/features/instructor/InspectionRoundHeader';
-import { ReportData, ReportFilterParams, ReviewStatus } from '@/types/report';
+import { ReportData, ReportFilterParams, ReviewStatus, VerificationStatus } from '@/types/report';
 import { reportService } from '@/services/report.service';
 
 export const ReportPage = () => {
@@ -55,6 +55,7 @@ export const ReportPage = () => {
         navigate(`/instructor/report/${report.id}`);
     };
 
+    // อัปเดต Review Status (สถานะการตรวจจากอาจารย์)
     const handleStatusChange = async (id: number, status: ReviewStatus) => {
         try {
             await reportService.submitReview(id, { reviewStatus: status });
@@ -68,6 +69,24 @@ export const ReportPage = () => {
             toast.fire({
                 icon: 'error',
                 title: 'เกิดข้อผิดพลาดในการอัปเดต'
+            });
+        }
+    };
+
+    // อัปเดต Verification Status (สถานะจากระบบ)
+    const handleVerificationStatusChange = async (id: number, status: VerificationStatus) => {
+        try {
+            await reportService.updateVerificationStatus(id, status);
+            toast.fire({
+                icon: 'success',
+                title: 'แก้ไขสถานะจากระบบเรียบร้อยแล้ว'
+            });
+            fetchReports(); // Refresh data
+        } catch (error) {
+            console.error(error);
+            toast.fire({
+                icon: 'error',
+                title: 'เกิดข้อผิดพลาดในการแก้ไขสถานะระบบ'
             });
         }
     };
@@ -134,6 +153,7 @@ export const ReportPage = () => {
                 isLoading={loading}
                 onReview={handleReview}
                 onStatusChange={handleStatusChange}
+                onVerificationStatusChange={handleVerificationStatusChange}
                 meta={meta}
                 onPageChange={(p) => setFilters(prev => ({ ...prev, page: p }))}
                 onRefresh={fetchReports}

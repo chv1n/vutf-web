@@ -1,9 +1,10 @@
 // src/components/features/admin/track/UnsubmittedList.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { UnsubmittedGroup, TrackThesisFilterParams } from '@/types/track-thesis';
 import { FiMail, FiAlertCircle, FiUser, FiCalendar, FiRefreshCw } from 'react-icons/fi';
 import { trackThesisService } from '@/services/track-thesis.service';
 import { toast } from 'react-hot-toast';
+import { Pagination } from './Pagination';
 
 interface Props {
   data: UnsubmittedGroup[];
@@ -14,6 +15,17 @@ interface Props {
 
 export const UnsubmittedList = ({ data, loading, error, filters }: Props) => {
   const [sendingId, setSendingId] = useState<string | null>(null);
+
+  const [page, setPage] = useState(1);
+  const limit = 10;
+
+  useEffect(() => {
+    setPage(1);
+  }, [data]);
+
+  const totalItems = data?.length || 0;
+  const totalPages = Math.ceil(totalItems / limit);
+  const paginatedData = data?.slice((page - 1) * limit, page * limit) || [];
 
   const handleSendReminder = async (groupId: string) => {
     const groupData = data.find(g => g.groupId === groupId);
@@ -81,7 +93,7 @@ export const UnsubmittedList = ({ data, loading, error, filters }: Props) => {
       </div>
 
       <div className="grid gap-4">
-        {data.map((group) => (
+        {paginatedData.map((group) => (
           <div key={group.groupId} className="bg-white dark:bg-slate-800 p-5 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 hover:border-red-300 dark:hover:border-red-700 transition-all group relative overflow-hidden">
             <div className="absolute top-0 left-0 w-1.5 h-full bg-red-500" />
 
@@ -138,6 +150,14 @@ export const UnsubmittedList = ({ data, loading, error, filters }: Props) => {
           </div>
         ))}
       </div>
+
+      <Pagination
+        currentPage={page}
+        totalPages={totalPages}
+        totalItems={totalItems}
+        limit={limit}
+        onPageChange={setPage}
+      />
     </div>
   );
 };

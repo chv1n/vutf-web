@@ -3,7 +3,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import {
   FiSearch, FiRefreshCw, FiCalendar, FiClock, FiLayers, FiChevronDown,
   FiFlag, FiFilter, FiList, FiCheckCircle, FiInfo, FiDownload,
-  FiGrid, FiFileText
+  FiGrid, FiFileText, FiMenu
 } from 'react-icons/fi';
 import { TrackThesisFilterParams, ActiveRoundOption } from '@/types/track-thesis';
 import { trackThesisService } from '@/services/track-thesis.service';
@@ -47,7 +47,7 @@ export const TrackFilter = ({ filters, setFilters, activeTab }: TrackFilterProps
         }
         setActiveRounds(options);
         if (options.length > 0 && !filters.inspectionId && !filters.roundNumber) {
-          setFilters(prev => ({ ...prev, inspectionId: options[0].id }));
+          setFilters(prev => ({ ...prev, inspectionId: options[0].id, sortOrder: prev.sortOrder || 'DESC' }));
         } else if (options.length === 0) {
           setMode('CUSTOM');
         }
@@ -99,7 +99,8 @@ export const TrackFilter = ({ filters, setFilters, activeTab }: TrackFilterProps
       page: 1,
       inspectionId: activeRounds.length > 0 ? activeRounds[0].id : undefined,
       verificationStatus: undefined,
-      submissionStatus: undefined
+      submissionStatus: undefined,
+      sortOrder: 'DESC'
     });
     setMode(activeRounds.length > 0 ? 'ACTIVE' : 'CUSTOM');
   };
@@ -356,6 +357,10 @@ export const TrackFilter = ({ filters, setFilters, activeTab }: TrackFilterProps
               <option value="COMPLETED" className="dark:bg-slate-800">ตรวจเสร็จแล้ว</option>
             </FilterSelect>
           )}
+          <FilterSelect icon={FiMenu} name="sortOrder" value={filters.sortOrder || 'DESC'} onChange={handleChange} width="w-full sm:w-36" label="เรียงตาม">
+            <option value="DESC" className="dark:bg-slate-800">อัปเดตล่าสุด</option>
+            <option value="ASC" className="dark:bg-slate-800">เก่าสุด</option>
+          </FilterSelect>
         </div>
 
         {/* Reset Button */}

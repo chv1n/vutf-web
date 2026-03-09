@@ -55,6 +55,8 @@ const ThesisReportPage: React.FC = () => {
 
     const [isLoadingGroups, setIsLoadingGroups] = useState(true);
     const [isLoadingSubmissions, setIsLoadingSubmissions] = useState(false);
+    const [isGeneratingReport, setIsGeneratingReport] = useState(false);
+    const [loadingAction, setLoadingAction] = useState<string | null>(null);
 
     // State สำหรับ Preview Modal
     const [previewFile, setPreviewFile] = useState<{
@@ -177,13 +179,16 @@ const ThesisReportPage: React.FC = () => {
      */
     const handleDownloadOriginal = async (submissionId: number) => {
         try {
-            // เรียกใช้ API เพื่อขอ URL ใหม่ (downloadUrl)
+            setLoadingAction(`download_original_${submissionId}`);
             const res = await submissionService.getFileUrl(submissionId);
             const targetUrl = res.downloadUrl || res.url;
             downloadFile(targetUrl);
+            await new Promise(resolve => setTimeout(resolve, 800)); // หน่วงเวลา UI
         } catch (error) {
             console.error('Error getting download URL:', error);
             alert('ไม่สามารถดาวน์โหลดไฟล์ได้');
+        } finally {
+            setLoadingAction(null);
         }
     };
 
@@ -193,15 +198,17 @@ const ThesisReportPage: React.FC = () => {
      */
     const handleDownloadReport = async (report: StudentReportData, submissionId: number) => {
         try {
-            // 1. ดึงข้อมูล URL ไฟล์ต้นฉบับ
+            // เซ็ต Action Name
+            setLoadingAction(`download_report_${submissionId}`);
+            setIsGeneratingReport(true);
+            const startTime = Date.now();
+
             const originalFileRes = await submissionService.getFileUrl(submissionId);
 
-            // 2. ดึงและ Parse CSV เพื่อแปลงเป็น Issue[]
             if (!report.urls.csv?.url) throw new Error("ไม่พบข้อมูลพิกัด (CSV)");
             const csvText = await fetch(report.urls.csv.url).then(res => res.text());
             const parsedResults = Papa.parse(csvText, { header: false, skipEmptyLines: true });
 
-            // แปลงข้อมูลแถว CSV ให้กลายเป็น Object รูปแบบ Issue
             const mappedIssues: Issue[] = parsedResults.data.slice(1).map((row: any, index: number) => {
                 let bbox = null;
                 try {
@@ -220,12 +227,19 @@ const ThesisReportPage: React.FC = () => {
                 };
             });
 
-            // 3. เรียกใช้ Utility ฟังก์ชันเดียวกับปุ่ม Export ของอาจารย์
             await generateAnnotatedPdf(originalFileRes.url, report.file_name, mappedIssues);
+
+            const duration = Date.now() - startTime;
+            if (duration < 1500) {
+                await new Promise(resolve => setTimeout(resolve, 1500 - duration));
+            }
 
         } catch (error) {
             console.error('Download Error:', error);
             alert('เกิดข้อผิดพลาดในการสร้างไฟล์รายงาน');
+        } finally {
+            setIsGeneratingReport(false);
+            setLoadingAction(null); // เคลียร์ Action
         }
     };
 
@@ -234,6 +248,7 @@ const ThesisReportPage: React.FC = () => {
      */
     const handlePreviewOriginal = async (submissionId: number, fileName: string, fileSize: number, mimeType?: string) => {
         try {
+            setLoadingAction(`preview_original_${submissionId}`);
             const res = await submissionService.getFileUrl(submissionId);
             setPreviewFile({
                 url: res.url,
@@ -246,6 +261,8 @@ const ThesisReportPage: React.FC = () => {
         } catch (error) {
             console.error('Error opening preview:', error);
             alert('ไม่สามารถเปิดไฟล์ได้');
+        } finally {
+            setLoadingAction(null);
         }
     };
 
@@ -254,6 +271,7 @@ const ThesisReportPage: React.FC = () => {
      */
     const handlePreviewReport = async (report: StudentReportData, submissionId: number) => {
         try {
+            setLoadingAction(`preview_report_${submissionId}`);
             const originalFileRes = await submissionService.getFileUrl(submissionId);
 
             setPreviewFile({
@@ -269,6 +287,8 @@ const ThesisReportPage: React.FC = () => {
         } catch (error) {
             console.error('Error fetching original file for report preview:', error);
             alert('ไม่สามารถดึงไฟล์ต้นฉบับเพื่อนำมาแสดงผลได้');
+        } finally {
+            setLoadingAction(null);
         }
     };
 
@@ -385,6 +405,8 @@ const ThesisReportPage: React.FC = () => {
                                     // ส่ง Report Data ไปให้ Component
                                     reportFile={report}
 
+                                    loadingAction={loadingAction}
+
                                     // Actions: Original File
                                     onDownloadOriginal={() => handleDownloadOriginal(submission.submissionId)}
                                     onPreviewOriginal={() => handlePreviewOriginal(submission.submissionId, submission.fileName, submission.fileSize, submission.mimeType)}
@@ -429,6 +451,19 @@ const ThesisReportPage: React.FC = () => {
                         </div>
                     )}
                 </>
+            )}
+
+            {/* Overlay สำหรับการ Generate Report */}
+            {isGeneratingReport && (
+                <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-xl flex flex-col items-center gap-4">
+                        <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+                        <div className="text-center">
+                            <p className="text-sm font-bold text-gray-800 dark:text-white">กำลังเตรียมไฟล์รายงาน...</p>
+                            <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-1">ระบบกำลังวาดตำแหน่งที่ต้องแก้ไขลงใน PDF</p>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );

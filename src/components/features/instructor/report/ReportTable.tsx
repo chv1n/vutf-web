@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FiDownload, FiEdit3, FiX, FiChevronDown, FiCheck, FiEye } from 'react-icons/fi';
 import { FaFilePdf, FaFileCsv, FaFile } from 'react-icons/fa6';
-import { ReportData, ReviewStatus } from '@/types/report';
+import { ReportData, ReviewStatus, VerificationStatus } from '@/types/report'; // เพิ่ม VerificationStatus
 import { ReportStatusBadge } from './ReportStatusBadge';
 import { Pagination } from '@/components/common/Pagination';
 import { ThesisValidator } from '@/components/shared/thesis-validator/ThesisValidator';
@@ -13,6 +13,7 @@ interface Props {
     isLoading: boolean;
     onReview: (report: ReportData) => void;
     onStatusChange?: (id: number, status: ReviewStatus) => void;
+    onVerificationStatusChange?: (id: number, status: VerificationStatus) => void; // เพิ่ม Prop นี้
     meta: { page: number; total: number; lastPage: number; limit: number };
     onPageChange: (newPage: number) => void;
     onRefresh?: () => void;
@@ -25,6 +26,7 @@ export const ReportTable: React.FC<Props> = ({
     isLoading,
     onReview,
     onStatusChange,
+    onVerificationStatusChange, // รับ Prop
     meta,
     onPageChange,
     onRefresh
@@ -32,13 +34,22 @@ export const ReportTable: React.FC<Props> = ({
     const [previewFile, setPreviewFile] = useState<ReportData | null>(null);
     const [previewMode, setPreviewMode] = useState<PreviewMode>('PDF');
 
+    // State สำหรับ Dropdown (Review Status)
     const [openDropdownId, setOpenDropdownId] = useState<number | null>(null);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
+    // State สำหรับ Dropdown (Verification Status)
+    const [openVerificationDropdownId, setOpenVerificationDropdownId] = useState<number | null>(null);
+    const verificationDropdownRef = useRef<HTMLDivElement>(null);
+
+    // Handle Click Outside สำหรับปิด Dropdown
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
                 setOpenDropdownId(null);
+            }
+            if (verificationDropdownRef.current && !verificationDropdownRef.current.contains(event.target as Node)) {
+                setOpenVerificationDropdownId(null);
             }
         };
         document.addEventListener('mousedown', handleClickOutside);
@@ -57,9 +68,13 @@ export const ReportTable: React.FC<Props> = ({
         setOpenDropdownId(null);
     };
 
+    const handleVerificationSelect = (id: number, status: VerificationStatus) => {
+        if (onVerificationStatusChange) onVerificationStatusChange(id, status);
+        setOpenVerificationDropdownId(null);
+    };
+
     const handlePreviewClick = async (e: React.MouseEvent, item: ReportData, type: 'MAIN' | 'CSV' = 'MAIN') => {
         e.stopPropagation();
-
         if (type === 'MAIN') {
             const fileType = getFileType(item.file.name);
             if (fileType === 'PDF') {
@@ -104,7 +119,6 @@ export const ReportTable: React.FC<Props> = ({
 
     return (
         <>
-            {/* แยกเงื่อนไขการโหลดมาครอบแค่ส่วนตาราง */}
             {isLoading && !previewFile ? (
                 <div className="p-12 text-center text-gray-500 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700">กำลังโหลดข้อมูลรายงาน...</div>
             ) : data.length === 0 ? (
@@ -166,7 +180,6 @@ export const ReportTable: React.FC<Props> = ({
                                                                     <span>Check Result</span>
                                                                     <FiEye size={10} className="ml-0.5 opacity-60" />
                                                                 </button>
-
                                                                 <a
                                                                     href={item.csv.downloadUrl}
                                                                     target="_blank"
@@ -195,12 +208,84 @@ export const ReportTable: React.FC<Props> = ({
                                                 </div>
                                             </td>
 
-                                            {/* 3. System Result */}
-                                            <td className="px-6 py-4 text-center">
-                                                <ReportStatusBadge type="verification" status={item.verificationStatus} />
+                                            {/* 3. System Result (Verification Status) */}
+                                            <td className="px-6 py-4 text-center relative">
+                                                <div className="relative inline-block text-left">
+                                                    <button
+                                                        type="button"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setOpenVerificationDropdownId(openVerificationDropdownId === item.id ? null : item.id);
+                                                            setOpenDropdownId(null); // ปิด Dropdown ของ Review Status หากเปิดอยู่
+                                                        }}
+                                                        className="group hover:scale-105 transition-all duration-200 cursor-pointer focus:outline-none rounded-full flex items-center justify-center mx-auto"
+                                                    >
+                                                        <div className="flex items-center gap-1">
+                                                            <ReportStatusBadge type="verification" status={item.verificationStatus} />
+                                                            <div className="w-5 h-5 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-400 group-hover:text-blue-500 group-hover:bg-blue-50 transition-colors">
+                                                                <FiChevronDown size={12} className={`transition-transform duration-200 ${openVerificationDropdownId === item.id ? 'rotate-180' : ''}`} />
+                                                            </div>
+                                                        </div>
+                                                    </button>
+
+                                                    {/* Verification Dropdown Menu */}
+                                                    {openVerificationDropdownId === item.id && (
+                                                        <div
+                                                            ref={verificationDropdownRef}
+                                                            className="absolute right-0 mt-2 w-56 rounded-xl shadow-xl bg-white dark:bg-[#1E2330] border border-gray-100 dark:border-gray-700 z-50 animate-in fade-in zoom-in-95 duration-200 origin-top-right overflow-hidden"
+                                                            style={{ top: '100%', left: '50%', transform: 'translateX(-50%)' }}
+                                                        >
+                                                            <div className="px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-700 text-left">
+                                                                แก้ไขสถานะจากระบบ
+                                                            </div>
+                                                            <div className="p-2 space-y-1 text-left">
+                                                                {(['PASS', 'FAIL', 'ERROR'] as VerificationStatus[]).map((status) => {
+                                                                    const isSelected = item.verificationStatus === status;
+                                                                    
+                                                                    let dotColor = '';
+                                                                    let label = '';
+                                                                    if (status === 'PASS') {
+                                                                        dotColor = 'bg-emerald-500';
+                                                                        label = 'ผ่านเกณฑ์ (PASS)';
+                                                                    } else if (status === 'FAIL') {
+                                                                        dotColor = 'bg-rose-500';
+                                                                        label = 'ไม่ผ่านเกณฑ์ (FAIL)';
+                                                                    } else if (status === 'ERROR') {
+                                                                        dotColor = 'bg-amber-500';
+                                                                        label = 'ระบบขัดข้อง (ERROR)';
+                                                                    }
+
+                                                                    return (
+                                                                        <button
+                                                                            key={status}
+                                                                            type="button"
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation();
+                                                                                handleVerificationSelect(item.id, status);
+                                                                            }}
+                                                                            className={`w-full flex items-center justify-between px-3 py-2.5 text-sm rounded-lg transition-colors ${
+                                                                                isSelected
+                                                                                    ? 'bg-blue-50 dark:bg-[#2A2F45] text-blue-700 dark:text-white font-medium'
+                                                                                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
+                                                                            }`}
+                                                                        >
+                                                                            <div className="flex items-center gap-3">
+                                                                                <span className={`w-2.5 h-2.5 rounded-full ${dotColor}`}></span>
+                                                                                <span>{label}</span>
+                                                                            </div>
+                                                                            {isSelected && (
+                                                                                <FiCheck className="text-blue-600 dark:text-indigo-400 text-lg" />
+                                                                            )}
+                                                                        </button>
+                                                                    );
+                                                                })}
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </td>
 
-                                            {/* 4. Review Status (Dropdown) */}
+                                            {/* 4. Review Status */}
                                             <td className="px-6 py-4 text-center relative">
                                                 <div className="relative inline-block text-left">
                                                     <button
@@ -208,6 +293,7 @@ export const ReportTable: React.FC<Props> = ({
                                                         onClick={(e) => {
                                                             e.stopPropagation();
                                                             setOpenDropdownId(openDropdownId === item.id ? null : item.id);
+                                                            setOpenVerificationDropdownId(null); // ปิด Dropdown ของ System Result หากเปิดอยู่
                                                         }}
                                                         className="group hover:scale-105 transition-all duration-200 cursor-pointer focus:outline-none rounded-full flex items-center justify-center mx-auto"
                                                     >
@@ -219,11 +305,11 @@ export const ReportTable: React.FC<Props> = ({
                                                         </div>
                                                     </button>
 
-                                                    {/* Dropdown Menu */}
+                                                    {/* Review Dropdown Menu */}
                                                     {openDropdownId === item.id && (
                                                         <div
                                                             ref={dropdownRef}
-                                                            className="absolute right-0 mt-2 w-44 rounded-xl shadow-xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 z-50 animate-in fade-in zoom-in-95 duration-200 origin-top-right overflow-hidden"
+                                                            className="absolute right-0 mt-2 w-48 rounded-xl shadow-xl bg-white dark:bg-[#1E2330] border border-gray-100 dark:border-gray-700 z-50 animate-in fade-in zoom-in-95 duration-200 origin-top-right overflow-hidden"
                                                             style={{ top: '100%', left: '50%', transform: 'translateX(-50%)' }}
                                                         >
                                                             <div className="p-1" role="menu">
@@ -240,10 +326,10 @@ export const ReportTable: React.FC<Props> = ({
                                                                                 e.stopPropagation();
                                                                                 handleStatusSelect(item.id, option.value as any);
                                                                             }}
-                                                                            className={`group flex items-center justify-between w-full px-3 py-2 text-xs rounded-lg transition-all duration-150 mb-0.5 ${isSelected ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 font-medium' : `text-gray-700 dark:text-gray-200 ${option.hoverBg} dark:hover:bg-gray-700`}`}
+                                                                            className={`group flex items-center justify-between w-full px-3 py-2 text-xs rounded-lg transition-all duration-150 mb-0.5 ${isSelected ? 'bg-indigo-50 dark:bg-[#2A2F45] text-indigo-700 dark:text-white font-medium' : `text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800`}`}
                                                                         >
                                                                             <div className="flex items-center gap-2.5">
-                                                                                <span className={`w-2 h-2 rounded-full ${option.dotColor} shadow-sm ring-1 ring-white dark:ring-gray-800`}></span>
+                                                                                <span className={`w-2.5 h-2.5 rounded-full ${option.dotColor} shadow-sm ring-1 ring-white dark:ring-gray-800`}></span>
                                                                                 <span>{option.label.split(' (')[0]}</span>
                                                                             </div>
                                                                             {isSelected && <FiCheck className="text-indigo-600 dark:text-indigo-400" size={14} />}
@@ -299,7 +385,6 @@ export const ReportTable: React.FC<Props> = ({
             )}
 
             {/* 4. MODAL SECTION: แสดงผลตาม PreviewMode */}
-
             {/* Case A: PDF Preview (สำหรับไฟล์ Report ทั่วไป) */}
             {previewFile && previewMode === 'PDF' && (
                 <PdfPreviewModal

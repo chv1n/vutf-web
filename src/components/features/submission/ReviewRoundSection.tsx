@@ -15,6 +15,8 @@ interface ReviewRoundSectionProps {
     /** Report */
     reportFile?: StudentReportData | null;
 
+    loadingAction?: string | null;
+
     /** Callback download original */
     onDownloadOriginal?: () => void;
     /** Callback preview original */
@@ -30,6 +32,7 @@ export const ReviewRoundSection: React.FC<ReviewRoundSectionProps> = ({
     roundTitle,
     submission,
     reportFile,
+    loadingAction,
     onDownloadOriginal,
     onPreviewOriginal,
     onDownloadReport,
@@ -109,6 +112,10 @@ export const ReviewRoundSection: React.FC<ReviewRoundSectionProps> = ({
                     }}
                     onDownload={onDownloadOriginal}
                     onPreview={onPreviewOriginal}
+                    // เช็คว่า Action ตรงกับของตัวเองไหม
+                    isPreviewLoading={loadingAction === `preview_original_${submission.submissionId}`}
+                    isDownloadLoading={loadingAction === `download_original_${submission.submissionId}`}
+                    isDisabled={!!loadingAction}
                 />
 
                 {/* Report File Card */}
@@ -128,6 +135,10 @@ export const ReviewRoundSection: React.FC<ReviewRoundSectionProps> = ({
                     
                     onDownload={onDownloadReport}
                     onPreview={onPreviewReport}
+                    
+                    isPreviewLoading={loadingAction === `preview_report_${submission.submissionId}`}
+                    isDownloadLoading={loadingAction === `download_report_${submission.submissionId}`}
+                    isDisabled={!!loadingAction}
                 />
             </div>
         </div>
