@@ -68,10 +68,10 @@ export const Header = ({ title, onMenuClick }: HeaderProps) => {
         </button>
 
         {/* Language Selector */}
-        <div className="hidden md:flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:text-gray-900 dark:hover:text-white transition-colors">
+        {/* <div className="hidden md:flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-300 cursor-pointer hover:text-gray-900 dark:hover:text-white transition-colors">
           <img src="https://flagcdn.com/w20/us.png" alt="US" className="w-5 rounded-sm shadow-sm" />
           Eng (US)
-        </div>
+        </div> */}
 
         {/* Notification ของจริง (ใช้งานได้ทั้งมือถือและ PC) */}
         <NotificationBell />
