@@ -29,11 +29,13 @@ export const ValidatorDocumentMap: React.FC<Props> = ({
 }) => {
 
     // คำนวณจำนวนหน้าที่มีปัญหา (ที่ไม่ใช่ ignored)
-    const affectedPagesCount = useMemo(() => {
+    const { affectedPagesCount, totalIssuesCount } = useMemo(() => {
         const activeIssues = issues.filter(i => !i.isIgnored);
-        // ใช้ Set เพื่อหาจำนวนหน้าไม่ซ้ำกัน
         const uniquePages = new Set(activeIssues.map(i => i.page));
-        return uniquePages.size;
+        return {
+            affectedPagesCount: uniquePages.size,
+            totalIssuesCount: activeIssues.length // นับจำนวน issues ทั้งหมด
+        };
     }, [issues]);
 
     return (
@@ -43,9 +45,9 @@ export const ValidatorDocumentMap: React.FC<Props> = ({
                     <h2 className="text-xs font-bold text-slate-400 dark:text-white uppercase tracking-wider">
                         Document Map
                     </h2>
-                    {affectedPagesCount > 0 && (
+                    {totalIssuesCount > 0 && (
                         <span className="bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400 text-[9px] md:text-[10px] font-bold px-1.5 py-0.5 rounded-md">
-                            {affectedPagesCount} Pages <span className="hidden sm:inline">with Issues</span>
+                            {totalIssuesCount} Issues <span className="hidden sm:inline">in {affectedPagesCount} Pages</span>
                         </span>
                     )}
                 </div>
