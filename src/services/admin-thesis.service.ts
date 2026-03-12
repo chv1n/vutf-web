@@ -27,4 +27,8 @@ export const adminThesisService = {
   updateThesisInfo: async (groupId: string, data: Record<string, any>) => {
     return api.patch(`/thesis-topics/groups/${groupId}/thesis`, data);
   },
+
+  createGroup: async (data: any) => {
+    return api.post('/thesis-topics/groups', data);
+  },
 };
