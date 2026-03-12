@@ -1,6 +1,6 @@
 // src/pages/admin/ThesisTopicPage.tsx
 import { useEffect, useState } from 'react';
-import { FiInbox, FiLayers, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import { FiInbox, FiLayers, FiChevronLeft, FiChevronRight, FiPlus } from 'react-icons/fi';
 
 import { adminThesisService } from '../../services/admin-thesis.service';
 import {
@@ -15,11 +15,12 @@ import { ActiveThesisTable } from '../../components/features/admin/thesis-topic/
 import { ActionModal } from '../../components/features/admin/thesis-topic/ActionModal';
 import { ThesisFilter } from '../../components/features/admin/thesis-topic/ThesisFilter';
 import { ThesisDetailView } from '../../components/features/admin/thesis-topic/ThesisDetailView';
+import { AdminCreateGroupForm } from '../../components/features/admin/thesis-topic/AdminCreateGroupForm';
 
 export const ThesisTopicPage = () => {
     // --- State ---
     const [activeTab, setActiveTab] = useState<'requests' | 'active'>('requests');
-    const [viewMode, setViewMode] = useState<'list' | 'detail'>('list');
+    const [viewMode, setViewMode] = useState<'list' | 'detail' | 'create'>('list');
 
     const [groups, setGroups] = useState<AdminThesisGroup[]>([]);
     const [loading, setLoading] = useState(true);
@@ -92,6 +93,12 @@ export const ThesisTopicPage = () => {
                 setGroups(res.data);
                 setTotalPages(res.meta.totalPages);
                 setTotalItems(res.meta.total);
+
+                // อัพเดท selectedGroup ด้วยข้อมูลใหม่ (เพื่อให้หน้า Detail View แสดงค่าล่าสุด)
+                if (selectedGroup) {
+                    const updated = res.data.find((g: AdminThesisGroup) => g.group_id === selectedGroup.group_id);
+                    if (updated) setSelectedGroup(updated);
+                }
             }
         } catch (error) {
             console.error("Failed to fetch groups:", error);
@@ -193,16 +200,34 @@ export const ThesisTopicPage = () => {
                         <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">ทั้งหมด {totalItems} รายการ</p>
                     )}
                 </div>
+                {viewMode === 'list' && (
+                    <button
+                        onClick={() => setViewMode('create')}
+                        className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white rounded-xl shadow-md transition-all text-sm font-medium"
+                    >
+                        <FiPlus size={16} />
+                        สร้างกลุ่มวิทยานิพนธ์
+                    </button>
+                )}
             </div>
 
             {/* --- Content --- */}
-            {viewMode === 'detail' && selectedGroup ? (
+            {viewMode === 'create' ? (
+                <AdminCreateGroupForm
+                    onBack={() => setViewMode('list')}
+                    onSuccess={() => {
+                        setViewMode('list');
+                        fetchGroups();
+                    }}
+                />
+            ) : viewMode === 'detail' && selectedGroup ? (
                 <ThesisDetailView
                     group={selectedGroup}
                     onBack={handleBackToTable}
                     onApprove={(g) => handleAction(g, 'approve')}
                     onReject={(g) => handleAction(g, 'reject')}
                     onRevertToPending={handleRevertToPending}
+                    onRefresh={fetchGroups}
                 />
             ) : (
                 <>
