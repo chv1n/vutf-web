@@ -92,6 +92,12 @@ export const ThesisTopicPage = () => {
                 setGroups(res.data);
                 setTotalPages(res.meta.totalPages);
                 setTotalItems(res.meta.total);
+
+                // อัพเดท selectedGroup ด้วยข้อมูลใหม่ (เพื่อให้หน้า Detail View แสดงค่าล่าสุด)
+                if (selectedGroup) {
+                    const updated = res.data.find((g: AdminThesisGroup) => g.group_id === selectedGroup.group_id);
+                    if (updated) setSelectedGroup(updated);
+                }
             }
         } catch (error) {
             console.error("Failed to fetch groups:", error);
@@ -203,6 +209,7 @@ export const ThesisTopicPage = () => {
                     onApprove={(g) => handleAction(g, 'approve')}
                     onReject={(g) => handleAction(g, 'reject')}
                     onRevertToPending={handleRevertToPending}
+                    onRefresh={fetchGroups}
                 />
             ) : (
                 <>

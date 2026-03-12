@@ -22,5 +22,9 @@ export const adminThesisService = {
 
   deleteThesis: async (thesisId: string) => {
     return api.delete(`/thesis-topics/${thesisId}`);
-  }
+  },
+
+  updateThesisInfo: async (groupId: string, data: Record<string, any>) => {
+    return api.patch(`/thesis-topics/groups/${groupId}/thesis`, data);
+  },
 };
